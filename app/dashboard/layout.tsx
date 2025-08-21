@@ -1,34 +1,15 @@
 "use client";
 
-import { Role } from "@/lib/generated/prisma/client";
-import React, { useState } from "react";
+import { LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { LogOut, User } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
-import { ManagerDashboard } from "./role-dashboards/manager-dashboard";
-import { FieldAgentDashboard } from "./role-dashboards/field-agent-dashboard";
-import { ProcurementOfficerDashboard } from "./role-dashboards/procurement-officer-dashboard";
-import { WarehouseManagerDashboard } from "./role-dashboards/warehouse-manager-dashboard";
-import { TransportDriverDashboard } from "./role-dashboards/transport-driver-dashboard";
 
-interface DashboardProps {
-  userRole: Role;
-}
-
-const ROLE_DASHBOARDS: Record<Role, () => React.ReactElement> = {
-  admin: () => <div>Admin Dashboard</div>,
-  manager: () => <ManagerDashboard />,
-  field_agent: () => <FieldAgentDashboard />,
-  procurement_officer: () => <ProcurementOfficerDashboard />,
-  warehouse_manager: () => <WarehouseManagerDashboard />,
-  transport_driver: () => <TransportDriverDashboard />
-};
-
-export function Dashboard({ userRole }: DashboardProps) {
-  const DashboardComponent = ROLE_DASHBOARDS[userRole] || ROLE_DASHBOARDS.admin;
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation Bar - Supabase Style */}
@@ -72,7 +53,7 @@ export function Dashboard({ userRole }: DashboardProps) {
       {/* Main Content */}
       <main className="py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <DashboardComponent />
+          {children}
         </div>
       </main>
     </div>
