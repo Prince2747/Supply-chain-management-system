@@ -1,0 +1,64 @@
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+enum Role {
+  admin
+  user
+}
+
+model Profile {
+  id      String   @id @default(uuid()) @db.Uuid
+  userId  String   @unique @db.Uuid // Maps to auth.users.id
+  role    Role     @default(user)
+  email   String?  @unique
+  name    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Warehouse {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  code        String   @unique
+  address     String?
+  city        String?
+  country     String?
+  capacity    Int?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String   @db.Uuid
+}
+
+model UnitOfMeasurement {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  code        String   @unique
+  category    String   // e.g., "weight", "volume", "length", "quantity"
+  baseUnit    String?  // For conversion calculations
+  conversionFactor Float? // Factor to convert to base unit
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String   @db.Uuid
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  action      String   // e.g., "CREATE_USER", "UPDATE_WAREHOUSE", "LOGIN"
+  entityType  String?  // e.g., "USER", "WAREHOUSE", "UNIT"
+  entityId    String?  @db.Uuid
+  details     Json?    // Additional details about the action
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+}
