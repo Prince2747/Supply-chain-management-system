@@ -1,5 +1,6 @@
 import { AdminAuthWrapper } from "@/components/admin/admin-auth-wrapper";
 import { AdminLayout } from "@/components/admin/admin-layout";
+import { Role } from "@/lib/generated/prisma/client";
 import {
   Card,
   CardContent,
@@ -24,14 +25,23 @@ async function getDashboardStats() {
   // Get total users count
   const totalUsers = await prisma.profile.count();
 
-  // Get admin users count
+  // Get users count by role
   const adminUsers = await prisma.profile.count({
-    where: { role: "admin" },
+    where: { role: Role.admin },
   });
 
-  // Get regular users count
-  const regularUsers = await prisma.profile.count({
-    where: { role: "user" },
+  const staffUsers = await prisma.profile.count({
+    where: { 
+      role: {
+        in: [
+          Role.manager,
+          Role.field_agent,
+          Role.procurement_officer,
+          Role.warehouse_manager,
+          Role.transport_driver
+        ]
+      }
+    },
   });
 
   // Get recent users (last 7 days)
@@ -73,7 +83,7 @@ async function getDashboardStats() {
   return {
     totalUsers,
     adminUsers,
-    regularUsers,
+    staffUsers,
     recentUsers,
     totalWarehouses,
     activeWarehouses,
@@ -104,12 +114,12 @@ export default async function AdminDashboard() {
                 <CardTitle className="text-sm font-medium">
                   Total Users
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <img src="/logo.png" alt="Company Logo" className="h-6 w-6 object-contain" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalUsers}</div>
                 <p className="text-xs text-muted-foreground">
-                  All registered users
+                  {stats.adminUsers} admins, {stats.staffUsers} staff members
                 </p>
               </CardContent>
             </Card>

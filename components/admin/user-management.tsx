@@ -1,12 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { UserManagementClient } from "./user-management-client";
 
+import { Role } from "@/lib/generated/prisma/client";
+
 export interface User {
   id: string;
   userId: string;
   email: string | null;
   name: string | null;
-  role: "admin" | "user";
+  role: Role;
   createdAt: Date;
   updatedAt: Date;
 }

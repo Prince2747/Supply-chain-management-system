@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { logAuthActivity } from '@/lib/activity-logger'
+import { getRoleBasedRedirectPath } from '@/lib/navigation'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -26,13 +27,14 @@ export async function login(formData: FormData) {
     throw new Error(error.message)
   }
 
-  // Check if user has a profile and determine redirect
+  // Check if user has a profile and determine role-based redirect
   if (data.user) {
     let profile = null
 
     try {
       profile = await prisma.profile.findUnique({
         where: { userId: data.user.id },
+        select: { role: true }
       })
     } catch (dbError: any) {
       console.error('Error checking user profile:', dbError)
@@ -55,19 +57,18 @@ export async function login(formData: FormData) {
       console.warn('Non-database error during profile check, continuing without profile')
     }
 
-    // Log the login activity (in background, don't await)
-    logAuthActivity(data.user.id, 'LOGIN').catch(error => {
-      console.error('Error logging login activity:', error)
-    })
+      // Log the activity
+  await logAuthActivity(data.user.id, 'LOGIN')
 
-    revalidatePath('/', 'layout')
-
-    // Redirect based on role
-    if (profile?.role === 'admin') {
-      redirect('/admin')
-    } else {
-      redirect('/')
-    }
+  revalidatePath('/', 'layout')
+  
+  if (profile?.role) {
+    const redirectPath = getRoleBasedRedirectPath(profile.role)
+    redirect(redirectPath)
+  } else {
+    // If no role is found, redirect to unauthorized
+    redirect('/unauthorized')
+  }
   }
 }
 

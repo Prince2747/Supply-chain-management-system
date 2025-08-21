@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/server'
 import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
 import { prisma } from '@/lib/prisma'
 import { logActivity } from '@/lib/activity-logger'
+import { Role } from '@/lib/generated/prisma/client'
 
 interface ActionResult {
   error: string | null
@@ -45,14 +46,22 @@ export async function createUser(formData: FormData): Promise<ActionResult> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const name = formData.get('name') as string | null
-  const role = formData.get('role') as 'admin' | 'user'
+  const role = formData.get('role') as Role
 
   // Validate inputs
   if (!email || !password || !role) {
     return { error: 'Email, password, and role are required.', message: null }
   }
-  if (!['admin', 'user'].includes(role)) {
-    return { error: 'Invalid role. Must be "admin" or "user".', message: null }
+  const validRoles = [
+    'admin',
+    'manager',
+    'field_agent',
+    'procurement_officer',
+    'warehouse_manager',
+    'transport_driver',
+  ];
+  if (!validRoles.includes(role)) {
+    return { error: 'Invalid role. Must be one of: ' + validRoles.join(', ') + '.', message: null }
   }
 
   // Create user with Supabase Admin API
@@ -92,8 +101,7 @@ export async function createUser(formData: FormData): Promise<ActionResult> {
       }
     } catch (dbError) {
       console.error('Failed to create profile:', dbError)
-      // User was created in Supabase but profile creation failed
-      // You might want to handle this case differently
+      return { error: 'Database error creating user profile.', message: null }
     }
   }
 
@@ -101,7 +109,7 @@ export async function createUser(formData: FormData): Promise<ActionResult> {
   return { error: null, message: `User ${email} created successfully with role ${role}.` }
 }
 
-export async function updateUserRole(userId: string, newRole: 'admin' | 'user'): Promise<ActionResult> {
+export async function updateUserRole(userId: string, newRole: Role): Promise<ActionResult> {
   const { error: permissionError } = await checkAdminPermission()
   if (permissionError) {
     return { error: permissionError, message: null }

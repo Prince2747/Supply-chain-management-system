@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { hasRouteAccess } from '@/lib/auth'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -40,13 +41,18 @@ export async function updateSession(request: NextRequest) {
   // Check if user is trying to access admin routes
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth') &&
-    !request.nextUrl.pathname.startsWith('/error') &&
-    !request.nextUrl.pathname.startsWith('/unauthorized') &&
-    !request.nextUrl.pathname.startsWith('/')
+  // Get user's role from profile
+  const { data: profile } = await supabase
+    .from('Profile')
+    .select('role')
+    .eq('userId', user?.id)
+    .single();
+
+  const role = profile?.role || 'user';
+  const path = request.nextUrl.pathname;
+
+  // Check if user has access to the requested route
+  if (!hasRouteAccess(role, path)
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()

@@ -44,7 +44,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           {/* Logo and Brand */}
           <div className="flex items-center space-x-8">
             <div className="flex items-center space-x-2">
-              <Shield className="h-7 w-7 text-green-600" />
+              <img src="/logo.png" alt="Company Logo" className="h-8 w-auto" />
               <span className="text-lg font-semibold text-gray-900">
                 Admin Dashboard
               </span>

@@ -11,13 +11,17 @@ datasource db {
 }
 enum Role {
   admin
-  user
+  manager
+  field_agent
+  procurement_officer
+  warehouse_manager
+  transport_driver
 }
 
 model Profile {
   id      String   @id @default(uuid()) @db.Uuid
   userId  String   @unique @db.Uuid // Maps to auth.users.id
-  role    Role     @default(user)
+  role    Role     @default(field_agent)
   email   String?  @unique
   name    String?
   createdAt DateTime @default(now())

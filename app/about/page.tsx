@@ -32,18 +32,20 @@ export default function AboutPage() {
                 Our Story
               </h2>
               <p className="text-lg text-muted-foreground mb-6">
-                Founded with a vision to revolutionize supply chain management, Azmeraw Bekele SCMS 
-                has grown from a small trading company to a comprehensive supply chain solutions provider. 
-                Our journey began with a simple mission: to connect global markets efficiently and reliably.
+                Established in 2011, Azmeraw Bekele Import & Export is a prominent Ethiopian company founded by 
+                Mr. Azmeraw Bekele, who brings over 20 years of extensive business experience. Starting with an 
+                initial capital of 20 million birr, our main office is strategically located on Churchill Avenue 
+                in Addis Ababa.
               </p>
               <p className="text-lg text-muted-foreground mb-6">
-                Today, we serve hundreds of clients worldwide, managing complex import and export operations 
-                with precision and expertise. Our commitment to innovation and customer satisfaction has made 
-                us a trusted partner in international trade.
+                From our roots in export trade, we have diversified into multiple sectors including transportation, 
+                bag manufacturing, hospitality, and fuel services. Our primary focus remains on export operations, 
+                specializing in oilseeds and pulses, with established markets in China, India, Turkey, and beyond.
               </p>
               <p className="text-lg text-muted-foreground">
-                We believe in building lasting relationships, delivering exceptional value, and contributing 
-                to the growth of global commerce through our comprehensive supply chain solutions.
+                Today, we operate a successful woven plastic bags manufacturing facility and are developing a hotel 
+                in Jiga town. Our commitment to quality, reliability, and fair pricing, coupled with our strong 
+                international partnerships, positions us as a leading contributor to Ethiopia's economic development.
               </p>
             </div>
             
@@ -105,9 +107,9 @@ export default function AboutPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  To be the leading supply chain management company that connects global markets 
-                  seamlessly, fostering international trade and economic growth. We envision a world 
-                  where businesses of all sizes can access global opportunities with confidence and ease.
+                  To be Ethiopia's leading export company, delivering quality products to global markets 
+                  while creating sustainable employment opportunities and contributing to our nation's 
+                  economic growth through diversified business operations and international partnerships.
                 </p>
               </CardContent>
             </Card>
@@ -128,16 +130,16 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle>Integrity</CardTitle>
+                <CardTitle>Honesty</CardTitle>
                 <CardDescription>
-                  We conduct business with the highest ethical standards, building trust through 
-                  transparency and honesty in all our interactions.
+                  We believe in conducting business with complete transparency and ethical practices, 
+                  building lasting trust with our partners and customers.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -146,6 +148,32 @@ export default function AboutPage() {
               <CardHeader>
                 <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                   <Award className="h-6 w-6 text-primary" />
+                </div>
+                <CardTitle>Quality</CardTitle>
+                <CardDescription>
+                  We maintain high standards in all our products and services, ensuring reliability 
+                  and satisfaction for our customers worldwide.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Target className="h-6 w-6 text-primary" />
+                </div>
+                <CardTitle>Innovation</CardTitle>
+                <CardDescription>
+                  We continuously seek new opportunities and solutions to grow our business and 
+                  better serve our customers' needs.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
                 <CardTitle>Excellence</CardTitle>
                 <CardDescription>

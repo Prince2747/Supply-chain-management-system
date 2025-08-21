@@ -40,9 +40,9 @@ export function Navigation() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-2">
-              <Leaf className="h-8 w-8 text-primary" />
+              <img src="/logo.png" alt="Company Logo" className="h-8 w-auto" />
               <span className="font-serif font-bold text-xl text-foreground">
-                Azmeraw Bekele SCMS
+                Azmeraw Bekele Import & Export
               </span>
             </Link>
 
