@@ -39,7 +39,7 @@ async function syncUsers() {
           userId: user.id,
           email: user.email,
           name: user.user_metadata?.name || null,
-          role: user.email?.includes('admin') ? 'admin' : 'user', // Make admin if email contains 'admin'
+          role: user.email?.includes('admin') ? 'admin' : 'field_agent', // Make admin if email contains 'admin', otherwise field_agent
         }
       })
 

@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { Role } from "@/lib/generated/prisma/client";
-import { prisma } from "@/lib/prisma";
+import { checkFieldAgentRole } from "@/app/dashboard/field-agent/actions";
 
 interface FieldAgentAuthWrapperProps {
   children: React.ReactNode;
@@ -23,13 +22,10 @@ export function FieldAgentAuthWrapper({ children }: FieldAgentAuthWrapperProps) 
         return;
       }
 
-      // Check if user is a field agent in Prisma
-      const profile = await prisma.profile.findUnique({
-        where: { userId: user.id },
-        select: { role: true }
-      });
-
-      if (!profile || profile.role !== Role.field_agent) {
+      // Check if user is a field agent using server action
+      const isFieldAgent = await checkFieldAgentRole(user.id);
+      
+      if (!isFieldAgent) {
         router.push('/unauthorized');
         return;
       }

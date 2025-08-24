@@ -20,11 +20,74 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tractor, Search } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getFarmers, createFarm, getFarms } from "../actions";
 
 export default function FarmsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [farmers, setFarmers] = useState<any[]>([]);
+  const [farms, setFarms] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    async function loadFarms() {
+      try {
+        const farmsData = await getFarms();
+        setFarms(farmsData);
+      } catch (error) {
+        console.error('Error loading farms:', error);
+      }
+    }
+
+    loadFarms();
+  }, []);
+
+  useEffect(() => {
+    async function loadFarmers() {
+      setLoading(true);
+      try {
+        const farmersData = await getFarmers();
+        setFarmers(farmersData);
+      } catch (error) {
+        console.error('Error loading farmers:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (showCreateForm) {
+      loadFarmers();
+    }
+  }, [showCreateForm]);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitting(true);
+    
+    try {
+      const formData = new FormData(event.currentTarget);
+      await createFarm(formData);
+      setShowCreateForm(false);
+      
+      // Reload farms after creation
+      const farmsData = await getFarms();
+      setFarms(farmsData);
+    } catch (error) {
+      console.error('Error creating farm:', error);
+      alert('Failed to create farm. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Filter farms based on search term
+  const filteredFarms = farms.filter(farm =>
+    farm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    farm.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    farm.farmer.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -47,26 +110,36 @@ export default function FarmsPage() {
             <CardTitle>Add New Farm</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="farmer">Farmer</Label>
-                  <Select name="farmer" required>
+                  <Label htmlFor="farmerId">Farmer</Label>
+                  <Select name="farmerId" required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select farmer" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="placeholder">Select a farmer</SelectItem>
+                      {loading ? (
+                        <SelectItem value="loading" disabled>Loading farmers...</SelectItem>
+                      ) : farmers.length === 0 ? (
+                        <SelectItem value="no-farmers" disabled>No farmers registered</SelectItem>
+                      ) : (
+                        farmers.map((farmer) => (
+                          <SelectItem key={farmer.id} value={farmer.id}>
+                            {farmer.name} - {farmer.farmerCode}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="farmName">Farm Name/ID</Label>
+                  <Label htmlFor="name">Farm Name</Label>
                   <Input
-                    id="farmName"
-                    name="farmName"
+                    id="name"
+                    name="name"
                     required
-                    placeholder="Farm identifier"
+                    placeholder="Farm name"
                   />
                 </div>
                 <div>
@@ -74,18 +147,17 @@ export default function FarmsPage() {
                   <Input
                     id="location"
                     name="location"
-                    required
                     placeholder="Farm location"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="size">Size (hectares)</Label>
+                  <Label htmlFor="area">Area (hectares)</Label>
                   <Input
-                    id="size"
-                    name="size"
+                    id="area"
+                    name="area"
                     type="number"
-                    required
-                    placeholder="Farm size"
+                    step="0.01"
+                    placeholder="Farm area"
                   />
                 </div>
                 <div>
@@ -93,30 +165,27 @@ export default function FarmsPage() {
                   <Input
                     id="soilType"
                     name="soilType"
-                    required
                     placeholder="Type of soil"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="waterSource">Water Source</Label>
-                  <Select name="waterSource" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select water source" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="rain">Rainfed</SelectItem>
-                      <SelectItem value="irrigation">Irrigation</SelectItem>
-                      <SelectItem value="both">Both</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="coordinates">Coordinates (optional)</Label>
+                  <Input
+                    id="coordinates"
+                    name="coordinates"
+                    placeholder="Latitude, Longitude"
+                  />
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button type="submit">Add Farm</Button>
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? "Adding..." : "Add Farm"}
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setShowCreateForm(false)}
+                  disabled={submitting}
                 >
                   Cancel
                 </Button>
@@ -145,21 +214,39 @@ export default function FarmsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Farm Name/ID</TableHead>
+                <TableHead>Farm Code</TableHead>
+                <TableHead>Farm Name</TableHead>
                 <TableHead>Farmer</TableHead>
                 <TableHead>Location</TableHead>
-                <TableHead>Size</TableHead>
+                <TableHead>Area (ha)</TableHead>
                 <TableHead>Soil Type</TableHead>
-                <TableHead>Water Source</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
-                  No farms recorded yet.
-                </TableCell>
-              </TableRow>
+              {filteredFarms.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                    {searchTerm ? "No farms found matching your search." : "No farms recorded yet."}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredFarms.map((farm) => (
+                  <TableRow key={farm.id}>
+                    <TableCell className="font-medium">{farm.farmCode}</TableCell>
+                    <TableCell>{farm.name}</TableCell>
+                    <TableCell>{farm.farmer.name}</TableCell>
+                    <TableCell>{farm.location || "Not specified"}</TableCell>
+                    <TableCell>{farm.area ? `${farm.area} ha` : "Not specified"}</TableCell>
+                    <TableCell>{farm.soilType || "Not specified"}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm">
+                        View Details
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

@@ -14,7 +14,7 @@ export interface ActivityLog {
   user?: {
     email: string | null;
     name: string | null;
-  };
+  } | null;
 }
 
 async function getActivityLogs(): Promise<ActivityLog[]> {
@@ -22,10 +22,6 @@ async function getActivityLogs(): Promise<ActivityLog[]> {
     const logs = await prisma.activityLog.findMany({
       orderBy: { createdAt: "desc" },
       take: 100, // Limit to last 100 logs for performance
-      include: {
-        // We'll need to join with Profile table to get user info
-        // For now, we'll fetch user info separately
-      },
     });
 
     // Get user profiles for the logs
