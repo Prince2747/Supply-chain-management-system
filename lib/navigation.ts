@@ -6,7 +6,8 @@ export const ROLE_REDIRECTS: Record<Role, string> = {
   field_agent: '/dashboard',
   procurement_officer: '/dashboard',
   warehouse_manager: '/dashboard',
-  transport_driver: '/dashboard'
+  transport_driver: '/dashboard',
+  transport_coordinator: '/dashboard/transport-coordinator'
 };
 
 export function getRoleBasedRedirectPath(role: Role): string {
@@ -135,6 +136,36 @@ export const ROLE_NAVIGATION: Record<Role, RoleNavigation> = {
         title: "Route Planning",
         href: "/routes",
         description: "Plan delivery routes"
+      }
+    ]
+  },
+  transport_coordinator: {
+    label: "Transport Coordinator",
+    items: [
+      {
+        title: "Dashboard",
+        href: "/dashboard/transport-coordinator",
+        description: "Transport coordination overview"
+      },
+      {
+        title: "Tasks",
+        href: "/dashboard/transport-coordinator/tasks",
+        description: "Manage transport tasks"
+      },
+      {
+        title: "Vehicles",
+        href: "/dashboard/transport-coordinator/vehicles",
+        description: "Fleet management"
+      },
+      {
+        title: "Drivers",
+        href: "/dashboard/transport-coordinator/drivers",
+        description: "Driver assignments"
+      },
+      {
+        title: "Issues",
+        href: "/dashboard/transport-coordinator/issues",
+        description: "Handle transport issues"
       }
     ]
   }

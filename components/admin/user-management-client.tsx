@@ -59,6 +59,7 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
         'procurement_officer',
         'warehouse_manager',
         'transport_driver',
+        'transport_coordinator'
       ];
       const role = formData.get('role');
       if (typeof role !== 'string' || !validRoles.includes(role)) {
@@ -85,6 +86,7 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
         'procurement_officer',
         'warehouse_manager',
         'transport_driver',
+        'transport_coordinator'
       ]
       if (!validRoles.includes(newRole)) {
         toast.error('Invalid role. Must be one of: ' + validRoles.join(', '))
@@ -193,6 +195,7 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
                           <SelectItem value="procurement_officer">Procurement Officer</SelectItem>
                           <SelectItem value="warehouse_manager">Warehouse Manager</SelectItem>
                           <SelectItem value="transport_driver">Transport Driver</SelectItem>
+                          <SelectItem value="transport_coordinator">Transport Coordinator</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -237,6 +240,7 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
                 <SelectItem value="procurement_officer">Procurement Officer</SelectItem>
                 <SelectItem value="warehouse_manager">Warehouse Manager</SelectItem>
                 <SelectItem value="transport_driver">Transport Driver</SelectItem>
+                <SelectItem value="transport_coordinator">Transport Coordinator</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -272,7 +276,12 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
                         <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                          {user.role}
+                          {user.role === 'field_agent' ? 'Field Agent' :
+                           user.role === 'procurement_officer' ? 'Procurement Officer' :
+                           user.role === 'warehouse_manager' ? 'Warehouse Manager' :
+                           user.role === 'transport_driver' ? 'Transport Driver' :
+                           user.role === 'transport_coordinator' ? 'Transport Coordinator' :
+                           user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -295,6 +304,7 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
                               <SelectItem value="procurement_officer">Procurement Officer</SelectItem>
                               <SelectItem value="warehouse_manager">Warehouse Manager</SelectItem>
                               <SelectItem value="transport_driver">Transport Driver</SelectItem>
+                              <SelectItem value="transport_coordinator">Transport Coordinator</SelectItem>
                             </SelectContent>
                           </Select>
                           <Button

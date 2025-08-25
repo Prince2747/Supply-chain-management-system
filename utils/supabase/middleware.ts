@@ -52,9 +52,15 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Check if user has access to the requested route
-  if (!hasRouteAccess(role, path)
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  if (user && !hasRouteAccess(role, path)) {
+    // User is authenticated but doesn't have access, redirect to unauthorized
+    const url = request.nextUrl.clone()
+    url.pathname = '/unauthorized'
+    return NextResponse.redirect(url)
+  }
+  
+  if (!user && !hasRouteAccess(role, path)) {
+    // User is not authenticated and trying to access protected route, redirect to login
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)

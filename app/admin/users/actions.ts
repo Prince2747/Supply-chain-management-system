@@ -59,6 +59,7 @@ export async function createUser(formData: FormData): Promise<ActionResult> {
     'procurement_officer',
     'warehouse_manager',
     'transport_driver',
+    'transport_coordinator'
   ];
   if (!validRoles.includes(role)) {
     return { error: 'Invalid role. Must be one of: ' + validRoles.join(', ') + '.', message: null }
