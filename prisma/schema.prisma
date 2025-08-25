@@ -1,116 +1,104 @@
-
 generator client {
   provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-enum Role {
-  admin
-  manager
-  field_agent
-  procurement_officer
-  warehouse_manager
-  transport_driver
-}
 
 model Profile {
-  id      String   @id @default(uuid()) @db.Uuid
-  userId  String   @unique @db.Uuid // Maps to auth.users.id
-  role    Role     @default(field_agent)
-  email   String?  @unique
-  name    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String          @id @default(uuid()) @db.Uuid
+  userId                String          @unique @db.Uuid
+  role                  Role            @default(field_agent)
+  email                 String?         @unique
+  name                  String?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  phone                 String?         @unique
+  coordinatedTransports TransportTask[] @relation("TransportCoordinator")
 }
 
 model Warehouse {
-  id          String   @id @default(uuid()) @db.Uuid
-  name        String
-  code        String   @unique
-  address     String?
-  city        String?
-  country     String?
-  capacity    Int?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String   @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  code      String   @unique
+  address   String?
+  city      String?
+  country   String?
+  capacity  Int?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String   @db.Uuid
 }
 
 model UnitOfMeasurement {
-  id          String   @id @default(uuid()) @db.Uuid
-  name        String
-  code        String   @unique
-  category    String   // e.g., "weight", "volume", "length", "quantity"
-  baseUnit    String?  // For conversion calculations
-  conversionFactor Float? // Factor to convert to base unit
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String   @db.Uuid
+  id               String   @id @default(uuid()) @db.Uuid
+  name             String
+  code             String   @unique
+  category         String
+  baseUnit         String?
+  conversionFactor Float?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdBy        String   @db.Uuid
 }
 
 model ActivityLog {
-  id          String   @id @default(uuid()) @db.Uuid
-  userId      String   @db.Uuid
-  action      String   // e.g., "CREATE_USER", "UPDATE_WAREHOUSE", "LOGIN"
-  entityType  String?  // e.g., "USER", "WAREHOUSE", "UNIT"
-  entityId    String?  @db.Uuid
-  details     Json?    // Additional details about the action
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  action     String
+  entityType String?
+  entityId   String?  @db.Uuid
+  details    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
 }
 
-// Field Agent Models
 model Farmer {
-  id            String   @id @default(uuid()) @db.Uuid
-  name          String
-  email         String?  @unique
-  phone         String?
-  address       String?
-  city          String?
-  state         String?
-  country       String?
-  farmerId      String   @unique // Farmer identification number
-  registeredBy  String   @db.Uuid // Field agent who registered
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  // Relations
-  farms         Farm[]
-  cropBatches   CropBatch[]
+  id           String      @id @default(uuid()) @db.Uuid
+  name         String
+  email        String?     @unique
+  phone        String?
+  address      String?
+  city         String?
+  state        String?
+  country      String?
+  farmerId     String      @unique
+  registeredBy String      @db.Uuid
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  cropBatches  CropBatch[]
+  farms        Farm[]
 }
 
 model Farm {
-  id            String   @id @default(uuid()) @db.Uuid
-  name          String
-  farmCode      String   @unique
-  farmerId      String   @db.Uuid
-  location      String?
-  coordinates   String?  // GPS coordinates
-  area          Float?   // in hectares
-  soilType      String?
-  isActive      Boolean  @default(true)
-  registeredBy  String   @db.Uuid // Field agent who registered
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  // Relations
-  farmer        Farmer     @relation(fields: [farmerId], references: [id])
-  cropBatches   CropBatch[]
-  inspections   FarmInspection[]
+  id           String           @id @default(uuid()) @db.Uuid
+  name         String
+  farmCode     String           @unique
+  farmerId     String           @db.Uuid
+  location     String?
+  coordinates  String?
+  area         Float?
+  soilType     String?
+  isActive     Boolean          @default(true)
+  registeredBy String           @db.Uuid
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  cropBatches  CropBatch[]
+  farmer       Farmer           @relation(fields: [farmerId], references: [id])
+  inspections  FarmInspection[]
 }
 
 model CropBatch {
-  id              String   @id @default(uuid()) @db.Uuid
-  batchCode       String   @unique
+  id              String                @id @default(uuid()) @db.Uuid
+  batchCode       String                @unique
   cropType        String
   variety         String?
   plantingDate    DateTime?
@@ -118,50 +106,112 @@ model CropBatch {
   actualHarvest   DateTime?
   quantity        Float?
   unit            String?
-  farmId          String   @db.Uuid
-  farmerId        String   @db.Uuid
-  status          CropBatchStatus @default(PLANTED)
-  qrCode          String?  @unique
+  farmId          String                @db.Uuid
+  farmerId        String                @db.Uuid
+  status          CropBatchStatus       @default(PLANTED)
+  qrCode          String?               @unique
   notes           String?
-  createdBy       String   @db.Uuid // Field agent
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  // Relations
-  farm            Farm     @relation(fields: [farmId], references: [id])
-  farmer          Farmer   @relation(fields: [farmerId], references: [id])
+  createdBy       String                @db.Uuid
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  farm            Farm                  @relation(fields: [farmId], references: [id])
+  farmer          Farmer                @relation(fields: [farmerId], references: [id])
   notifications   HarvestNotification[]
+  transportTasks  TransportTask[]
 }
 
 model FarmInspection {
-  id            String   @id @default(uuid()) @db.Uuid
-  farmId        String   @db.Uuid
-  inspectedBy   String   @db.Uuid // Field agent
-  inspectionDate DateTime
-  cropCondition String?
-  soilHealth    String?
-  pestIssues    String?
+  id              String           @id @default(uuid()) @db.Uuid
+  farmId          String           @db.Uuid
+  inspectedBy     String           @db.Uuid
+  inspectionDate  DateTime
+  cropCondition   String?
+  soilHealth      String?
+  pestIssues      String?
   recommendations String?
-  photos        String[] // Array of photo URLs
-  status        InspectionStatus @default(COMPLETED)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  // Relations
-  farm          Farm     @relation(fields: [farmId], references: [id])
+  photos          String[]
+  status          InspectionStatus @default(COMPLETED)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  farm            Farm             @relation(fields: [farmId], references: [id])
 }
 
 model HarvestNotification {
-  id            String   @id @default(uuid()) @db.Uuid
-  cropBatchId   String   @db.Uuid
-  message       String
+  id               String           @id @default(uuid()) @db.Uuid
+  cropBatchId      String           @db.Uuid
+  message          String
   notificationType NotificationType @default(HARVEST_READY)
-  isRead        Boolean  @default(false)
-  sentTo        String   @db.Uuid // Field agent
-  createdAt     DateTime @default(now())
-  
-  // Relations
-  cropBatch     CropBatch @relation(fields: [cropBatchId], references: [id])
+  isRead           Boolean          @default(false)
+  sentTo           String           @db.Uuid
+  createdAt        DateTime         @default(now())
+  cropBatch        CropBatch        @relation(fields: [cropBatchId], references: [id])
+}
+
+model Vehicle {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  plateNumber    String          @unique
+  type           VehicleType
+  capacity       Float
+  status         VehicleStatus   @default(AVAILABLE)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  transportTasks TransportTask[]
+}
+
+model Driver {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  licenseNumber  String          @unique
+  phone          String
+  email          String?
+  status         DriverStatus    @default(AVAILABLE)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  transportTasks TransportTask[]
+}
+
+model TransportTask {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cropBatchId        String           @db.Uuid
+  vehicleId          String           @db.Uuid
+  driverId           String           @db.Uuid
+  coordinatorId      String           @db.Uuid
+  pickupLocation     String
+  deliveryLocation   String
+  scheduledDate      DateTime
+  actualPickupDate   DateTime?
+  actualDeliveryDate DateTime?
+  status             TransportStatus  @default(SCHEDULED)
+  notes              String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  issues             TransportIssue[]
+  coordinator        Profile          @relation("TransportCoordinator", fields: [coordinatorId], references: [id])
+  cropBatch          CropBatch        @relation(fields: [cropBatchId], references: [id])
+  driver             Driver           @relation(fields: [driverId], references: [id])
+  vehicle            Vehicle          @relation(fields: [vehicleId], references: [id])
+}
+
+model TransportIssue {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  transportTaskId String        @db.Uuid
+  issueType       IssueType
+  description     String
+  status          IssueStatus   @default(OPEN)
+  reportedAt      DateTime      @default(now())
+  resolvedAt      DateTime?
+  resolution      String?
+  transportTask   TransportTask @relation(fields: [transportTaskId], references: [id])
+}
+
+enum Role {
+  admin
+  manager
+  field_agent
+  procurement_officer
+  warehouse_manager
+  transport_driver
+  transport_coordinator
 }
 
 enum CropBatchStatus {
@@ -186,4 +236,50 @@ enum NotificationType {
   PEST_ALERT
   WEATHER_WARNING
   GENERAL
+}
+
+enum VehicleType {
+  TRUCK
+  VAN
+  PICKUP
+  REFRIGERATED_TRUCK
+  CONTAINER_TRUCK
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  IN_USE
+  MAINTENANCE
+  OUT_OF_SERVICE
+}
+
+enum DriverStatus {
+  AVAILABLE
+  ON_DUTY
+  OFF_DUTY
+  SICK_LEAVE
+}
+
+enum TransportStatus {
+  SCHEDULED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+  DELAYED
+}
+
+enum IssueType {
+  VEHICLE_BREAKDOWN
+  TRAFFIC_DELAY
+  WEATHER_DELAY
+  DAMAGED_GOODS
+  ROUTE_CHANGE
+  OTHER
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  ESCALATED
 }

@@ -35,6 +35,13 @@ const ROLE_ACCESS_PATTERNS: Record<Role, string[]> = {
     '/routes',
     '/profile',
   ],
+  transport_coordinator: [
+    '/dashboard',
+    '/dashboard/*',
+    '/dashboard/transport-coordinator',
+    '/dashboard/transport-coordinator/*',
+    '/profile',
+  ],
 };
 
 // Public routes that don't require authentication

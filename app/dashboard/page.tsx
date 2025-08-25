@@ -8,6 +8,7 @@ const ROLE_ROUTES = {
   procurement_officer: "/dashboard/procurement-officer",
   warehouse_manager: "/dashboard/warehouse-manager",
   transport_driver: "/dashboard/transport-driver",
+  transport_coordinator: "/dashboard/transport-coordinator",
   admin: "/admin"
 };
 
