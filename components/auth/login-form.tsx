@@ -1,36 +1,61 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { login } from "@/app/login/actions";
+import { toast } from "sonner";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleSubmit = async (formData: FormData) => {
     setError(null);
+    
+    // Show signing in toast
+    const signingInToast = toast.loading("Signing in...", {
+      description: "Authenticating your credentials"
+    });
+    
     startTransition(async () => {
       try {
-        await login(formData);
+        const result = await login(formData);
+        
+        if (result && result.success) {
+          // Show success toast
+          toast.success("Authentication successful!", {
+            description: "Welcome back! Redirecting to your dashboard...",
+            id: signingInToast,
+            duration: 2000,
+          });
+          
+          // Wait a moment for the toast to show, then redirect
+          setTimeout(() => {
+            router.push(result.redirectPath);
+          }, 1500);
+        } else {
+          throw new Error("Authentication failed");
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
+        const errorMessage = err instanceof Error ? err.message : "An error occurred during sign in";
+        setError(errorMessage);
+        toast.error("Sign in failed", {
+          description: errorMessage,
+          id: signingInToast,
+          duration: 4000,
+        });
       }
     });
   };
 
   return (
     <form action={handleSubmit} className="space-y-4">
-      {error && (
-        <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-          {error}
-        </div>
-      )}
-
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -74,7 +99,7 @@ export function LoginForm() {
         {isPending ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Signing In...
+            Authenticating...
           </>
         ) : (
           "Sign In"

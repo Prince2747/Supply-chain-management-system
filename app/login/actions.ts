@@ -45,30 +45,31 @@ export async function login(formData: FormData) {
         dbError?.message?.includes("Can't reach database server") ||
         dbError?.message?.includes("Connection refused")
       ) {
-        redirect('/error?type=database')
+        throw new Error('Database connection error. Please try again later.')
       }
 
       // Handle other database-related Prisma errors
       if (dbError?.code?.startsWith('P') && dbError?.code !== 'P2025') {
-        redirect('/error?type=database')
+        throw new Error('Database error occurred. Please try again later.')
       }
 
       // For other errors, continue without profile (will redirect to home)
       console.warn('Non-database error during profile check, continuing without profile')
     }
 
-      // Log the activity
-  await logAuthActivity(data.user.id, 'LOGIN')
+    // Log the activity
+    await logAuthActivity(data.user.id, 'LOGIN')
 
-  revalidatePath('/', 'layout')
-  
-  if (profile?.role) {
-    const redirectPath = getRoleBasedRedirectPath(profile.role)
-    redirect(redirectPath)
-  } else {
-    // If no role is found, redirect to unauthorized
-    redirect('/unauthorized')
-  }
+    revalidatePath('/', 'layout')
+    
+    // Return success result with redirect path instead of redirecting immediately
+    if (profile?.role) {
+      const redirectPath = getRoleBasedRedirectPath(profile.role)
+      return { success: true, redirectPath }
+    } else {
+      // If no role is found, redirect to unauthorized
+      return { success: true, redirectPath: '/unauthorized' }
+    }
   }
 }
 
