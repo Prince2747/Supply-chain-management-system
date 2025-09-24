@@ -3,48 +3,39 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Truck, Users, Package, AlertTriangle, BarChart3, Calendar } from "lucide-react";
+import { 
+  Truck, 
+  CheckSquare, 
+  QrCode, 
+  AlertTriangle, 
+  BarChart3 
+} from "lucide-react";
 
 // Navigation items for the side bar
 const navigation = [
   {
     name: "Dashboard",
-    href: "/dashboard/transport-coordinator",
+    href: "/dashboard/transport-driver",
     icon: BarChart3,
   },
   {
-    name: "Schedule Tasks",
-    href: "/dashboard/transport-coordinator/schedule",
-    icon: Calendar,
+    name: "My Tasks",
+    href: "/dashboard/transport-driver/tasks",
+    icon: CheckSquare,
   },
   {
-    name: "Transport Tasks",
-    href: "/dashboard/transport-coordinator/tasks",
-    icon: Package,
-  },
-  {
-    name: "Vehicles",
-    href: "/dashboard/transport-coordinator/vehicles",
-    icon: Truck,
-  },
-  {
-    name: "Drivers",
-    href: "/dashboard/transport-coordinator/drivers",
-    icon: Users,
+    name: "QR Scanner",
+    href: "/dashboard/transport-driver/scanner",
+    icon: QrCode,
   },
   {
     name: "Issues",
-    href: "/dashboard/transport-coordinator/issues",
+    href: "/dashboard/transport-driver/issues",
     icon: AlertTriangle,
-  },
-  {
-    name: "Reports",
-    href: "/dashboard/transport-coordinator/reports",
-    icon: BarChart3,
   },
 ];
 
-export function TransportCoordinatorNavigation({
+export function TransportDriverNavigation({
   children,
 }: {
   children: React.ReactNode;

@@ -9,12 +9,27 @@ export interface User {
   email: string | null;
   name: string | null;
   role: Role;
+  warehouseId: string | null;
+  warehouse: {
+    id: string;
+    name: string;
+    code: string;
+  } | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
 async function getUsers(): Promise<User[]> {
   const users = await prisma.profile.findMany({
+    include: {
+      warehouse: {
+        select: {
+          id: true,
+          name: true,
+          code: true,
+        }
+      }
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -25,8 +40,22 @@ async function getUsers(): Promise<User[]> {
   }));
 }
 
+async function getWarehouses() {
+  return await prisma.warehouse.findMany({
+    where: { isActive: true },
+    select: {
+      id: true,
+      name: true,
+      code: true,
+      city: true,
+    },
+    orderBy: { name: "asc" },
+  });
+}
+
 export async function UserManagement() {
   const users = await getUsers();
+  const warehouses = await getWarehouses();
 
-  return <UserManagementClient initialUsers={users} />;
+  return <UserManagementClient initialUsers={users} warehouses={warehouses} />;
 }

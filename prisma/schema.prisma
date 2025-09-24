@@ -18,21 +18,28 @@ model Profile {
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
   phone                 String?         @unique
+  warehouseId           String?         @db.Uuid
+  Driver                Driver?
+  warehouse             Warehouse?      @relation(fields: [warehouseId], references: [id])
   coordinatedTransports TransportTask[] @relation("TransportCoordinator")
+
+  @@index([warehouseId])
 }
 
 model Warehouse {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  code      String   @unique
-  address   String?
-  city      String?
-  country   String?
-  capacity  Int?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  createdBy String   @db.Uuid
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String
+  code        String      @unique
+  address     String?
+  city        String?
+  country     String?
+  capacity    Int?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  createdBy   String      @db.Uuid
+  managers    Profile[]
+  cropBatches CropBatch[]
 }
 
 model UnitOfMeasurement {
@@ -108,6 +115,7 @@ model CropBatch {
   unit            String?
   farmId          String                @db.Uuid
   farmerId        String                @db.Uuid
+  warehouseId     String?               @db.Uuid
   status          CropBatchStatus       @default(PLANTED)
   qrCode          String?               @unique
   notes           String?
@@ -116,8 +124,11 @@ model CropBatch {
   updatedAt       DateTime              @updatedAt
   farm            Farm                  @relation(fields: [farmId], references: [id])
   farmer          Farmer                @relation(fields: [farmerId], references: [id])
+  warehouse       Warehouse?            @relation(fields: [warehouseId], references: [id])
   notifications   HarvestNotification[]
   transportTasks  TransportTask[]
+
+  @@index([warehouseId])
 }
 
 model FarmInspection {
@@ -167,6 +178,8 @@ model Driver {
   status         DriverStatus    @default(AVAILABLE)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+  profileId      String?         @unique @db.Uuid
+  Profile        Profile?        @relation(fields: [profileId], references: [id], onUpdate: NoAction)
   transportTasks TransportTask[]
 }
 
@@ -221,6 +234,11 @@ enum CropBatchStatus {
   HARVESTED
   PROCESSED
   SHIPPED
+  READY_FOR_PACKAGING
+  PACKAGING
+  PACKAGED
+  RECEIVED
+  STORED
 }
 
 enum InspectionStatus {

@@ -61,7 +61,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     className={cn(
                       "flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                       isActive
-                        ? "bg-gray-100 text-gray-900"
+                        ? "bg-green-100 text-green-900"
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     )}
                   >
@@ -122,7 +122,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     className={cn(
                       "flex items-center space-x-3 rounded-md px-3 py-2 text-sm font-medium",
                       isActive
-                        ? "bg-gray-100 text-gray-900"
+                        ? "bg-green-100 text-green-900"
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     )}
                   >

@@ -3,48 +3,40 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Truck, Users, Package, AlertTriangle, BarChart3, Calendar } from "lucide-react";
+import { 
+  QrCode, 
+  Warehouse, 
+  BarChart3,
+  PackageCheck,
+  Scan,
+  Archive
+} from "lucide-react";
 
 // Navigation items for the side bar
 const navigation = [
   {
     name: "Dashboard",
-    href: "/dashboard/transport-coordinator",
+    href: "/dashboard/warehouse-manager",
     icon: BarChart3,
   },
   {
-    name: "Schedule Tasks",
-    href: "/dashboard/transport-coordinator/schedule",
-    icon: Calendar,
+    name: "Packaging",
+    href: "/dashboard/warehouse-manager/packaging",
+    icon: PackageCheck,
   },
   {
-    name: "Transport Tasks",
-    href: "/dashboard/transport-coordinator/tasks",
-    icon: Package,
+    name: "Receipt Scanner",
+    href: "/dashboard/warehouse-manager/scanner",
+    icon: Scan,
   },
   {
-    name: "Vehicles",
-    href: "/dashboard/transport-coordinator/vehicles",
-    icon: Truck,
-  },
-  {
-    name: "Drivers",
-    href: "/dashboard/transport-coordinator/drivers",
-    icon: Users,
-  },
-  {
-    name: "Issues",
-    href: "/dashboard/transport-coordinator/issues",
-    icon: AlertTriangle,
-  },
-  {
-    name: "Reports",
-    href: "/dashboard/transport-coordinator/reports",
-    icon: BarChart3,
+    name: "Storage",
+    href: "/dashboard/warehouse-manager/storage",
+    icon: Archive,
   },
 ];
 
-export function TransportCoordinatorNavigation({
+export function WarehouseManagerNavigation({
   children,
 }: {
   children: React.ReactNode;

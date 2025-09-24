@@ -113,6 +113,11 @@ enum CropBatchStatus {
   HARVESTED
   PROCESSED
   SHIPPED
+  READY_FOR_PACKAGING
+  PACKAGING
+  PACKAGED
+  RECEIVED
+  STORED
 }
 
 enum InspectionStatus {

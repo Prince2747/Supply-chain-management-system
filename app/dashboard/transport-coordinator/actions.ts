@@ -591,3 +591,128 @@ export async function getTransportReports() {
     recentIssues: issues.slice(0, 10)
   };
 }
+
+// Create Transport Schedule
+export async function createTransportSchedule(formData: FormData) {
+  try {
+    const profile = await getCurrentUser();
+
+    const cropBatchId = formData.get("cropBatchId") as string;
+    const driverId = formData.get("driverId") as string;
+    const vehicleId = formData.get("vehicleId") as string;
+    const scheduledDateStr = formData.get("scheduledDate") as string;
+    const pickupLocation = formData.get("pickupLocation") as string;
+    const deliveryLocation = formData.get("deliveryLocation") as string;
+    const notes = formData.get("notes") as string;
+
+    if (!cropBatchId || !driverId || !vehicleId || !scheduledDateStr || !pickupLocation || !deliveryLocation) {
+      return { success: false, error: "All required fields must be filled" };
+    }
+
+    const scheduledDate = new Date(scheduledDateStr);
+
+    // Verify crop batch exists and is ready for transport
+    const cropBatch = await prisma.cropBatch.findUnique({
+      where: { id: cropBatchId },
+      include: { farm: true }
+    });
+
+    if (!cropBatch || cropBatch.status !== "HARVESTED") {
+      return { success: false, error: "Crop batch not found or not ready for transport" };
+    }
+
+    // Verify driver exists and is available
+    const driver = await prisma.driver.findUnique({
+      where: { id: driverId }
+    });
+
+    if (!driver || driver.status !== "AVAILABLE") {
+      return { success: false, error: "Driver not found or not available" };
+    }
+
+    // Verify vehicle exists and is available
+    const vehicle = await prisma.vehicle.findUnique({
+      where: { id: vehicleId }
+    });
+
+    if (!vehicle || vehicle.status !== "AVAILABLE") {
+      return { success: false, error: "Vehicle not found or not available" };
+    }
+
+    // Check if driver/vehicle is already scheduled for the same date
+    const conflictingTasks = await prisma.transportTask.findFirst({
+      where: {
+        OR: [
+          { driverId: driverId },
+          { vehicleId: vehicleId }
+        ],
+        scheduledDate: scheduledDate,
+        status: {
+          in: ["SCHEDULED", "IN_TRANSIT"]
+        }
+      }
+    });
+
+    if (conflictingTasks) {
+      return { success: false, error: "Driver or vehicle already scheduled for this date" };
+    }
+
+    // Create the transport task
+    const transportTask = await prisma.transportTask.create({
+      data: {
+        cropBatchId,
+        driverId,
+        vehicleId,
+        status: "SCHEDULED",
+        scheduledDate,
+        pickupLocation,
+        deliveryLocation,
+        notes: notes || null,
+        coordinatorId: profile.id,
+      }
+    });
+
+    // Update crop batch status
+    await prisma.cropBatch.update({
+      where: { id: cropBatchId },
+      data: { status: "SHIPPED" }
+    });
+
+    // Update driver and vehicle status
+    await Promise.all([
+      prisma.driver.update({
+        where: { id: driverId },
+        data: { status: "ON_DUTY" }
+      }),
+      prisma.vehicle.update({
+        where: { id: vehicleId },
+        data: { status: "IN_USE" }
+      })
+    ]);
+
+    // Log activity
+    await logActivity({
+      userId: profile.userId,
+      action: "SCHEDULE_TRANSPORT",
+      entityType: "TransportTask",
+      entityId: transportTask.id,
+      details: {
+        transportTaskId: transportTask.id,
+        cropBatchId,
+        driverId,
+        vehicleId,
+        scheduledDate: scheduledDate.toISOString()
+      }
+    });
+
+    revalidatePath("/dashboard/transport-coordinator/schedule");
+    revalidatePath("/dashboard/transport-coordinator/tasks");
+    revalidatePath("/dashboard/transport-coordinator");
+
+    return { success: true, transportTask };
+
+  } catch (error) {
+    console.error("Error creating transport schedule:", error);
+    return { success: false, error: "Failed to create transport schedule" };
+  }
+}

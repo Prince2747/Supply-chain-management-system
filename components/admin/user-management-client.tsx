@@ -27,11 +27,19 @@ import { createUser, updateUserRole, deleteUser } from '@/app/admin/users/action
 import { User } from './user-management'
 import { Role } from '@/lib/generated/prisma/client'
 
-interface UserManagementClientProps {
-  initialUsers: User[]
+interface Warehouse {
+  id: string;
+  name: string;
+  code: string;
+  city: string | null;
 }
 
-export function UserManagementClient({ initialUsers }: UserManagementClientProps) {
+interface UserManagementClientProps {
+  initialUsers: User[]
+  warehouses: Warehouse[]
+}
+
+export function UserManagementClient({ initialUsers, warehouses }: UserManagementClientProps) {
   const [users, setUsers] = useState<User[]>(initialUsers)
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<'all' | Role>('all')
@@ -102,6 +110,50 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
         ))
       }
     })
+  }
+
+  const handleWarehouseAssignment = async (userId: string, warehouseId: string | null) => {
+    startTransition(async () => {
+      try {
+        const response = await fetch('/api/admin/assign-warehouse', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId, warehouseId }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          toast.error(result.error || 'Failed to assign warehouse');
+          return;
+        }
+
+        toast.success('Warehouse assignment updated successfully');
+        
+        // Update the local state
+        setUsers(users.map(user => {
+          if (user.userId === userId) {
+            const assignedWarehouse = warehouseId 
+              ? warehouses.find(w => w.id === warehouseId) 
+              : null;
+            return { 
+              ...user, 
+              warehouseId,
+              warehouse: assignedWarehouse ? {
+                id: assignedWarehouse.id,
+                name: assignedWarehouse.name,
+                code: assignedWarehouse.code,
+              } : null
+            };
+          }
+          return user;
+        }));
+      } catch (error) {
+        toast.error('Failed to assign warehouse');
+      }
+    });
   }
 
   const handleDeleteUser = async (userId: string) => {
@@ -253,6 +305,7 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
                   <TableHead>User</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Warehouse</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -260,7 +313,7 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                       No users found
                     </TableCell>
                   </TableRow>
@@ -285,6 +338,20 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
                         </Badge>
                       </TableCell>
                       <TableCell>
+                        {user.role === 'warehouse_manager' && user.warehouse ? (
+                          <div>
+                            <div className="font-medium">{user.warehouse.name}</div>
+                            <div className="text-sm text-muted-foreground">Code: {user.warehouse.code}</div>
+                          </div>
+                        ) : user.role === 'warehouse_manager' ? (
+                          <Badge variant="outline" className="text-orange-600">
+                            Not Assigned
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">N/A</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         {new Date(user.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
@@ -307,6 +374,25 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
                               <SelectItem value="transport_coordinator">Transport Coordinator</SelectItem>
                             </SelectContent>
                           </Select>
+                          {user.role === 'warehouse_manager' && (
+                            <Select
+                              value={user.warehouseId || 'none'}
+                              onValueChange={(warehouseId: string) => handleWarehouseAssignment(user.userId, warehouseId === 'none' ? null : warehouseId)}
+                              disabled={isPending}
+                            >
+                              <SelectTrigger className="w-[200px]">
+                                <SelectValue placeholder="Assign Warehouse" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">No Warehouse</SelectItem>
+                                {warehouses.map((warehouse) => (
+                                  <SelectItem key={warehouse.id} value={warehouse.id}>
+                                    {warehouse.name} ({warehouse.code})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
