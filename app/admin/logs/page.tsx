@@ -1,5 +1,3 @@
-import { AdminAuthWrapper } from '@/components/admin/admin-auth-wrapper'
-import { AdminLayout } from '@/components/admin/admin-layout'
 import { ActivityLogs } from '@/components/admin/activity-logs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -31,21 +29,17 @@ function ActivityLogsSkeleton() {
 
 export default function AdminLogsPage() {
   return (
-    <AdminAuthWrapper>
-      <AdminLayout>
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Activity Logs</h2>
-            <p className="text-muted-foreground">
-              Monitor system activity and user actions for security and auditing
-            </p>
-          </div>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Activity Logs</h2>
+        <p className="text-muted-foreground">
+          Monitor system activity and user actions for security and auditing
+        </p>
+      </div>
 
-          <Suspense fallback={<ActivityLogsSkeleton />}>
-            <ActivityLogs />
-          </Suspense>
-        </div>
-      </AdminLayout>
-    </AdminAuthWrapper>
+      <Suspense fallback={<ActivityLogsSkeleton />}>
+        <ActivityLogs />
+      </Suspense>
+    </div>
   )
 }

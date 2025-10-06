@@ -60,7 +60,10 @@ export function WarehouseManagementClient({
       warehouse.country?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleCreateWarehouse = async (formData: FormData) => {
+  const handleCreateWarehouse = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
     startTransition(async () => {
       const result = await createWarehouse(formData);
       if (result.error) {
@@ -68,13 +71,18 @@ export function WarehouseManagementClient({
       } else {
         toast.success(result.message || "Warehouse created successfully");
         setShowCreateForm(false);
-        // Refresh the page to show new data
-        window.location.reload();
+        
+        // Add the new warehouse to local state instead of refreshing
+        if (result.warehouse) {
+          setWarehouses(prevWarehouses => [...prevWarehouses, result.warehouse]);
+        }
       }
     });
   };
 
-  const handleEditWarehouse = async (formData: FormData) => {
+  const handleEditWarehouse = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
     if (!editingWarehouse) return;
 
     startTransition(async () => {
@@ -84,8 +92,13 @@ export function WarehouseManagementClient({
       } else {
         toast.success(result.message || "Warehouse updated successfully");
         setEditingWarehouse(null);
-        // Refresh the page to show updated data
-        window.location.reload();
+        
+        // Update the warehouse in local state instead of refreshing
+        if (result.warehouse) {
+          setWarehouses(prevWarehouses => 
+            prevWarehouses.map(w => w.id === editingWarehouse.id ? result.warehouse : w)
+          );
+        }
       }
     });
   };
@@ -105,8 +118,11 @@ export function WarehouseManagementClient({
         toast.error(result.error);
       } else {
         toast.success(result.message || "Warehouse deleted successfully");
-        // Refresh the page to show updated data
-        window.location.reload();
+        
+        // Remove the warehouse from local state instead of refreshing
+        setWarehouses(prevWarehouses => 
+          prevWarehouses.filter(w => w.id !== warehouseId)
+        );
       }
     });
   };
@@ -124,8 +140,13 @@ export function WarehouseManagementClient({
           result.message ||
             `Warehouse ${isActive ? "activated" : "deactivated"} successfully`
         );
-        // Refresh the page to show updated data
-        window.location.reload();
+        
+        // Update the warehouse status in local state instead of refreshing
+        setWarehouses(prevWarehouses => 
+          prevWarehouses.map(w => 
+            w.id === warehouseId ? { ...w, isActive } : w
+          )
+        );
       }
     });
   };
@@ -161,7 +182,7 @@ export function WarehouseManagementClient({
               </CardHeader>
               <CardContent>
                 <form
-                  action={
+                  onSubmit={
                     editingWarehouse
                       ? handleEditWarehouse
                       : handleCreateWarehouse

@@ -58,32 +58,37 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
     return matchesSearch && matchesRole
   })
 
-  const handleCreateUser = async (formData: FormData) => {
+  const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
     startTransition(async () => {
-      const validRoles = [
-        'admin',
-        'manager',
-        'field_agent',
-        'procurement_officer',
-        'warehouse_manager',
-        'transport_driver',
-        'transport_coordinator'
-      ];
-      const role = formData.get('role');
-      if (typeof role !== 'string' || !validRoles.includes(role)) {
-        toast.error('Invalid role. Must be one of: ' + validRoles.join(', '));
-        return;
-      }
-      const result = await createUser(formData);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success(result.message || 'User created successfully');
-        setShowCreateForm(false);
-        window.location.reload();
+      try {
+        // Validate role
+        const role = formData.get('role');
+        if (!role || !['field_agent', 'warehouse_manager', 'transport_coordinator', 'procurement_officer', 'admin'].includes(role as string)) {
+          toast.error('Please select a valid role');
+          return;
+        }
+
+        const result = await createUser(formData);
+        
+        if (result.error) {
+          toast.error(result.error);
+        } else {
+          toast.success('User created successfully');
+          setShowCreateForm(false);
+          
+          // Add the new user to local state instead of refreshing
+          if (result.user) {
+            setUsers(prevUsers => [...prevUsers, result.user]);
+          }
+        }
+      } catch (error) {
+        toast.error('Failed to create user');
       }
     });
-  }
+  };
 
   const handleRoleChange = async (userId: string, newRole: Role) => {
     startTransition(async () => {
@@ -201,7 +206,7 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
                 <CardTitle>Create New User</CardTitle>
               </CardHeader>
               <CardContent>
-                <form action={handleCreateUser} className="space-y-4">
+                <form onSubmit={handleCreateUser} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="email">Email</Label>

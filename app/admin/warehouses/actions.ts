@@ -8,6 +8,7 @@ import { logActivity } from '@/lib/activity-logger'
 interface ActionResult {
   error: string | null
   message: string | null
+  warehouse?: any
 }
 
 async function checkAdminPermission() {
@@ -70,7 +71,11 @@ export async function createWarehouse(formData: FormData): Promise<ActionResult>
     })
 
     revalidatePath('/admin/warehouses')
-    return { error: null, message: `Warehouse "${name}" created successfully.` }
+    return { 
+      error: null, 
+      message: `Warehouse "${name}" created successfully.`,
+      warehouse: warehouse
+    }
   } catch (error: any) {
     if (error.code === 'P2002') {
       return { error: 'A warehouse with this code already exists.', message: null }
@@ -118,7 +123,11 @@ export async function updateWarehouse(warehouseId: string, formData: FormData): 
     })
 
     revalidatePath('/admin/warehouses')
-    return { error: null, message: `Warehouse "${name}" updated successfully.` }
+    return { 
+      error: null, 
+      message: `Warehouse "${name}" updated successfully.`,
+      warehouse: warehouse
+    }
   } catch (error: any) {
     if (error.code === 'P2002') {
       return { error: 'A warehouse with this code already exists.', message: null }

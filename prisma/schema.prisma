@@ -301,3 +301,15 @@ enum IssueStatus {
   RESOLVED
   ESCALATED
 }
+
+model SecuritySettings {
+  id                     String   @id @default(uuid()) @db.Uuid
+  sessionTimeoutMinutes  Int      @default(30)
+  maxLoginAttempts       Int      @default(5)
+  lockoutDurationMinutes Int      @default(15)
+  passwordExpiryDays     Int      @default(90)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  
+  @@map("SecuritySettings")
+}

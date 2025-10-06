@@ -1,5 +1,3 @@
-import { AdminAuthWrapper } from '@/components/admin/admin-auth-wrapper'
-import { AdminLayout } from '@/components/admin/admin-layout'
 import { UnitsManagement } from '@/components/admin/units-management'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -31,21 +29,17 @@ function UnitsManagementSkeleton() {
 
 export default function AdminUnitsPage() {
   return (
-    <AdminAuthWrapper>
-      <AdminLayout>
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Units of Measurement</h2>
-            <p className="text-muted-foreground">
-              Define and manage units of measurement for inventory tracking
-            </p>
-          </div>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Units of Measurement</h2>
+        <p className="text-muted-foreground">
+          Define and manage units of measurement for inventory tracking
+        </p>
+      </div>
 
-          <Suspense fallback={<UnitsManagementSkeleton />}>
-            <UnitsManagement />
-          </Suspense>
-        </div>
-      </AdminLayout>
-    </AdminAuthWrapper>
+      <Suspense fallback={<UnitsManagementSkeleton />}>
+        <UnitsManagement />
+      </Suspense>
+    </div>
   )
 }

@@ -10,6 +10,7 @@ import { Role } from '@/lib/generated/prisma/client'
 interface ActionResult {
   error: string | null
   message: string | null
+  user?: any
 }
 
 async function checkAdminPermission() {
@@ -100,6 +101,26 @@ export async function createUser(formData: FormData): Promise<ActionResult> {
           details: { email, name, role },
         })
       }
+
+      // Return the created user data
+      const userData = {
+        userId: data.user.id,
+        email: data.user.email,
+        name: name,
+        role: role,
+        phone: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        warehouseId: null,
+        warehouse: null
+      };
+
+      revalidatePath('/admin/users')
+      return { 
+        error: null, 
+        message: `User ${email} created successfully with role ${role}.`,
+        user: userData
+      };
     } catch (dbError) {
       console.error('Failed to create profile:', dbError)
       return { error: 'Database error creating user profile.', message: null }

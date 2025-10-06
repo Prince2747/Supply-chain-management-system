@@ -1,5 +1,3 @@
-import { AdminAuthWrapper } from '@/components/admin/admin-auth-wrapper'
-import { AdminLayout } from '@/components/admin/admin-layout'
 import { WarehouseManagement } from '@/components/admin/warehouse-management'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -31,21 +29,17 @@ function WarehouseManagementSkeleton() {
 
 export default function AdminWarehousesPage() {
   return (
-    <AdminAuthWrapper>
-      <AdminLayout>
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Warehouse Management</h2>
-            <p className="text-muted-foreground">
-              Manage warehouses, locations, and storage facilities
-            </p>
-          </div>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Warehouse Management</h2>
+        <p className="text-muted-foreground">
+          Manage warehouses, locations, and storage facilities
+        </p>
+      </div>
 
-          <Suspense fallback={<WarehouseManagementSkeleton />}>
-            <WarehouseManagement />
-          </Suspense>
-        </div>
-      </AdminLayout>
-    </AdminAuthWrapper>
+      <Suspense fallback={<WarehouseManagementSkeleton />}>
+        <WarehouseManagement />
+      </Suspense>
+    </div>
   )
 }

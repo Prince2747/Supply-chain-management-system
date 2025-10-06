@@ -1,6 +1,5 @@
-import { AdminAuthWrapper } from "@/components/admin/admin-auth-wrapper";
-import { AdminLayout } from "@/components/admin/admin-layout";
 import { Role } from "@/lib/generated/prisma/client";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -97,9 +96,7 @@ export default async function AdminDashboard() {
   const stats = await getDashboardStats();
 
   return (
-    <AdminAuthWrapper>
-      <AdminLayout>
-        <div className="space-y-6">
+    <div className="space-y-6">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
             <p className="text-muted-foreground">
@@ -180,39 +177,37 @@ export default async function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <a
+                <Link
                   href="/admin/users"
                   className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Manage Users
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/admin/warehouses"
                   className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
                   <Warehouse className="mr-2 h-4 w-4" />
                   Manage Warehouses
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/admin/units"
                   className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
                   <Ruler className="mr-2 h-4 w-4" />
                   Manage Units
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/admin/logs"
                   className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
                   <Activity className="mr-2 h-4 w-4" />
                   View Activity Logs
-                </a>
+                </Link>
               </div>
             </CardContent>
           </Card>
-        </div>
-      </AdminLayout>
-    </AdminAuthWrapper>
+    </div>
   );
 }
