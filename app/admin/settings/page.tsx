@@ -33,9 +33,9 @@ export default async function AdminSettingsPage() {
   return (
     <div className="container mx-auto py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Security Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Admin Settings</h1>
         <p className="text-muted-foreground">
-          Configure system security policies and authentication settings
+          Manage your admin account settings
         </p>
       </div>
       

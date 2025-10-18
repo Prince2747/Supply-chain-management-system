@@ -716,3 +716,265 @@ export async function createTransportSchedule(formData: FormData) {
     return { success: false, error: "Failed to create transport schedule" };
   }
 }
+
+// New functions for crop batch workflow
+export async function getTransportCoordinatorTasks(coordinatorId: string) {
+  try {
+    const transportTasks = await prisma.transportTask.findMany({
+      where: {
+        coordinatorId: coordinatorId
+      },
+      include: {
+        cropBatch: {
+          include: {
+            farm: {
+              select: {
+                name: true,
+                location: true
+              }
+            },
+            farmer: {
+              select: {
+                name: true
+              }
+            }
+          }
+        },
+
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            licenseNumber: true,
+            phone: true
+          }
+        },
+        vehicle: {
+          select: {
+            id: true,
+            plateNumber: true,
+            type: true,
+            capacity: true
+          }
+        }
+      },
+      orderBy: {
+        scheduledDate: 'asc'
+      }
+    })
+
+    return transportTasks
+  } catch (error) {
+    console.error('Error fetching transport tasks:', error)
+    throw new Error('Failed to fetch transport tasks')
+  }
+}
+
+export async function assignDriverToTransportTask(
+  coordinatorId: string,
+  data: {
+    transportTaskId: string
+    driverId: string
+    vehicleId: string
+    scheduledDate?: Date
+    notes?: string
+  }
+) {
+  try {
+    const profile = await getCurrentUser();
+    if (profile.userId !== coordinatorId) {
+      throw new Error('Unauthorized')
+    }
+
+    // Verify the transport task exists and belongs to this coordinator
+    const transportTask = await prisma.transportTask.findFirst({
+      where: {
+        id: data.transportTaskId,
+        coordinatorId: coordinatorId,
+        status: 'SCHEDULED'
+      },
+      include: {
+        cropBatch: true
+      }
+    })
+
+    if (!transportTask) {
+      throw new Error('Transport task not found or not available for assignment')
+    }
+
+    // Verify the driver exists and is available
+    const driver = await prisma.driver.findFirst({
+      where: {
+        id: data.driverId,
+        status: 'AVAILABLE'
+      }
+    })
+
+    if (!driver) {
+      throw new Error('Driver not found or not available')
+    }
+
+    // Verify the vehicle exists and is available
+    const vehicle = await prisma.vehicle.findFirst({
+      where: {
+        id: data.vehicleId,
+        status: 'AVAILABLE'
+      }
+    })
+
+    if (!vehicle) {
+      throw new Error('Vehicle not found or not available')
+    }
+
+    // Update transport task with driver and vehicle assignment
+    const updatedTask = await prisma.transportTask.update({
+      where: { id: data.transportTaskId },
+      data: {
+        driverId: data.driverId,
+        vehicleId: data.vehicleId,
+        scheduledDate: data.scheduledDate || transportTask.scheduledDate,
+        notes: data.notes ? `${transportTask.notes || ''}\n${data.notes}`.trim() : transportTask.notes,
+        status: 'SCHEDULED'
+      }
+    })
+
+    // Update driver status to ON_DUTY
+    await prisma.driver.update({
+      where: { id: data.driverId },
+      data: { status: 'ON_DUTY' }
+    })
+
+    // Update vehicle status to IN_USE
+    await prisma.vehicle.update({
+      where: { id: data.vehicleId },
+      data: { status: 'IN_USE' }
+    })
+
+    // Log the activity
+    await logActivity({
+      userId: coordinatorId,
+      action: 'ASSIGN_DRIVER_VEHICLE',
+      entityType: 'TransportTask',
+      entityId: data.transportTaskId,
+      details: {
+        transportTaskId: data.transportTaskId,
+        driverId: data.driverId,
+        vehicleId: data.vehicleId,
+        cropBatchId: transportTask.cropBatchId
+      }
+    })
+
+    revalidatePath('/dashboard/transport-coordinator')
+    
+    return { success: true, updatedTask }
+  } catch (error) {
+    console.error('Error assigning driver to task:', error)
+    throw new Error(error instanceof Error ? error.message : 'Failed to assign driver to task')
+  }
+}
+
+export async function updateTransportTaskStatusAction(
+  coordinatorId: string,
+  taskId: string,
+  status: string
+) {
+  try {
+    const profile = await getCurrentUser();
+    if (profile.userId !== coordinatorId) {
+      throw new Error('Unauthorized')
+    }
+
+    // Verify the transport task exists and belongs to this coordinator
+    const transportTask = await prisma.transportTask.findFirst({
+      where: {
+        id: taskId,
+        coordinatorId: coordinatorId
+      },
+      include: {
+        cropBatch: true,
+        driver: true,
+        vehicle: true
+      }
+    })
+
+    if (!transportTask) {
+      throw new Error('Transport task not found')
+    }
+
+    const updateData: any = { status }
+
+    // Set timestamps based on status
+    if (status === 'IN_TRANSIT') {
+      updateData.actualPickupDate = new Date()
+    } else if (status === 'DELIVERED') {
+      updateData.actualDeliveryDate = new Date()
+      
+      // Update crop batch status to RECEIVED
+      await prisma.cropBatch.update({
+        where: { id: transportTask.cropBatchId },
+        data: { status: 'RECEIVED' }
+      })
+
+      // Free up the driver and vehicle
+      if (transportTask.driverId) {
+        await prisma.driver.update({
+          where: { id: transportTask.driverId },
+          data: { status: 'AVAILABLE' }
+        })
+      }
+
+      if (transportTask.vehicleId) {
+        await prisma.vehicle.update({
+          where: { id: transportTask.vehicleId },
+          data: { status: 'AVAILABLE' }
+        })
+      }
+    }
+
+    // Update the task
+    const updatedTask = await prisma.transportTask.update({
+      where: { id: taskId },
+      data: updateData
+    })
+
+    // Log the activity
+    await logActivity({
+      userId: coordinatorId,
+      action: 'UPDATE_TRANSPORT_STATUS',
+      entityType: 'TransportTask',
+      entityId: taskId,
+      details: {
+        transportTaskId: taskId,
+        previousStatus: transportTask.status,
+        newStatus: status,
+        cropBatchId: transportTask.cropBatchId
+      }
+    })
+
+    revalidatePath('/dashboard/transport-coordinator')
+    
+    return { success: true, updatedTask }
+  } catch (error) {
+    console.error('Error updating transport task status:', error)
+    throw new Error(error instanceof Error ? error.message : 'Failed to update transport task status')
+  }
+}
+
+export async function getTransportCoordinatorDashboardData(coordinatorId: string) {
+  try {
+    const [transportTasks, allDrivers, allVehicles] = await Promise.all([
+      getTransportCoordinatorTasks(coordinatorId),
+      getDrivers(),
+      getVehicles()
+    ])
+
+    return {
+      transportTasks,
+      drivers: allDrivers,
+      vehicles: allVehicles
+    }
+  } catch (error) {
+    console.error('Error fetching transport coordinator dashboard data:', error)
+    throw new Error('Failed to fetch dashboard data')
+  }
+}

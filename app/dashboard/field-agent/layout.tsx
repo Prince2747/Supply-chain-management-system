@@ -1,11 +1,12 @@
 "use client";
 
 import { FieldAgentAuthWrapper } from "@/components/field-agent/field-agent-auth-wrapper";
+import { NotificationBell } from "@/components/field-agent/notification-bell";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Users, Building2, Sprout, QrCode, Bell } from "lucide-react";
+import { Users, Building2, Sprout, QrCode } from "lucide-react";
 
 // Navigation items for the side bar
 const navigation = [
@@ -33,11 +34,6 @@ const navigation = [
     name: "QR Codes",
     href: "/dashboard/field-agent/qr-codes",
     icon: QrCode,
-  },
-  {
-    name: "Notifications",
-    href: "/dashboard/field-agent/notifications",
-    icon: Bell,
   },
 ];
 
@@ -91,6 +87,10 @@ export default function FieldAgentLayout({
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden h-[calc(100vh-4rem)]">
           <div className="p-6">
+            {/* Notification Bell */}
+            <div className="flex justify-end mb-4">
+              <NotificationBell />
+            </div>
             {children}
           </div>
         </div>

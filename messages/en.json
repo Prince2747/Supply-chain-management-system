@@ -1,0 +1,532 @@
+{
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login",
+    "address": "Churchill Avenue, Eshetu Mamo Building - F8 Office 801",
+    "email": "info@azmerawbekele.com",
+    "systemOnline": "System Online",
+    "companyName": "Azmeraw Bekele Import & Export",
+    "employeePortal": "Employee Portal"
+  },
+  
+  "hero": {
+    "badge": "13+ Years of Excellence in Import & Export",
+    "companyName": "Azmeraw Bekele",
+    "companyType": "Import & Export",
+    "description": "Leading Ethiopian import and export company specializing in oil seeds, pulses, coffee, and Khat exports, alongside importing machinery, steel bars, and consumer goods. Serving global markets with quality and reliability.",
+    "employeePortal": "Employee Portal",
+    "learnMore": "Learn More About Us",
+    "yearsExperience": "Years Experience",
+    "countriesServed": "Countries Served",
+    "satisfiedCustomers": "Satisfied Customers",
+    "employees": "Employees"
+  },
+  
+  "home": {
+    "features": {
+      "badge": "Our Expertise",
+      "title": "Our Products & Services",
+      "heading": "What We Offer",
+      "description": "From exports of premium Ethiopian agricultural products to imports of industrial machinery and materials, we serve as your trusted partner in international trade.",
+      
+      "oilSeeds": {
+        "title": "Oil Seeds Export",
+        "description": "Sesame seeds, Niger seeds, and Soybeans - Premium quality Ethiopian oil seeds for global markets"
+      },
+      
+      "coffee": {
+        "title": "Coffee & Beans",
+        "description": "Yirgacheffe, Lekempti, Jimma Grade coffee beans - World-renowned Ethiopian coffee varieties"
+      },
+      
+      "pulses": {
+        "title": "Pulses Export",
+        "description": "High quality White Pea Beans, Red Kidney Beans, Chickpeas, and Green Mung beans for international markets"
+      },
+      
+      "machinery": {
+        "title": "Machinery Import",
+        "description": "Industrial equipment and machinery to support Ethiopia's growing manufacturing sector"
+      },
+      
+      "steel": {
+        "title": "Steel Bars Import",
+        "description": "Construction-grade steel bars and reinforcement materials for infrastructure development"
+      },
+      
+      "tyres": {
+        "title": "Tyres & Automotive",
+        "description": "Quality tyres and automotive products to meet local market demand"
+      },
+      
+      "consumer": {
+        "title": "Consumer Goods",
+        "description": "Quality tyres and other consumer products to meet local market demand"
+      }
+    },
+    
+    "products": {
+      "badge": "Premium Products",
+      "title": "Our Export Products",
+      "description": "High-quality Ethiopian agricultural products sourced directly from local farmers and cooperatives",
+      
+      "coffee": {
+        "title": "Ethiopian Coffee",
+        "description": "Premium Arabica coffee beans from renowned Ethiopian regions"
+      },
+      
+      "sesame": {
+        "title": "Sesame Seeds",
+        "description": "High-quality whitish and humera type sesame seeds"
+      },
+      
+      "pulses": {
+        "title": "Pulses & Beans",
+        "description": "Various types of beans including kidney, chickpeas, and mung beans"
+      },
+      
+      "machinery": {
+        "title": "Industrial Machinery",
+        "description": "Modern agricultural and industrial equipment"
+      },
+      
+      "steel": {
+        "title": "Construction Steel",
+        "description": "High-grade steel bars for construction projects"
+      },
+      
+      "tyres": {
+        "title": "Quality Tyres",
+        "description": "Durable tyres for various vehicle types"
+      }
+    },
+    
+    "why": {
+      "badge": "Why Choose Us",
+      "title": "Excellence in Every Trade",
+      "description": "We combine quality, reliability, and competitive pricing to deliver exceptional value",
+      
+      "quality": {
+        "title": "Premium Quality",
+        "description": "Rigorous quality control ensures only the best products reach our clients"
+      },
+      
+      "global": {
+        "title": "Global Network",
+        "description": "Strong partnerships across China, India, Turkey, and beyond"
+      },
+      
+      "logistics": {
+        "title": "Reliable Logistics",
+        "description": "Efficient transportation and timely delivery guaranteed"
+      },
+      
+      "support": {
+        "title": "24/7 Support",
+        "description": "Dedicated customer service team always ready to assist"
+      },
+      
+      "pricing": {
+        "title": "Competitive Pricing",
+        "description": "Fair and transparent pricing for maximum value"
+      },
+      
+      "certified": {
+        "title": "Certified Standards",
+        "description": "ISO certified with international quality standards"
+      }
+    },
+    
+    "cta": {
+      "badge": "Get in Touch",
+      "title": "Ready to Partner with Us?",
+      "description": "Join hundreds of satisfied clients worldwide who trust us for their import and export needs",
+      "contactButton": "Contact Sales",
+      "emailButton": "Send us an Email",
+      "contact": {
+        "phone": "Call Us",
+        "email": "Email Us",
+        "location": "Visit Us"
+      }
+    },
+    
+    "whyChooseUs": {
+      "badge": "Why Choose Us",
+      "title": "Excellence in Every Trade",
+      "description": "We combine quality, reliability, and competitive pricing to deliver exceptional value",
+      "exportExcellence": {
+        "title": "Export Excellence",
+        "description": "Premium Ethiopian products to global markets with quality assurance"
+      },
+      "importOperations": {
+        "title": "Import Operations",
+        "description": "Reliable sourcing of machinery, steel, and consumer goods from trusted partners"
+      },
+      "manufacturing": {
+        "title": "Manufacturing",
+        "description": "Own woven plastic bags factory ensuring quality and timely supply"
+      },
+      "diversified": {
+        "title": "Diversified Business",
+        "description": "Integrated operations across trade, transport, manufacturing, and hospitality"
+      },
+      "discoverButton": "Discover Our Story",
+      "stats": {
+        "capital": "Initial Capital (Birr)",
+        "employees": "Dedicated Employees",
+        "productCategories": "Product Categories",
+        "businessSectors": "Business Sectors"
+      }
+    }
+  },
+  
+  "about": {
+    "hero": {
+      "title": "About Us",
+      "description": "Discover the story behind Azmeraw Bekele Import & Export and our commitment to excellence in global trade operations.",
+      "button": "Our Story"
+    },
+    
+    "story": {
+      "badge": "Since 2011",
+      "title": "Our Story",
+      "paragraph1": "Established in 2011, Azmeraw Bekele Import & Export is a prominent Ethiopian company founded by Mr. Azmeraw Bekele, who brings over 20 years of extensive business experience. Starting with an initial capital of 20 million birr, our main office is strategically located on Churchill Avenue in Addis Ababa.",
+      "paragraph2": "From our roots in export trade, we have diversified into multiple sectors including transportation, bag manufacturing, hospitality, and fuel services. Our primary focus remains on export operations, specializing in oilseeds and pulses, with established markets in China, India, Turkey, and beyond.",
+      "paragraph3": "Today, we operate a successful woven plastic bags manufacturing facility and are developing a hotel in Jiga town. Our commitment to quality, reliability, and fair pricing, coupled with our strong international partnerships, positions us as a leading contributor to Ethiopia's economic development.",
+      "highlights": {
+        "iso": {
+          "title": "ISO Certified",
+          "description": "Quality Management"
+        },
+        "global": {
+          "title": "Global Reach",
+          "description": "50+ Countries"
+        }
+      },
+      "stats": {
+        "experience": "Years Experience",
+        "clients": "Satisfied Clients",
+        "countries": "Countries Served",
+        "employees": "Team Members"
+      },
+      "isoCertified": "ISO Certified",
+      "qualityManagement": "Quality Management",
+      "globalReach": "Global Reach",
+      "countries": "Countries"
+    },
+    
+    "mission": {
+      "badge": "Our Purpose",
+      "title": "Mission & Vision",
+      "subtitle": "Our commitment to excellence and sustainable growth",
+      "missionTitle": "Our Mission",
+      "missionDescription": "To provide premium quality Ethiopian agricultural products and essential imports to international and local markets, while supporting sustainable farming practices and contributing to Ethiopia's economic growth through fair trade and reliable partnerships.",
+      "visionTitle": "Our Vision",
+      "visionDescription": "To become the leading import-export company in Ethiopia, recognized globally for quality, reliability, and ethical business practices. We aspire to bridge international markets while empowering local communities and driving sustainable economic development.",
+      "missionHeading": "Our Mission",
+      "missionText": "To provide premium quality Ethiopian agricultural products and essential imports to international and local markets, while supporting sustainable farming practices and contributing to Ethiopia's economic growth through fair trade and reliable partnerships.",
+      "visionHeading": "Our Vision",
+      "visionText": "To become the leading import-export company in Ethiopia, recognized globally for quality, reliability, and ethical business practices. We aspire to bridge international markets while empowering local communities and driving sustainable economic development."
+    },
+    
+    "growth": {
+      "badge": "Sustainable Growth",
+      "title": "Growing Together",
+      "paragraph1": "Our growth strategy focuses on sustainable expansion while maintaining our commitment to quality and ethical practices. We invest in our people, infrastructure, and technology to better serve our clients and communities.",
+      "paragraph2": "Through continuous innovation and adaptation to market needs, we've expanded our operations across multiple sectors while staying true to our core values of integrity, excellence, and partnership."
+    },
+    
+    "values": {
+      "badge": "What Drives Us",
+      "title": "Our Core Values",
+      "description": "The principles that guide every decision we make and every partnership we build",
+      
+      "quality": {
+        "title": "Quality First",
+        "description": "Uncompromising standards in every product and service we deliver"
+      },
+      
+      "integrity": {
+        "title": "Integrity",
+        "description": "We believe in conducting business with complete transparency and ethical practices, building lasting trust with our partners and customers"
+      },
+      
+      "innovation": {
+        "title": "Innovation",
+        "description": "We embrace new technologies and innovative approaches to solve complex supply chain challenges and drive efficiency"
+      },
+      
+      "sustainability": {
+        "title": "Sustainability",
+        "description": "Supporting eco-friendly practices and long-term growth"
+      },
+      
+      "partnership": {
+        "title": "Partnership",
+        "description": "We believe in building long-term partnerships based on mutual respect, collaboration, and shared success"
+      },
+      
+      "excellence": {
+        "title": "Excellence",
+        "description": "We maintain high standards in all our products and services, ensuring reliability and satisfaction for our customers worldwide"
+      },
+      
+      "community": {
+        "title": "Community",
+        "description": "Contributing to local economic development and farmer welfare"
+      },
+      
+      "reliability": {
+        "title": "Reliability",
+        "description": "We deliver on our promises with consistent, dependable service that our clients can count on, every time"
+      },
+      
+      "globalReach": {
+        "title": "Global Reach",
+        "description": "We embrace diversity and maintain a global outlook, understanding the unique needs of different markets and cultures"
+      },
+      
+      "customerFocus": {
+        "title": "Customer Focus",
+        "description": "Our customers are at the heart of everything we do. We prioritize their needs and work tirelessly to exceed their expectations"
+      },
+      
+      "growth": {
+        "title": "Growth",
+        "description": "We are committed to continuous improvement and sustainable growth that benefits our company, employees, and the communities we serve"
+      }
+    },
+    
+    "team": {
+      "badge": "Our People",
+      "title": "Meet Our Leadership",
+      "description": "Experienced professionals dedicated to your success",
+      "founder": {
+        "name": "Azmeraw Bekele",
+        "title": "Founder & CEO",
+        "bio": "With over 20 years of business experience, leads our vision and strategy"
+      }
+    },
+    
+    "journey": {
+      "title": "Our Journey",
+      "description": "Growth and milestones since 2011",
+      "2011": {
+        "title": "Company Founded",
+        "description": "Established with 20M birr capital, focusing on export operations"
+      },
+      "2015": {
+        "title": "Market Expansion",
+        "description": "Expanded to Asian and European markets"
+      },
+      "2018": {
+        "title": "Diversification",
+        "description": "Added manufacturing and hospitality divisions"
+      },
+      "2024": {
+        "title": "Digital Transformation",
+        "description": "Launched modern supply chain management system"
+      }
+    },
+    
+    "cta": {
+      "title": "Let's Build Something Great Together",
+      "description": "Partner with us for reliable import and export services",
+      "button": "Contact Us Today"
+    }
+  },
+  
+  "contact": {
+    "title": "Get in Touch",
+    "description": "We're here to help and answer any questions you might have",
+    
+    "header": {
+      "title": "Get In Touch With Us",
+      "description": "You can contact us by any method that works best for you, either by visiting our office in person or using the short form below. We would be pleased to respond to your inquiries."
+    },
+    
+    "callUs": {
+      "title": "Call Us"
+    },
+    
+    "emailUs": {
+      "title": "Email Us"
+    },
+    
+    "visitUs": {
+      "title": "Visit Us"
+    },
+    
+    "form": {
+      "title": "Contact With Us",
+      "description": "Fill out the form below and we'll get back to you as soon as possible",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "mobile": "Mobile",
+      "mobilePlaceholder": "Enter your mobile number",
+      "subject": "Subject",
+      "subjectPlaceholder": "Enter subject",
+      "message": "Write Your Message",
+      "messagePlaceholder": "Enter your message here...",
+      "sendButton": "Send Message",
+      "name": "Full Name",
+      "namePlaceholder": "John Doe",
+      "phone": "Phone Number",
+      "phonePlaceholder": "+251 912 345 678",
+      "company": "Company Name",
+      "companyPlaceholder": "Your Company",
+      "submit": "Send Message",
+      "sending": "Sending..."
+    },
+    
+    "map": {
+      "title": "Our Location",
+      "description": "Visit our office at Churchill Avenue, Eshetu Mamo Building - F8, Office 801"
+    },
+    
+    "info": {
+      "callUs": "Call Us",
+      "callDescription": "Mon-Fri from 8am to 6pm",
+      "emailUs": "Email Us",
+      "emailDescription": "We'll respond within 24 hours",
+      "visitUs": "Visit Us",
+      "visitDescription": "Come say hello at our office",
+      "address": "Churchill Avenue, Eshetu Mamo Building F8, Office 801, Addis Ababa, Ethiopia"
+    },
+    
+    "hours": {
+      "title": "Business Hours",
+      "weekdays": "Monday - Friday",
+      "weekdaysTime": "8:00 AM - 6:00 PM",
+      "saturday": "Saturday",
+      "saturdayTime": "9:00 AM - 1:00 PM",
+      "sunday": "Sunday",
+      "sundayTime": "Closed"
+    }
+  },
+  
+  "footer": {
+    "logoAlt": "Azmeraw Bekele Import & Export Logo",
+    "companyName": "Azmeraw Bekele Import & Export",
+    "description": "Leading Ethiopian import and export company serving global markets since 2011.",
+    "followUs": "Follow Us",
+    "contactUs": "Contact Us",
+    "rightsReserved": "All rights reserved.",
+    "quickLinks": "Quick Links",
+    "products": "Products",
+    "services": "Services",
+    "about": "About Us",
+    "contact": "Contact",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "connect": "Connect With Us",
+    "rights": "All rights reserved.",
+    "madeWith": "Made with",
+    "in": "in Ethiopia"
+  },
+  
+  "loginForm": {
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "authenticatingButton": "Authenticating...",
+    "signingIn": "Signing in...",
+    "authenticating": "Please wait while we verify your credentials",
+    "authSuccess": "Authentication successful!",
+    "welcome": "Welcome back!",
+    "error": "An error occurred",
+    "signInFailed": "Sign in failed",
+    "noAccount": "Don't have an account?",
+    "contactAdmin": "Contact Admin"
+  },
+  
+  "login": {
+    "logoAlt": "Azmeraw Bekele Import & Export Logo",
+    "title": "Employee Portal Login",
+    "description": "Access your employee dashboard",
+    "accountDeactivated": "Your account has been deactivated. Please contact your administrator.",
+    "subtitle": "Access your employee dashboard",
+    "message": {
+      "invalid": "Invalid credentials. Please try again.",
+      "error": "An error occurred during login.",
+      "success": "Login successful!"
+    }
+  },
+  
+  "errorPage": {
+    "general": {
+      "title": "Something went wrong",
+      "description": "An unexpected error has occurred"
+    },
+    "database": {
+      "title": "Database Connection Error",
+      "description": "Unable to connect to the database",
+      "suggestions": {
+        "0": "Check database connection settings",
+        "1": "Verify database is running",
+        "2": "Check network connectivity",
+        "3": "Review database credentials",
+        "4": "Contact system administrator"
+      }
+    },
+    "auth": {
+      "title": "Authentication Error",
+      "description": "There was a problem with your authentication"
+    },
+    "goHome": "Go to Home",
+    "retry": "Try Again",
+    "timestamp": "Error occurred at"
+  },
+  
+  "unauthorized": {
+    "title": "Access Denied",
+    "description": "You do not have permission to access this page",
+    "reasons": {
+      "title": "Possible reasons:",
+      "0": "You are not logged in",
+      "1": "Your session has expired",
+      "2": "You don't have the required permissions",
+      "3": "This page is restricted to authorized personnel only"
+    },
+    "actions": {
+      "title": "What you can do:",
+      "login": "Log in to your account",
+      "home": "Return to home page",
+      "contact": "Contact support if you believe this is an error"
+    },
+    "loginButton": "Go to Login",
+    "homeButton": "Go to Home"
+  },
+  
+  "common": {
+    "learnMore": "Learn More",
+    "getStarted": "Get Started",
+    "contactUs": "Contact Us",
+    "readMore": "Read More",
+    "viewAll": "View All",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "apply": "Apply",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "continue": "Continue"
+  }
+}

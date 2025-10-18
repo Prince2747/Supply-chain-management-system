@@ -79,6 +79,29 @@ async function getDashboardStats() {
     },
   });
 
+  // Get last 5 activity logs
+  const recentActivityLogs = await prisma.activityLog.findMany({
+    take: 5,
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  // Fetch user details for the activity logs
+  const activityLogsWithUsers = await Promise.all(
+    recentActivityLogs.map(async (log) => {
+      const user = await prisma.profile.findUnique({
+        where: { id: log.userId },
+        select: { name: true, role: true },
+      });
+      return {
+        ...log,
+        user,
+        detailsString: log.details ? JSON.stringify(log.details) : null,
+      };
+    })
+  );
+
   return {
     totalUsers,
     adminUsers,
@@ -89,6 +112,7 @@ async function getDashboardStats() {
     totalUnits,
     activeUnits,
     recentActivity,
+    recentActivityLogs: activityLogsWithUsers,
   };
 }
 
@@ -169,42 +193,66 @@ export default async function AdminDashboard() {
             </Card>
           </div>
 
-          {/* Quick Actions */}
+          {/* Recent Activities */}
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Common administrative tasks</CardDescription>
+              <CardTitle>Recent Activities</CardTitle>
+              <CardDescription>Last 5 activity logs from the system</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <Link
-                  href="/admin/users"
-                  className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  Manage Users
-                </Link>
-                <Link
-                  href="/admin/warehouses"
-                  className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                >
-                  <Warehouse className="mr-2 h-4 w-4" />
-                  Manage Warehouses
-                </Link>
-                <Link
-                  href="/admin/units"
-                  className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                >
-                  <Ruler className="mr-2 h-4 w-4" />
-                  Manage Units
-                </Link>
-                <Link
-                  href="/admin/logs"
-                  className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                >
-                  <Activity className="mr-2 h-4 w-4" />
-                  View Activity Logs
-                </Link>
+              <div className="space-y-4">
+                {stats.recentActivityLogs.length > 0 ? (
+                  stats.recentActivityLogs.map((log) => (
+                    <div 
+                      key={log.id} 
+                      className="flex items-start space-x-4 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex-shrink-0">
+                        <Activity className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-sm font-medium text-foreground">
+                            {log.user?.name || 'Unknown User'}
+                          </p>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(log.createdAt).toLocaleString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {log.action}
+                        </p>
+                        {log.detailsString && (
+                          <p className="text-xs text-muted-foreground mt-1 truncate">
+                            {log.detailsString}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Activity className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No recent activity logs</p>
+                  </div>
+                )}
+                
+                {stats.recentActivityLogs.length > 0 && (
+                  <div className="pt-2">
+                    <Link
+                      href="/admin/logs"
+                      className="text-sm text-primary hover:underline inline-flex items-center"
+                    >
+                      View all activity logs
+                      <Activity className="ml-1 h-3 w-3" />
+                    </Link>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

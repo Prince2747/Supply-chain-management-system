@@ -76,38 +76,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { 
-      sessionTimeoutMinutes,
-      maxLoginAttempts,
-      lockoutDurationMinutes,
-      passwordExpiryDays
-    } = await request.json();
+    const { sessionTimeoutMinutes } = await request.json();
 
     // Validate input
     if (sessionTimeoutMinutes < 5 || sessionTimeoutMinutes > 480) {
       return NextResponse.json(
         { error: 'Session timeout must be between 5 and 480 minutes' },
-        { status: 400 }
-      );
-    }
-
-    if (maxLoginAttempts < 1 || maxLoginAttempts > 20) {
-      return NextResponse.json(
-        { error: 'Max login attempts must be between 1 and 20' },
-        { status: 400 }
-      );
-    }
-
-    if (lockoutDurationMinutes < 1 || lockoutDurationMinutes > 1440) {
-      return NextResponse.json(
-        { error: 'Lockout duration must be between 1 and 1440 minutes' },
-        { status: 400 }
-      );
-    }
-
-    if (passwordExpiryDays < 1 || passwordExpiryDays > 365) {
-      return NextResponse.json(
-        { error: 'Password expiry must be between 1 and 365 days' },
         { status: 400 }
       );
     }
@@ -120,10 +94,7 @@ export async function POST(request: NextRequest) {
       settings = await prisma.securitySettings.update({
         where: { id: settings.id },
         data: {
-          sessionTimeoutMinutes,
-          maxLoginAttempts,
-          lockoutDurationMinutes,
-          passwordExpiryDays
+          sessionTimeoutMinutes
         }
       });
     } else {
@@ -131,9 +102,9 @@ export async function POST(request: NextRequest) {
       settings = await prisma.securitySettings.create({
         data: {
           sessionTimeoutMinutes,
-          maxLoginAttempts,
-          lockoutDurationMinutes,
-          passwordExpiryDays
+          maxLoginAttempts: 5,
+          lockoutDurationMinutes: 15,
+          passwordExpiryDays: 90
         }
       });
     }
@@ -146,9 +117,6 @@ export async function POST(request: NextRequest) {
       entityId: settings.id,
       details: {
         sessionTimeoutMinutes,
-        maxLoginAttempts,
-        lockoutDurationMinutes,
-        passwordExpiryDays,
         updatedBy: profile.name
       }
     });

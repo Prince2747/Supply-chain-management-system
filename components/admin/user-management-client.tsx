@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { Search, UserPlus, Trash2 } from 'lucide-react'
+import { Search, UserPlus, UserCheck, UserX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,7 +23,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { createUser, updateUserRole, deleteUser } from '@/app/admin/users/actions'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { createUser, updateUserRole, deactivateUser, reactivateUser } from '@/app/admin/users/actions'
 import { User } from './user-management'
 import { Role } from '@/lib/generated/prisma/client'
 
@@ -45,7 +53,23 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
   const [roleFilter, setRoleFilter] = useState<'all' | Role>('all')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [isPending, startTransition] = useTransition()
-  // Remove local message state, use Sonner toast instead
+  
+  // Confirmation dialog state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean
+    title: string
+    description: string
+    onConfirm: () => void
+    confirmText: string
+    confirmVariant: 'default' | 'destructive'
+  }>({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: () => {},
+    confirmText: 'Confirm',
+    confirmVariant: 'default'
+  })
 
   // Filter users based on search term and role filter
   const filteredUsers = users.filter(user => {
@@ -161,24 +185,73 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
     });
   }
 
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+  const handleToggleUserStatus = async (userEmail: string, isActive: boolean) => {
+    const action = isActive ? 'deactivate' : 'reactivate'
+    
+    if (!userEmail) {
+      toast.error('Cannot modify user: Email address is required')
       return
     }
-    startTransition(async () => {
-      const result = await deleteUser(userId)
-      if (result.error) {
-        toast.error(result.error)
-      } else {
-        toast.success(result.message || 'User deleted successfully')
-        setUsers(users.filter(user => user.userId !== userId))
+    
+    // Show custom confirmation dialog
+    setConfirmDialog({
+      isOpen: true,
+      title: `${action.charAt(0).toUpperCase() + action.slice(1)} User Account`,
+      description: `Are you sure you want to ${action} this user account? ${isActive ? 'The user will no longer be able to log in.' : 'The user will be able to log in again.'}`,
+      confirmText: action.charAt(0).toUpperCase() + action.slice(1),
+      confirmVariant: isActive ? 'destructive' : 'default',
+      onConfirm: () => {
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+        startTransition(async () => {
+          const result = isActive 
+            ? await deactivateUser(userEmail)
+            : await reactivateUser(userEmail)
+          
+          if (result.error) {
+            toast.error(result.error)
+          } else {
+            toast.success(result.message || `User ${action}d successfully`)
+            setUsers(users.map(user => 
+              user.email === userEmail 
+                ? { ...user, isActive: !isActive }
+                : user
+            ))
+          }
+        })
       }
     })
   }
 
   return (
     <div className="space-y-6">
-
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmDialog.isOpen} onOpenChange={(open) => 
+        setConfirmDialog(prev => ({ ...prev, isOpen: open }))
+      }>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{confirmDialog.title}</DialogTitle>
+            <DialogDescription>
+              {confirmDialog.description}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={confirmDialog.confirmVariant}
+              onClick={confirmDialog.onConfirm}
+              disabled={isPending}
+            >
+              {isPending ? 'Processing...' : confirmDialog.confirmText}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardHeader>
@@ -399,13 +472,26 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
                             </Select>
                           )}
                           <Button
-                            variant="outline"
+                            variant={user.isActive ? "destructive" : "default"}
                             size="sm"
-                            onClick={() => handleDeleteUser(user.userId)}
-                            disabled={isPending}
-                            className="text-red-600 hover:text-red-700"
+                            onClick={() => handleToggleUserStatus(user.email || '', user.isActive)}
+                            disabled={isPending || !user.email}
+                            className={user.isActive ? 
+                              "bg-red-600 hover:bg-red-700 text-white border-red-600" : 
+                              "bg-green-600 hover:bg-green-700 text-white border-green-600"
+                            }
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {user.isActive ? (
+                              <>
+                                <UserX className="h-4 w-4 mr-1" />
+                                Deactivate
+                              </>
+                            ) : (
+                              <>
+                                <UserCheck className="h-4 w-4 mr-1" />
+                                Reactivate
+                              </>
+                            )}
                           </Button>
                         </div>
                       </TableCell>

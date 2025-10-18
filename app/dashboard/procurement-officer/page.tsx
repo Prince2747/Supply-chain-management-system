@@ -13,10 +13,13 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  Bell
+  Bell,
+  Truck
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { ProcurementDashboard } from '@/components/procurement/procurement-dashboard';
+import { getProcurementDashboardData, assignTransportTask } from './actions';
 
 export default async function ProcurementOfficerDashboard() {
   // Get current user authentication
@@ -74,6 +77,19 @@ export default async function ProcurementOfficerDashboard() {
     },
     take: 5
   });
+
+  // Get transport assignment data
+  let transportData = null;
+  try {
+    transportData = await getProcurementDashboardData(user.id);
+  } catch (error) {
+    console.error('Error loading transport data:', error);
+  }
+
+  const handleAssignTransport = async (data: any) => {
+    'use server'
+    await assignTransportTask(user.id, data)
+  }
 
   // Get inventory stats (simplified for now)
   const inventoryStats = {
@@ -199,22 +215,24 @@ export default async function ProcurementOfficerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-purple-600" />
-              Inventory Monitor
+              <Truck className="h-5 w-5 text-blue-600" />
+              Transport Assignment
             </CardTitle>
             <CardDescription>
-              Monitor inventory levels and stock progress
+              Assign crop batches to transport coordinators
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="text-2xl font-bold text-purple-600">{inventoryStats.inStock}</div>
-              <p className="text-sm text-muted-foreground">Items in stock</p>
-              <Link href="/dashboard/procurement-officer/inventory">
-                <Button variant="outline" className="w-full">
-                  View Inventory
-                </Button>
-              </Link>
+              <div className="text-2xl font-bold text-blue-600">
+                {transportData?.cropBatches?.length || 0}
+              </div>
+              <p className="text-sm text-muted-foreground">Ready for transport</p>
+              <Button variant="outline" className="w-full" asChild>
+                <Link href="#transport-section">
+                  Assign Transport
+                </Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -294,6 +312,18 @@ export default async function ProcurementOfficerDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Transport Assignment Section */}
+      {transportData && (
+        <div id="transport-section">
+          <ProcurementDashboard
+            initialCropBatches={transportData.cropBatches}
+            transportCoordinators={transportData.transportCoordinators}
+            warehouses={transportData.warehouses}
+            onAssignTransport={handleAssignTransport}
+          />
+        </div>
+      )}
     </div>
   );
 }

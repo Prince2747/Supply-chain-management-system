@@ -43,9 +43,10 @@ import {
   Download,
   Loader2
 } from "lucide-react";
-import { createCropBatch, getCropBatches, getFarms, updateCropBatchStatus } from "../actions";
+import { createCropBatch, getCropBatches, getFarms, updateCropBatchStatus, updateCropStatus, getUnitsOfMeasurement } from "../actions";
 import { toast } from "sonner";
 import QRCode from "qrcode";
+import { CropStatusModal } from "@/components/field-agent/crop-status-modal";
 
 interface CropBatch {
   id: string;
@@ -64,10 +65,13 @@ interface CropBatch {
   notes: string | null;
   createdAt: Date;
   farm: {
+    id: string;
     name: string;
     farmCode: string;
+    location: string | null;
   };
   farmer: {
+    id: string;
     name: string;
     farmerId: string;
   };
@@ -98,13 +102,15 @@ const statusColors: Record<string, string> = {
 export default function CropsPage() {
   const [cropBatches, setCropBatches] = useState<CropBatch[]>([]);
   const [farms, setFarms] = useState<Farm[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [units, setUnits] = useState<Array<{ id: string; name: string; code: string }>>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedQR, setSelectedQR] = useState<string | null>(null);
   const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
   const [generatingQR, setGeneratingQR] = useState<string | null>(null);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedBatchForStatusUpdate, setSelectedBatchForStatusUpdate] = useState<CropBatch | null>(null);
 
   // Load crop batches and farms
   useEffect(() => {
@@ -113,16 +119,16 @@ export default function CropsPage() {
 
   const loadData = async () => {
     try {
-      const [batchesData, farmsData] = await Promise.all([
+      const [batchesData, farmsData, unitsData] = await Promise.all([
         getCropBatches(),
-        getFarms()
+        getFarms(),
+        getUnitsOfMeasurement()
       ]);
       setCropBatches(batchesData);
       setFarms(farmsData);
+      setUnits(unitsData);
     } catch (error) {
       toast.error("Failed to load data");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -164,6 +170,32 @@ export default function CropsPage() {
       if (result.success) {
         toast.success("Status updated successfully");
         loadData();
+      } else {
+        toast.error(result.error || "Failed to update status");
+      }
+    } catch (error) {
+      toast.error("Failed to update status");
+    }
+  };
+
+  const handleOpenStatusModal = (batch: CropBatch) => {
+    setSelectedBatchForStatusUpdate(batch);
+    setIsStatusModalOpen(true);
+  };
+
+  const handleStatusModalUpdate = async (batchId: string, status: string, notes: string, additionalData?: any) => {
+    try {
+      const result = await updateCropStatus(
+        batchId, 
+        status, 
+        notes, 
+        additionalData
+      );
+      if (result.success) {
+        toast.success("Crop status updated successfully");
+        loadData();
+        setIsStatusModalOpen(false);
+        setSelectedBatchForStatusUpdate(null);
       } else {
         toast.error(result.error || "Failed to update status");
       }
@@ -281,14 +313,6 @@ export default function CropsPage() {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -302,7 +326,7 @@ export default function CropsPage() {
           <Button
             variant="outline"
             onClick={downloadAllQRCodes}
-            disabled={loading || generatingQR === 'bulk'}
+            disabled={generatingQR === 'bulk'}
           >
             {generatingQR === 'bulk' ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -373,11 +397,21 @@ export default function CropsPage() {
                       <SelectValue placeholder="Select unit" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="kg">Kilograms</SelectItem>
-                      <SelectItem value="tons">Tons</SelectItem>
-                      <SelectItem value="bags">Bags</SelectItem>
-                      <SelectItem value="boxes">Boxes</SelectItem>
-                      <SelectItem value="pieces">Pieces</SelectItem>
+                      {units.length > 0 ? (
+                        units.map((unit) => (
+                          <SelectItem key={unit.id} value={unit.code}>
+                            {unit.name} ({unit.code})
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <>
+                          <SelectItem value="kg">Kilograms (kg)</SelectItem>
+                          <SelectItem value="tons">Tons</SelectItem>
+                          <SelectItem value="bags">Bags</SelectItem>
+                          <SelectItem value="boxes">Boxes</SelectItem>
+                          <SelectItem value="pieces">Pieces</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -531,22 +565,20 @@ export default function CropsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Select
-                      value={batch.status}
-                      onValueChange={(value) => handleStatusUpdate(batch.id, value)}
-                    >
-                      <SelectTrigger className="w-[140px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PLANTED">Planted</SelectItem>
-                        <SelectItem value="GROWING">Growing</SelectItem>
-                        <SelectItem value="READY_FOR_HARVEST">Ready</SelectItem>
-                        <SelectItem value="HARVESTED">Harvested</SelectItem>
-                        <SelectItem value="PROCESSED">Processed</SelectItem>
-                        <SelectItem value="SHIPPED">Shipped</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center space-x-2">
+                      <Badge className={statusColors[batch.status] || "bg-gray-100 text-gray-800"}>
+                        {batch.status.replace('_', ' ')}
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenStatusModal(batch)}
+                        className="flex items-center gap-1"
+                      >
+                        <Edit className="h-3 w-3" />
+                        Update Status
+                      </Button>
+                    </div>
                   </TableCell>
                   <TableCell>
                     {batch.qrCode ? (
@@ -653,6 +685,14 @@ export default function CropsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Crop Status Update Modal */}
+      <CropStatusModal
+        isOpen={isStatusModalOpen}
+        onOpenChange={setIsStatusModalOpen}
+        cropBatch={selectedBatchForStatusUpdate}
+        onUpdateStatus={handleStatusModalUpdate}
+      />
     </div>
   );
 }

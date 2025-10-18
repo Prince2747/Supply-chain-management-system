@@ -11,13 +11,22 @@ import {
   Activity,
   TrendingUp
 } from "lucide-react";
-import { getTransportStats, getTransportTasks, getTransportIssues } from "./actions";
+import { getTransportStats, getTransportTasks, getTransportIssues, getTransportCoordinatorDashboardData, assignDriverToTransportTask, updateTransportTaskStatusAction } from "./actions";
+import { TransportCoordinatorDashboard } from '@/components/transport-coordinator/transport-coordinator-dashboard';
+import { auth } from '@/lib/auth';
 
 export default async function TransportCoordinatorDashboard() {
-  const [stats, recentTasks, recentIssues] = await Promise.all([
+  const session = await auth()
+  
+  if (!session?.user?.id) {
+    return <div>Unauthorized</div>
+  }
+
+  const [stats, recentTasks, recentIssues, workflowData] = await Promise.all([
     getTransportStats(),
     getTransportTasks().then(tasks => tasks.slice(0, 5)),
-    getTransportIssues().then(issues => issues.slice(0, 5))
+    getTransportIssues().then(issues => issues.slice(0, 5)),
+    getTransportCoordinatorDashboardData(session.user.id).catch(() => null)
   ]);
 
   const statCards = [
@@ -212,6 +221,26 @@ export default async function TransportCoordinatorDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Crop Batch Transport Workflow */}
+      {workflowData && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Crop Batch Transport Management</h2>
+          <TransportCoordinatorDashboard
+            initialTransportTasks={workflowData.transportTasks}
+            drivers={workflowData.drivers}
+            vehicles={workflowData.vehicles}
+            onAssignDriver={async (data: any) => {
+              'use server'
+              await assignDriverToTransportTask(session.user.id, data)
+            }}
+            onUpdateTaskStatus={async (taskId: string, status: string) => {
+              'use server'
+              await updateTransportTaskStatusAction(session.user.id, taskId, status)
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

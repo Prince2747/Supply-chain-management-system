@@ -41,28 +41,55 @@ export async function updateSession(request: NextRequest) {
   // Check if user is trying to access admin routes
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
 
-  // Get user's role from profile
-  const { data: profile } = await supabase
-    .from('Profile')
-    .select('role')
-    .eq('userId', user?.id)
-    .single();
+  // Get user's role from profile and check if user is active
+  let profile = null;
+  if (user) {
+    try {
+      const { data } = await supabase
+        .from('Profile')
+        .select('role, isActive')
+        .eq('userId', user.id)
+        .single();
+      profile = data;
+    } catch (error) {
+      console.error('Error fetching profile in middleware:', error);
+      // If we can't fetch profile, redirect to login
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+  }
 
   const role = profile?.role || 'user';
+  const isActive = profile?.isActive !== false; // Default to true if null
+  
+  // Extract locale from path (e.g., /en/login -> en)
+  const pathSegments = request.nextUrl.pathname.split('/').filter(Boolean);
+  const locale = ['en', 'am'].includes(pathSegments[0]) ? pathSegments[0] : 'en';
+  
+  // Check if user account is deactivated
+  if (user && profile && profile.isActive === false) {
+    // User is authenticated but account is deactivated, sign them out and redirect
+    await supabase.auth.signOut()
+    const url = request.nextUrl.clone()
+    url.pathname = `/${locale}/login`
+    url.searchParams.set('message', 'account_deactivated')
+    return NextResponse.redirect(url)
+  }
   const path = request.nextUrl.pathname;
 
   // Check if user has access to the requested route
   if (user && !hasRouteAccess(role, path)) {
     // User is authenticated but doesn't have access, redirect to unauthorized
     const url = request.nextUrl.clone()
-    url.pathname = '/unauthorized'
+    url.pathname = `/${locale}/unauthorized`
     return NextResponse.redirect(url)
   }
   
   if (!user && !hasRouteAccess(role, path)) {
     // User is not authenticated and trying to access protected route, redirect to login
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    url.pathname = `/${locale}/login`
     return NextResponse.redirect(url)
   }
 
@@ -78,7 +105,7 @@ export async function updateSession(request: NextRequest) {
     } catch (error) {
       console.error('Error checking admin permissions:', error)
       const url = request.nextUrl.clone()
-      url.pathname = '/unauthorized'
+      url.pathname = `/${locale}/unauthorized`
       return NextResponse.redirect(url)
     }
   }

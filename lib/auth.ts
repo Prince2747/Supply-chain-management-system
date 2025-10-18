@@ -51,11 +51,23 @@ const PUBLIC_ROUTES = [
   '/error',
   '/unauthorized',
   '/',
+  '/about',
+  '/contact',
 ];
 
+// Helper function to strip locale prefix from path
+function stripLocalePrefix(path: string): string {
+  // Remove locale prefix like /en/ or /am/
+  const localePattern = /^\/(en|am)(\/|$)/;
+  return path.replace(localePattern, '/');
+}
+
 export function hasRouteAccess(role: Role, path: string): boolean {
+  // Strip locale prefix for route matching
+  const normalizedPath = stripLocalePrefix(path);
+  
   // Allow access to public routes
-  if (PUBLIC_ROUTES.some(route => path.startsWith(route))) {
+  if (PUBLIC_ROUTES.some(route => normalizedPath === route || normalizedPath.startsWith(route + '/'))) {
     return true;
   }
 
@@ -67,8 +79,8 @@ export function hasRouteAccess(role: Role, path: string): boolean {
   // Check if the path matches any of the allowed patterns for the role
   return ROLE_ACCESS_PATTERNS[role].some(pattern => {
     if (pattern.endsWith('/*')) {
-      return path.startsWith(pattern.slice(0, -2));
+      return normalizedPath.startsWith(pattern.slice(0, -2));
     }
-    return path === pattern;
+    return normalizedPath === pattern;
   });
 }

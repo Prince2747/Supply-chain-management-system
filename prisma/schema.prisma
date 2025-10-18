@@ -19,11 +19,13 @@ model Profile {
   updatedAt             DateTime        @updatedAt
   phone                 String?         @unique
   warehouseId           String?         @db.Uuid
+  isActive              Boolean         @default(true)
   Driver                Driver?
   warehouse             Warehouse?      @relation(fields: [warehouseId], references: [id])
   coordinatedTransports TransportTask[] @relation("TransportCoordinator")
 
   @@index([warehouseId])
+  @@index([isActive])
 }
 
 model Warehouse {
@@ -38,8 +40,8 @@ model Warehouse {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   createdBy   String      @db.Uuid
-  managers    Profile[]
   cropBatches CropBatch[]
+  managers    Profile[]
 }
 
 model UnitOfMeasurement {
@@ -56,7 +58,7 @@ model UnitOfMeasurement {
 }
 
 model ActivityLog {
-  id         String   @id @default(uuid()) @db.Uuid
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId     String   @db.Uuid
   action     String
   entityType String?
@@ -115,13 +117,13 @@ model CropBatch {
   unit            String?
   farmId          String                @db.Uuid
   farmerId        String                @db.Uuid
-  warehouseId     String?               @db.Uuid
   status          CropBatchStatus       @default(PLANTED)
   qrCode          String?               @unique
   notes           String?
   createdBy       String                @db.Uuid
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
+  warehouseId     String?               @db.Uuid
   farm            Farm                  @relation(fields: [farmId], references: [id])
   farmer          Farmer                @relation(fields: [farmerId], references: [id])
   warehouse       Warehouse?            @relation(fields: [warehouseId], references: [id])
@@ -217,6 +219,18 @@ model TransportIssue {
   transportTask   TransportTask @relation(fields: [transportTaskId], references: [id])
 }
 
+model SecuritySettings {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionTimeoutMinutes  Int      @default(30)
+  maxLoginAttempts       Int      @default(5)
+  lockoutDurationMinutes Int      @default(15)
+  passwordExpiryDays     Int      @default(90)
+  createdAt              DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@map("SecuritySettings")
+}
+
 enum Role {
   admin
   manager
@@ -300,16 +314,4 @@ enum IssueStatus {
   IN_PROGRESS
   RESOLVED
   ESCALATED
-}
-
-model SecuritySettings {
-  id                     String   @id @default(uuid()) @db.Uuid
-  sessionTimeoutMinutes  Int      @default(30)
-  maxLoginAttempts       Int      @default(5)
-  lockoutDurationMinutes Int      @default(15)
-  passwordExpiryDays     Int      @default(90)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
-  
-  @@map("SecuritySettings")
 }

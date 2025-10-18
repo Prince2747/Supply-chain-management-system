@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { login } from "@/app/login/actions";
+import { login } from "@/app/[locale]/login/actions";
 import { toast } from "sonner";
+import { useTranslations } from 'next-intl';
 
 export function LoginForm() {
+  const t = useTranslations('loginForm');
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -19,8 +21,8 @@ export function LoginForm() {
     setError(null);
     
     // Show signing in toast
-    const signingInToast = toast.loading("Signing in...", {
-      description: "Authenticating your credentials"
+    const signingInToast = toast.loading(t('signingIn'), {
+      description: t('authenticating')
     });
     
     startTransition(async () => {
@@ -29,8 +31,8 @@ export function LoginForm() {
         
         if (result && result.success) {
           // Show success toast
-          toast.success("Authentication successful!", {
-            description: "Welcome back! Redirecting to your dashboard...",
+          toast.success(t('authSuccess'), {
+            description: t('welcome'),
             id: signingInToast,
             duration: 2000,
           });
@@ -43,9 +45,9 @@ export function LoginForm() {
           throw new Error("Authentication failed");
         }
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "An error occurred during sign in";
+        const errorMessage = err instanceof Error ? err.message : t('error');
         setError(errorMessage);
-        toast.error("Sign in failed", {
+        toast.error(t('signInFailed'), {
           description: errorMessage,
           id: signingInToast,
           duration: 4000,
@@ -57,25 +59,25 @@ export function LoginForm() {
   return (
     <form action={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t('email')}</Label>
         <Input
           id="email"
           name="email"
           type="email"
-          placeholder="Enter your email"
+          placeholder={t('emailPlaceholder')}
           required
           disabled={isPending}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t('password')}</Label>
         <div className="relative">
           <Input
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
-            placeholder="Enter your password"
+            placeholder={t('passwordPlaceholder')}
             required
             disabled={isPending}
             className="pr-10"
@@ -99,21 +101,21 @@ export function LoginForm() {
         {isPending ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Authenticating...
+            {t('authenticatingButton')}
           </>
         ) : (
-          "Sign In"
+          t('signIn')
         )}
       </Button>
 
       <div className="text-center pt-4 border-t border-border">
         <p className="text-sm text-muted-foreground">
-          Don't have an account?{" "}
+          {t('noAccount')}{" "}
           <a
             href="mailto:admin@example.com"
             className="text-primary hover:underline"
           >
-            Contact your administrator
+            {t('contactAdmin')}
           </a>
         </p>
       </div>

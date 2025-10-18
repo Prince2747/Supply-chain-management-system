@@ -400,12 +400,15 @@ export async function getCropBatches() {
       include: {
         farm: {
           select: {
+            id: true,
             name: true,
             farmCode: true,
+            location: true,
           }
         },
         farmer: {
           select: {
+            id: true,
             name: true,
             farmerId: true,
           }
@@ -510,5 +513,170 @@ export async function markNotificationAsRead(notificationId: string) {
   } catch (error) {
     console.error('Error marking notification as read:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// Crop Status Management
+export async function updateCropStatus(
+  batchId: string, 
+  newStatus: string, 
+  notes: string, 
+  additionalData?: any
+) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('Unauthorized');
+    }
+
+    const isFieldAgent = await checkFieldAgentRole(user.id);
+    if (!isFieldAgent) {
+      throw new Error('Access denied: Field agent role required');
+    }
+
+    // Get the current crop batch
+    const cropBatch = await prisma.cropBatch.findUnique({
+      where: { id: batchId },
+      include: {
+        farm: true,
+        farmer: true
+      }
+    });
+
+    if (!cropBatch) {
+      throw new Error('Crop batch not found');
+    }
+
+    // Update crop batch status and additional data
+    const updateData: any = {
+      status: newStatus as any,
+      notes: notes,
+      updatedAt: new Date()
+    };
+
+    if (additionalData?.actualHarvest) {
+      updateData.actualHarvest = new Date(additionalData.actualHarvest);
+    }
+
+    if (additionalData?.quantity) {
+      updateData.quantity = additionalData.quantity;
+    }
+
+    await prisma.cropBatch.update({
+      where: { id: batchId },
+      data: updateData
+    });
+
+    // Create notification for procurement officer when crop is ready for harvest or processed
+    if (newStatus === 'READY_FOR_HARVEST' || newStatus === 'PROCESSED') {
+      // Find procurement officers
+      const procurementOfficers = await prisma.profile.findMany({
+        where: { role: 'procurement_officer', isActive: true }
+      });
+
+      // Create notifications for all procurement officers
+      for (const officer of procurementOfficers) {
+        await prisma.harvestNotification.create({
+          data: {
+            cropBatchId: batchId,
+            message: `Crop batch ${cropBatch.batchCode} is now ${newStatus.replace('_', ' ').toLowerCase()}. Status notes: ${notes}`,
+            notificationType: newStatus === 'READY_FOR_HARVEST' ? 'HARVEST_READY' : 'GENERAL',
+            sentTo: officer.userId,
+            isRead: false
+          }
+        });
+      }
+    }
+
+    // Log the activity
+    await logActivity({
+      userId: user.id,
+      action: 'UPDATE_CROP_STATUS',
+      entityType: 'CROP_BATCH',
+      entityId: batchId,
+      details: {
+        batchCode: cropBatch.batchCode,
+        previousStatus: cropBatch.status,
+        newStatus: newStatus,
+        notes: notes,
+        farmName: cropBatch.farm.name,
+        farmerName: cropBatch.farmer.name,
+        additionalData
+      }
+    });
+
+    revalidatePath('/dashboard/field-agent/crops');
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating crop status:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// Get crop batches assigned to field agent
+export async function getFieldAgentCropBatches() {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('Unauthorized');
+    }
+
+    const isFieldAgent = await checkFieldAgentRole(user.id);
+    if (!isFieldAgent) {
+      throw new Error('Access denied: Field agent role required');
+    }
+
+    const cropBatches = await prisma.cropBatch.findMany({
+      where: {
+        // Assuming field agents are responsible for crops they created
+        createdBy: user.id
+      },
+      include: {
+        farm: {
+          select: {
+            id: true,
+            name: true,
+            location: true
+          }
+        },
+        farmer: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        warehouse: {
+          select: {
+            id: true,
+            name: true,
+            code: true
+          }
+        }
+      },
+      orderBy: { updatedAt: 'desc' }
+    });
+
+    return { success: true, data: cropBatches };
+  } catch (error) {
+    console.error('Error getting crop batches:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+export async function getUnitsOfMeasurement() {
+  try {
+    const units = await prisma.unitOfMeasurement.findMany({
+      where: { isActive: true },
+      orderBy: { name: 'asc' }
+    });
+
+    return units;
+  } catch (error) {
+    console.error('Error fetching units:', error);
+    return [];
   }
 }

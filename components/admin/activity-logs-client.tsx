@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Filter, Eye, Download } from "lucide-react";
+import { Search, Filter, Eye, Download, X } from "lucide-react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ActivityLog } from "./activity-logs";
 
 interface ActivityLogsClientProps {
@@ -302,77 +309,110 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
         </CardContent>
       </Card>
 
-      {/* Log Details Modal/Card */}
-      {selectedLog && (
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>Activity Log Details</CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedLog(null)}
-              >
-                Close
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-semibold mb-2">Basic Information</h4>
-                <div className="space-y-2 text-sm">
+      {/* Log Details Dialog */}
+      <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Activity Log Details</DialogTitle>
+            <DialogDescription>
+              Detailed information about this activity log entry
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedLog && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
                   <div>
-                    <strong>Action:</strong> {selectedLog.action}
-                  </div>
-                  <div>
-                    <strong>User:</strong> {selectedLog.user?.name || "Unknown"}{" "}
-                    ({selectedLog.user?.email})
-                  </div>
-                  <div>
-                    <strong>Timestamp:</strong>{" "}
-                    {new Date(selectedLog.createdAt).toLocaleString()}
-                  </div>
-                  <div>
-                    <strong>IP Address:</strong>{" "}
-                    {selectedLog.ipAddress || "Unknown"}
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Entity Information</h4>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <strong>Entity Type:</strong>{" "}
-                    {selectedLog.entityType || "None"}
-                  </div>
-                  <div>
-                    <strong>Entity ID:</strong> {selectedLog.entityId || "None"}
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-2">
+                      Basic Information
+                    </h4>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground">Action</span>
+                        <Badge variant={getActionBadgeVariant(selectedLog.action)} className="w-fit mt-1">
+                          {selectedLog.action.replace("_", " ")}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground">User</span>
+                        <span className="font-medium">{selectedLog.user?.name || "Unknown"}</span>
+                        <span className="text-xs text-muted-foreground">{selectedLog.user?.email || selectedLog.userId}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground">Timestamp</span>
+                        <span className="font-medium">
+                          {new Date(selectedLog.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground">IP Address</span>
+                        <span className="font-mono text-sm">
+                          {selectedLog.ipAddress || "Unknown"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {selectedLog.userAgent && (
-              <div className="mt-4">
-                <h4 className="font-semibold mb-2">User Agent</h4>
-                <div className="text-sm font-mono bg-muted p-2 rounded">
-                  {selectedLog.userAgent}
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-2">
+                      Entity Information
+                    </h4>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground">Entity Type</span>
+                        {selectedLog.entityType ? (
+                          <Badge variant="outline" className="w-fit mt-1">
+                            {selectedLog.entityType}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">None</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground">Entity ID</span>
+                        <span className="font-mono text-xs break-all">
+                          {selectedLog.entityId || "None"}
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground">Log ID</span>
+                        <span className="font-mono text-xs break-all text-muted-foreground">
+                          {selectedLog.id}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {selectedLog.details && (
-              <div className="mt-4">
-                <h4 className="font-semibold mb-2">Additional Details</h4>
-                <pre className="text-sm bg-muted p-4 rounded overflow-auto max-h-40">
-                  {formatDetails(selectedLog.details)}
-                </pre>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+              {selectedLog.userAgent && (
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground mb-2">
+                    User Agent
+                  </h4>
+                  <div className="text-xs font-mono bg-muted p-3 rounded border break-all">
+                    {selectedLog.userAgent}
+                  </div>
+                </div>
+              )}
+
+              {selectedLog.details && (
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground mb-2">
+                    Additional Details
+                  </h4>
+                  <pre className="text-xs bg-muted p-4 rounded border overflow-auto max-h-60">
+                    {formatDetails(selectedLog.details)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

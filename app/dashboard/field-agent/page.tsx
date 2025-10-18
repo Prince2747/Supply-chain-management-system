@@ -4,11 +4,9 @@ import Link from "next/link";
 import { 
   Building, 
   Users, 
-  Bell, 
   Sprout, 
   QrCode, 
   TrendingUp, 
-  AlertTriangle,
   CheckCircle,
   Clock,
   MapPin
@@ -169,16 +167,8 @@ export default async function FieldAgentDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div>
         <h1 className="text-3xl font-bold tracking-tight">Field Agent Dashboard</h1>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" asChild>
-            <Link href="/dashboard/field-agent/notifications">
-              <Bell className="mr-2 h-4 w-4" />
-              {stats.unreadNotifications} Notifications
-            </Link>
-          </Button>
-        </div>
       </div>
 
       {/* Stats Overview */}
@@ -336,53 +326,6 @@ export default async function FieldAgentDashboard() {
                 <p className="text-xs">Start by registering farmers or creating crop batches</p>
               </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Pending Tasks */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <AlertTriangle className="mr-2 h-5 w-5 text-orange-500" />
-            Pending Tasks
-          </CardTitle>
-          <CardDescription>
-            Items requiring your attention
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-lg border border-orange-200 bg-orange-50">
-              <div>
-                <p className="text-sm font-medium">Farm inspection due</p>
-                <p className="text-xs text-gray-600">Meadow Creek Farm - Due tomorrow</p>
-              </div>
-              <Button size="sm" variant="outline">
-                <MapPin className="mr-1 h-3 w-3" />
-                View
-              </Button>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg border border-blue-200 bg-blue-50">
-              <div>
-                <p className="text-sm font-medium">Harvest notifications</p>
-                <p className="text-xs text-gray-600">{stats.pendingHarvests} farms ready for harvest</p>
-              </div>
-              <Button size="sm" variant="outline">
-                <Bell className="mr-1 h-3 w-3" />
-                Review
-              </Button>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg border border-green-200 bg-green-50">
-              <div>
-                <p className="text-sm font-medium">QR codes to generate</p>
-                <p className="text-xs text-gray-600">3 new crop batches awaiting QR codes</p>
-              </div>
-              <Button size="sm" variant="outline">
-                <QrCode className="mr-1 h-3 w-3" />
-                Generate
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>

@@ -10,6 +10,7 @@ export interface User {
   name: string | null;
   role: Role;
   warehouseId: string | null;
+  isActive: boolean;
   warehouse: {
     id: string;
     name: string;
@@ -35,6 +36,7 @@ async function getUsers(): Promise<User[]> {
 
   return users.map((user) => ({
     ...user,
+    isActive: user.isActive,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   }));

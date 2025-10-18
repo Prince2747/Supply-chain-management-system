@@ -79,14 +79,29 @@ export function UnitsManagementClient({
 
   const handleCreateUnit = async (formData: FormData) => {
     startTransition(async () => {
-      const result = await createUnit(formData);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success(result.message || "Unit created successfully");
+      try {
+        const response = await fetch('/api/admin/units', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          toast.error(result.error || 'Failed to create unit');
+          return;
+        }
+
+        toast.success(result.message || 'Unit created successfully');
         setShowCreateForm(false);
-        // Refresh the page to show new data
-        window.location.reload();
+        
+        // Add the new unit to the local state instead of refreshing
+        if (result.unit) {
+          setUnits(prev => [result.unit, ...prev]);
+        }
+      } catch (error) {
+        console.error('Error creating unit:', error);
+        toast.error('Failed to create unit');
       }
     });
   };
@@ -95,14 +110,31 @@ export function UnitsManagementClient({
     if (!editingUnit) return;
 
     startTransition(async () => {
-      const result = await updateUnit(editingUnit.id, formData);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success(result.message || "Unit updated successfully");
+      try {
+        const response = await fetch(`/api/admin/units/${editingUnit.id}`, {
+          method: 'PUT',
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          toast.error(result.error || 'Failed to update unit');
+          return;
+        }
+
+        toast.success(result.message || 'Unit updated successfully');
         setEditingUnit(null);
-        // Refresh the page to show updated data
-        window.location.reload();
+        
+        // Update the unit in local state instead of refreshing
+        if (result.unit) {
+          setUnits(prev => prev.map(unit => 
+            unit.id === editingUnit.id ? result.unit : unit
+          ));
+        }
+      } catch (error) {
+        console.error('Error updating unit:', error);
+        toast.error('Failed to update unit');
       }
     });
   };
@@ -117,29 +149,59 @@ export function UnitsManagementClient({
     }
 
     startTransition(async () => {
-      const result = await deleteUnit(unitId);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success(result.message || "Unit deleted successfully");
-        // Refresh the page to show updated data
-        window.location.reload();
+      try {
+        const response = await fetch(`/api/admin/units/${unitId}`, {
+          method: 'DELETE',
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          toast.error(result.error || 'Failed to delete unit');
+          return;
+        }
+
+        toast.success(result.message || 'Unit deleted successfully');
+        
+        // Remove the unit from local state instead of refreshing
+        setUnits(prev => prev.filter(unit => unit.id !== unitId));
+      } catch (error) {
+        console.error('Error deleting unit:', error);
+        toast.error('Failed to delete unit');
       }
     });
   };
 
   const handleToggleUnitStatus = async (unitId: string, isActive: boolean) => {
     startTransition(async () => {
-      const result = await toggleUnitStatus(unitId, isActive);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
+      try {
+        const response = await fetch(`/api/admin/units/${unitId}/toggle`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ isActive }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          toast.error(result.error || 'Failed to update unit status');
+          return;
+        }
+
         toast.success(
           result.message ||
             `Unit ${isActive ? "activated" : "deactivated"} successfully`
         );
-        // Refresh the page to show updated data
-        window.location.reload();
+        
+        // Update the unit status in local state instead of refreshing
+        setUnits(prev => prev.map(unit => 
+          unit.id === unitId ? { ...unit, isActive } : unit
+        ));
+      } catch (error) {
+        console.error('Error toggling unit status:', error);
+        toast.error('Failed to update unit status');
       }
     });
   };

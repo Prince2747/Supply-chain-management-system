@@ -150,33 +150,134 @@ export async function updateUserRole(userId: string, newRole: Role): Promise<Act
   }
 }
 
-export async function deleteUser(userId: string): Promise<ActionResult> {
-  const { error: permissionError } = await checkAdminPermission()
-  if (permissionError) {
-    return { error: permissionError, message: null }
+export async function deactivateUser(userEmail: string): Promise<ActionResult> {
+  const { error: permissionError, user: currentUser } = await checkAdminPermission()
+  if (permissionError || !currentUser) {
+    return { error: permissionError || 'Authentication failed', message: null }
   }
 
-  const supabaseAdmin = createSupabaseAdmin(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  )
+  // Validate userEmail
+  if (!userEmail || typeof userEmail !== 'string') {
+    return { error: 'Invalid user email provided.', message: null }
+  }
 
   try {
-    // Delete from Supabase Auth
-    const { error: supabaseError } = await supabaseAdmin.auth.admin.deleteUser(userId)
-    if (supabaseError) {
-      return { error: supabaseError.message, message: null }
+    // First, verify the user exists
+    const userProfile = await prisma.profile.findFirst({
+      where: { 
+        email: userEmail,
+        NOT: { email: null }
+      },
+      select: { id: true, userId: true, name: true, email: true, role: true, isActive: true }
+    })
+
+    if (!userProfile) {
+      return { error: 'User not found or has no email address', message: null }
     }
 
-    // Delete profile from database
-    await prisma.profile.delete({
-      where: { userId },
+    console.log('Found user profile:', userProfile)
+
+    // Use a simple updateMany approach without transaction
+    const updateResult = await prisma.profile.updateMany({
+      where: { 
+        email: userEmail,
+        NOT: { email: null }
+      },
+      data: { 
+        isActive: false
+      }
+    })
+
+    console.log('Update result:', updateResult)
+
+    if (updateResult.count === 0) {
+      return { error: 'No user was updated', message: null }
+    }
+
+    // Log the activity
+    await logActivity({
+      userId: currentUser.id,
+      action: 'DEACTIVATE_USER',
+      entityType: 'USER',
+      entityId: userProfile.userId,
+      details: {
+        deactivatedUser: userProfile.name || userProfile.email,
+        role: userProfile.role,
+        email: userEmail
+      }
     })
 
     revalidatePath('/admin/users')
-    return { error: null, message: 'User deleted successfully.' }
+    return { error: null, message: 'User account deactivated successfully.' }
   } catch (error) {
-    return { error: 'Failed to delete user.', message: null }
+    console.error('Error deactivating user:', error)
+    console.error('User Email:', userEmail)
+    return { error: `Failed to deactivate user: ${error instanceof Error ? error.message : 'Unknown error'}`, message: null }
+  }
+}
+
+export async function reactivateUser(userEmail: string): Promise<ActionResult> {
+  const { error: permissionError, user: currentUser } = await checkAdminPermission()
+  if (permissionError || !currentUser) {
+    return { error: permissionError || 'Authentication failed', message: null }
+  }
+
+  // Validate userEmail
+  if (!userEmail || typeof userEmail !== 'string') {
+    return { error: 'Invalid user email provided.', message: null }
+  }
+
+  try {
+    // First, verify the user exists
+    const userProfile = await prisma.profile.findFirst({
+      where: { 
+        email: userEmail,
+        NOT: { email: null }
+      },
+      select: { id: true, userId: true, name: true, email: true, role: true, isActive: true }
+    })
+
+    if (!userProfile) {
+      return { error: 'User not found or has no email address', message: null }
+    }
+
+    console.log('Found user profile:', userProfile)
+
+    // Use a simple updateMany approach without transaction
+    const updateResult = await prisma.profile.updateMany({
+      where: { 
+        email: userEmail,
+        NOT: { email: null }
+      },
+      data: { 
+        isActive: true
+      }
+    })
+
+    console.log('Update result:', updateResult)
+
+    if (updateResult.count === 0) {
+      return { error: 'No user was updated', message: null }
+    }
+
+    // Log the activity
+    await logActivity({
+      userId: currentUser.id,
+      action: 'REACTIVATE_USER',
+      entityType: 'USER',
+      entityId: userProfile.userId,
+      details: {
+        reactivatedUser: userProfile.name || userProfile.email,
+        role: userProfile.role,
+        email: userEmail
+      }
+    })
+
+    revalidatePath('/admin/users')
+    return { error: null, message: 'User account reactivated successfully.' }
+  } catch (error) {
+    console.error('Error reactivating user:', error)
+    console.error('User Email:', userEmail)
+    return { error: `Failed to reactivate user: ${error instanceof Error ? error.message : 'Unknown error'}`, message: null }
   }
 }
