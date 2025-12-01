@@ -153,23 +153,6 @@ export async function assignTransportTask(
       }
     })
 
-    // Create notification for transport coordinator
-    await prisma.notification.create({
-      data: {
-        userId: data.coordinatorId,
-        type: 'TRANSPORT_ASSIGNMENT',
-        title: 'New Transport Request',
-        message: `Please arrange transport for crop batch ${cropBatch.batchCode} from ${cropBatch.farm.name} to ${warehouse.name}. Scheduled for ${data.scheduledDate.toLocaleDateString()}.`,
-        metadata: {
-          cropBatchId: data.cropBatchId,
-          warehouseId: data.warehouseId,
-          scheduledDate: data.scheduledDate.toISOString(),
-          pickupLocation: data.pickupLocation,
-          notes: data.notes || ''
-        }
-      }
-    })
-
     // Log the activity
     await logActivity(
       procurementOfficerId,
