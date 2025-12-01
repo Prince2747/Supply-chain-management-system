@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/utils/supabase/server";
+import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
 async function getDashboardStats() {
   const supabase = await createClient();
@@ -118,13 +120,14 @@ async function getDashboardStats() {
 
 export default async function AdminDashboard() {
   const stats = await getDashboardStats();
+  const t = await getTranslations('admin.dashboardPage');
 
   return (
     <div className="space-y-6">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
             <p className="text-muted-foreground">
-              Overview of your application's user management
+              {t('subtitle')}
             </p>
           </div>
 
@@ -133,14 +136,14 @@ export default async function AdminDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Users
+                  {t('totalUsers')}
                 </CardTitle>
                 <img src="/logo.png" alt="Company Logo" className="h-6 w-6 object-contain" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalUsers}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.adminUsers} admins, {stats.staffUsers} staff members
+                  {stats.adminUsers} {t('admins')}, {stats.staffUsers} {t('staff')}
                 </p>
               </CardContent>
             </Card>
@@ -148,7 +151,7 @@ export default async function AdminDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Active Warehouses
+                  {t('activeWarehouses')}
                 </CardTitle>
                 <Warehouse className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -157,7 +160,7 @@ export default async function AdminDashboard() {
                   {stats.activeWarehouses}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Out of {stats.totalWarehouses} total warehouses
+                  {t('outOf')} {stats.totalWarehouses} {t('totalWarehouses')}
                 </p>
               </CardContent>
             </Card>
@@ -165,14 +168,14 @@ export default async function AdminDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Units of Measurement
+                  {t('unitsOfMeasurement')}
                 </CardTitle>
                 <Ruler className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.activeUnits}</div>
                 <p className="text-xs text-muted-foreground">
-                  Active measurement units
+                  {t('activeMeasurementUnits')}
                 </p>
               </CardContent>
             </Card>
@@ -180,14 +183,14 @@ export default async function AdminDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Recent Activity
+                  {t('recentActivity')}
                 </CardTitle>
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.recentActivity}</div>
                 <p className="text-xs text-muted-foreground">
-                  Actions in last 24 hours
+                  {t('actionsInLast24Hours')}
                 </p>
               </CardContent>
             </Card>
@@ -196,8 +199,8 @@ export default async function AdminDashboard() {
           {/* Recent Activities */}
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activities</CardTitle>
-              <CardDescription>Last 5 activity logs from the system</CardDescription>
+              <CardTitle>{t('recentActivities')}</CardTitle>
+              <CardDescription>{t('last5ActivityLogs')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -213,7 +216,7 @@ export default async function AdminDashboard() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-sm font-medium text-foreground">
-                            {log.user?.name || 'Unknown User'}
+                            {log.user?.name || t('unknownUser')}
                           </p>
                           <span className="text-xs text-muted-foreground">
                             {new Date(log.createdAt).toLocaleString('en-US', {
@@ -238,7 +241,7 @@ export default async function AdminDashboard() {
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     <Activity className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No recent activity logs</p>
+                    <p className="text-sm">{t('noRecentActivityLogs')}</p>
                   </div>
                 )}
                 
@@ -248,7 +251,7 @@ export default async function AdminDashboard() {
                       href="/admin/logs"
                       className="text-sm text-primary hover:underline inline-flex items-center"
                     >
-                      View all activity logs
+                      {t('viewAllActivityLogs')}
                       <Activity className="ml-1 h-3 w-3" />
                     </Link>
                   </div>

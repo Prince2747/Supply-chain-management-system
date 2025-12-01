@@ -2,6 +2,7 @@ import { SecuritySettingsClient } from '@/components/admin/security-settings-cli
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
 export default async function AdminSettingsPage() {
   const supabase = await createClient();
@@ -30,12 +31,14 @@ export default async function AdminSettingsPage() {
     updatedAt: settingsData.updatedAt.toISOString()
   } : null;
 
+  const t = await getTranslations('admin.settingsPage');
+
   return (
     <div className="container mx-auto py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Admin Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <p className="text-muted-foreground">
-          Manage your admin account settings
+          {t('subtitle')}
         </p>
       </div>
       

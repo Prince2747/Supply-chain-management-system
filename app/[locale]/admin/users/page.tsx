@@ -1,9 +1,16 @@
-import { UnitsManagement } from '@/components/admin/units-management'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Suspense } from 'react'
+import { Suspense } from "react";
+import { UserManagement } from "@/components/admin/user-management";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getTranslations } from 'next-intl/server';
 
-function UnitsManagementSkeleton() {
+function UserManagementSkeleton() {
   return (
     <Card>
       <CardHeader>
@@ -24,22 +31,26 @@ function UnitsManagementSkeleton() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
-export default function AdminUnitsPage() {
+export default async function AdminUsersPage() {
+  const t = await getTranslations('admin.usersPage');
+  
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Units of Measurement</h2>
+        <h2 className="text-3xl font-bold tracking-tight">
+          {t('title')}
+        </h2>
         <p className="text-muted-foreground">
-          Define and manage units of measurement for inventory tracking
+          {t('subtitle')}
         </p>
       </div>
 
-      <Suspense fallback={<UnitsManagementSkeleton />}>
-        <UnitsManagement />
+      <Suspense fallback={<UserManagementSkeleton />}>
+        <UserManagement />
       </Suspense>
     </div>
-  )
+  );
 }

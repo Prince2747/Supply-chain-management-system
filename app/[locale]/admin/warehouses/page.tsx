@@ -1,9 +1,9 @@
-import { ActivityLogs } from '@/components/admin/activity-logs'
+import { WarehouseManagement } from '@/components/admin/warehouse-management'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Suspense } from 'react'
 
-function ActivityLogsSkeleton() {
+function WarehouseManagementSkeleton() {
   return (
     <Card>
       <CardHeader>
@@ -17,8 +17,8 @@ function ActivityLogsSkeleton() {
             <Skeleton className="h-10 w-32" />
           </div>
           <div className="space-y-2">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full" />
             ))}
           </div>
         </div>
@@ -27,18 +27,21 @@ function ActivityLogsSkeleton() {
   )
 }
 
-export default function AdminLogsPage() {
+export default async function AdminWarehousesPage() {
+  const { getTranslations } = await import('next-intl/server');
+  const t = await getTranslations('admin.warehousesPage');
+  
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Activity Logs</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
         <p className="text-muted-foreground">
-          Monitor system activity and user actions for security and auditing
+          {t('subtitle')}
         </p>
       </div>
 
-      <Suspense fallback={<ActivityLogsSkeleton />}>
-        <ActivityLogs />
+      <Suspense fallback={<WarehouseManagementSkeleton />}>
+        <WarehouseManagement />
       </Suspense>
     </div>
   )

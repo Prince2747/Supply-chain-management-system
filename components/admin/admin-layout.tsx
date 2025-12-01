@@ -3,6 +3,7 @@
 import { ReactNode, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   Users,
@@ -17,24 +18,34 @@ import {
   Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { logout } from "@/app/admin/actions";
+import { logout } from "@/app/[locale]/admin/actions";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 interface AdminLayoutProps {
   children: ReactNode;
 }
 
-const navigation = [
-  { name: "Dashboard", href: "/admin", icon: BarChart3 },
-  { name: "Users", href: "/admin/users", icon: Users },
-  { name: "Warehouses", href: "/admin/warehouses", icon: Warehouse },
-  { name: "Units", href: "/admin/units", icon: Ruler },
-  { name: "Activity Logs", href: "/admin/logs", icon: Activity },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
-];
-
 export function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
+  const locale = useLocale();
+  const t = useTranslations('admin');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Define navigation with translation keys
+  const navigation = [
+    { name: t('dashboard'), href: "/admin", icon: BarChart3 },
+    { name: t('users'), href: "/admin/users", icon: Users },
+    { name: t('warehouses'), href: "/admin/warehouses", icon: Warehouse },
+    { name: t('units'), href: "/admin/units", icon: Ruler },
+    { name: t('activityLogs'), href: "/admin/logs", icon: Activity },
+    { name: t('settings'), href: "/admin/settings", icon: Settings },
+  ];
+
+  // Create locale-aware navigation links
+  const localizedNav = navigation.map(item => ({
+    ...item,
+    href: `/${locale}${item.href}`
+  }));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,13 +57,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex items-center space-x-2">
               <img src="/logo.png" alt="Company Logo" className="h-8 w-auto" />
               <span className="text-lg font-semibold text-gray-900">
-                Admin Dashboard
+                {t('adminDashboard')}
               </span>
             </div>
 
             {/* Navigation Links */}
             <nav className="hidden md:flex items-center space-x-1">
-              {navigation.map((item) => {
+              {localizedNav.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
@@ -73,12 +84,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </nav>
           </div>
 
-          {/* Right side - Status, logout, and mobile menu */}
+          {/* Right side - Language switcher, logout, and mobile menu */}
           <div className="flex items-center space-x-4">
-            <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-600">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span>System Online</span>
-            </div>
+            <LanguageSwitcher />
 
             <form action={logout} className="hidden md:block">
               <Button
@@ -88,7 +96,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 className="text-gray-600 hover:text-gray-900"
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                Logout
+                {t('logout')}
               </Button>
             </form>
 
@@ -112,7 +120,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 bg-white">
             <div className="px-4 py-2 space-y-1">
-              {navigation.map((item) => {
+              {localizedNav.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
@@ -132,8 +140,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 );
               })}
 
-              {/* Mobile logout */}
-              <div className="pt-2 border-t border-gray-100">
+              {/* Mobile language switcher and logout */}
+              <div className="pt-2 border-t border-gray-100 space-y-2">
+                <div className="px-3">
+                  <LanguageSwitcher />
+                </div>
                 <form action={logout}>
                   <Button
                     type="submit"
@@ -142,7 +153,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     className="w-full justify-start text-gray-600 hover:text-gray-900"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    Logout
+                    {t('logout')}
                   </Button>
                 </form>
               </div>

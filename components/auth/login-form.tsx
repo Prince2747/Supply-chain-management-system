@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from 'next-intl';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,7 @@ export function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const locale = useLocale();
 
   const handleSubmit = async (formData: FormData) => {
     setError(null);
@@ -39,6 +41,7 @@ export function LoginForm() {
           
           // Wait a moment for the toast to show, then redirect
           setTimeout(() => {
+            // Routes like /admin, /dashboard, /api are not under [locale] and should not be prefixed
             router.push(result.redirectPath);
           }, 1500);
         } else {

@@ -13,7 +13,7 @@ import {
   updateWarehouse,
   deleteWarehouse,
   toggleWarehouseStatus,
-} from "@/app/admin/warehouses/actions";
+} from "@/app/[locale]/admin/warehouses/actions";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

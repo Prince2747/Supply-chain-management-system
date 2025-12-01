@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Key } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 interface SecuritySettings {
   id: string;
@@ -23,6 +24,7 @@ interface SecuritySettingsClientProps {
 }
 
 export function SecuritySettingsClient({ initialSettings }: SecuritySettingsClientProps) {
+  const t = useTranslations('admin.settingsPage');
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -33,12 +35,12 @@ export function SecuritySettingsClient({ initialSettings }: SecuritySettingsClie
     e.preventDefault();
     
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error('New passwords do not match');
+      toast.error(t('passwordsDoNotMatch'));
       return;
     }
 
     if (passwordForm.newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters long');
+      toast.error(t('passwordTooShort'));
       return;
     }
 
@@ -56,11 +58,11 @@ export function SecuritySettingsClient({ initialSettings }: SecuritySettingsClie
       const result = await response.json();
 
       if (!response.ok) {
-        toast.error(result.error || 'Failed to change password');
+        toast.error(result.error || t('passwordChangeFailed'));
         return;
       }
 
-      toast.success('Password changed successfully');
+      toast.success(t('passwordChangedSuccess'));
       setPasswordForm({
         currentPassword: '',
         newPassword: '',
@@ -68,7 +70,7 @@ export function SecuritySettingsClient({ initialSettings }: SecuritySettingsClie
       });
     } catch (error) {
       console.error('Error changing password:', error);
-      toast.error('Failed to change password');
+      toast.error(t('passwordChangeFailed'));
     } finally {
       setIsChangingPassword(false);
     }
@@ -81,16 +83,16 @@ export function SecuritySettingsClient({ initialSettings }: SecuritySettingsClie
         <CardHeader>
           <div className="flex items-center space-x-2">
             <Key className="h-5 w-5 text-green-600" />
-            <CardTitle>Admin Password Change</CardTitle>
+            <CardTitle>{t('passwordChange')}</CardTitle>
           </div>
           <CardDescription>
-            Update your admin account password
+            {t('passwordChangeDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
             <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
+              <Label htmlFor="currentPassword">{t('currentPassword')}</Label>
               <Input
                 id="currentPassword"
                 type="password"
@@ -105,7 +107,7 @@ export function SecuritySettingsClient({ initialSettings }: SecuritySettingsClie
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
+              <Label htmlFor="newPassword">{t('newPassword')}</Label>
               <Input
                 id="newPassword"
                 type="password"
@@ -119,12 +121,12 @@ export function SecuritySettingsClient({ initialSettings }: SecuritySettingsClie
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground">
-                Must be at least 8 characters long
+                {t('passwordMinLength')}
               </p>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -144,7 +146,7 @@ export function SecuritySettingsClient({ initialSettings }: SecuritySettingsClie
               disabled={isChangingPassword}
               className="w-full bg-green-600 hover:bg-green-700"
             >
-              {isChangingPassword ? 'Changing Password...' : 'Change Password'}
+              {isChangingPassword ? t('changingPassword') : t('changePassword')}
             </Button>
           </form>
         </CardContent>

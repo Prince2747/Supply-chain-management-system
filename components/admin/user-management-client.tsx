@@ -31,9 +31,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { createUser, updateUserRole, deactivateUser, reactivateUser } from '@/app/admin/users/actions'
+import { createUser, updateUserRole, deactivateUser, reactivateUser } from '@/app/[locale]/admin/users/actions'
 import { User } from './user-management'
 import { Role } from '@/lib/generated/prisma/client'
+import { useTranslations } from 'next-intl'
 
 interface Warehouse {
   id: string;
@@ -48,6 +49,8 @@ interface UserManagementClientProps {
 }
 
 export function UserManagementClient({ initialUsers, warehouses }: UserManagementClientProps) {
+  const t = useTranslations('admin.usersPage');
+  const tRoles = useTranslations('admin.roles');
   const [users, setUsers] = useState<User[]>(initialUsers)
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<'all' | Role>('all')
@@ -257,9 +260,9 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Users</CardTitle>
+              <CardTitle>{t('users')}</CardTitle>
               <CardDescription>
-                Manage user accounts and permissions
+                {t('description')}
               </CardDescription>
             </div>
             <Button 
@@ -267,7 +270,7 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
               disabled={isPending}
             >
               <UserPlus className="mr-2 h-4 w-4" />
-              Add User
+              {t('addUser')}
             </Button>
           </div>
         </CardHeader>
@@ -276,13 +279,13 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
           {showCreateForm && (
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Create New User</CardTitle>
+                <CardTitle>{t('createNewUser')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleCreateUser} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">{t('email')}</Label>
                       <Input 
                         id="email" 
                         name="email" 
@@ -292,54 +295,54 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
                       />
                     </div>
                     <div>
-                      <Label htmlFor="name">Name</Label>
+                      <Label htmlFor="name">{t('name')}</Label>
                       <Input 
                         id="name" 
                         name="name" 
                         type="text" 
-                        placeholder="Full Name"
+                        placeholder={t('fullName')}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password">{t('password')}</Label>
                       <Input 
                         id="password" 
                         name="password" 
                         type="password" 
                         required 
-                        placeholder="Temporary password"
+                        placeholder={t('temporaryPassword')}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="role">Role</Label>
+                      <Label htmlFor="role">{t('role')}</Label>
                       <Select name="role" required defaultValue="field_agent">
                         <SelectTrigger>
-                          <SelectValue placeholder="Select role" />
+                          <SelectValue placeholder={t('selectRole')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="field_agent">Field Agent</SelectItem>
-                          <SelectItem value="procurement_officer">Procurement Officer</SelectItem>
-                          <SelectItem value="warehouse_manager">Warehouse Manager</SelectItem>
-                          <SelectItem value="transport_driver">Transport Driver</SelectItem>
-                          <SelectItem value="transport_coordinator">Transport Coordinator</SelectItem>
+                          <SelectItem value="admin">{tRoles('admin')}</SelectItem>
+                          <SelectItem value="manager">{tRoles('manager')}</SelectItem>
+                          <SelectItem value="field_agent">{tRoles('field_agent')}</SelectItem>
+                          <SelectItem value="procurement_officer">{tRoles('procurement_officer')}</SelectItem>
+                          <SelectItem value="warehouse_manager">{tRoles('warehouse_manager')}</SelectItem>
+                          <SelectItem value="transport_driver">{tRoles('transport_driver')}</SelectItem>
+                          <SelectItem value="transport_coordinator">{tRoles('transport_coordinator')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <Button type="submit" disabled={isPending}>
-                      {isPending ? 'Creating...' : 'Create User'}
+                      {isPending ? t('creating') : t('createUser')}
                     </Button>
                     <Button 
                       type="button" 
                       variant="outline" 
                       onClick={() => setShowCreateForm(false)}
                     >
-                      Cancel
+                      {t('cancel')}
                     </Button>
                   </div>
                 </form>
@@ -380,19 +383,19 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Warehouse</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('user')}</TableHead>
+                  <TableHead>{t('email')}</TableHead>
+                  <TableHead>{t('role')}</TableHead>
+                  <TableHead>{t('warehouse')}</TableHead>
+                  <TableHead>{t('created')}</TableHead>
+                  <TableHead className="text-right">{t('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      No users found
+                      {t('noUsersFound')}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -400,33 +403,28 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
                     <TableRow key={user.id}>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{user.name || 'No name'}</div>
+                          <div className="font-medium">{user.name || t('noName')}</div>
                           <div className="text-sm text-muted-foreground">ID: {user.userId.slice(0, 8)}...</div>
                         </div>
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
                         <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                          {user.role === 'field_agent' ? 'Field Agent' :
-                           user.role === 'procurement_officer' ? 'Procurement Officer' :
-                           user.role === 'warehouse_manager' ? 'Warehouse Manager' :
-                           user.role === 'transport_driver' ? 'Transport Driver' :
-                           user.role === 'transport_coordinator' ? 'Transport Coordinator' :
-                           user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                          {tRoles(user.role)}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         {user.role === 'warehouse_manager' && user.warehouse ? (
                           <div>
                             <div className="font-medium">{user.warehouse.name}</div>
-                            <div className="text-sm text-muted-foreground">Code: {user.warehouse.code}</div>
+                            <div className="text-sm text-muted-foreground">{t('code')}: {user.warehouse.code}</div>
                           </div>
                         ) : user.role === 'warehouse_manager' ? (
                           <Badge variant="outline" className="text-orange-600">
-                            Not Assigned
+                            {t('notAssigned')}
                           </Badge>
                         ) : (
-                          <span className="text-muted-foreground">N/A</span>
+                          <span className="text-muted-foreground">{t('na')}</span>
                         )}
                       </TableCell>
                       <TableCell>
