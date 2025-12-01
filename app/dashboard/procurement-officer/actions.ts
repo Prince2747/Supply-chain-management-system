@@ -143,24 +143,12 @@ export async function assignTransportTask(
       throw new Error('Warehouse not found')
     }
 
-    // Create transport task
-    const transportTask = await prisma.transportTask.create({
-      data: {
-        cropBatchId: data.cropBatchId,
-        coordinatorId: data.coordinatorId,
-        warehouseId: data.warehouseId,
-        scheduledDate: data.scheduledDate,
-        pickupLocation: data.pickupLocation,
-        notes: data.notes,
-        status: 'SCHEDULED'
-      }
-    })
-
-    // Update crop batch status to indicate transport is assigned
+    // Update crop batch status and assign warehouse
+    // Transport coordinator will create the actual transport task later
     await prisma.cropBatch.update({
       where: { id: data.cropBatchId },
       data: { 
-        status: 'SHIPPED',
+        status: 'PACKAGED',
         warehouseId: data.warehouseId
       }
     })
@@ -170,13 +158,14 @@ export async function assignTransportTask(
       data: {
         userId: data.coordinatorId,
         type: 'TRANSPORT_ASSIGNMENT',
-        title: 'New Transport Task Assigned',
-        message: `You have been assigned to transport crop batch ${cropBatch.batchCode} from ${cropBatch.farm.name} to ${warehouse.name}. Scheduled for ${data.scheduledDate.toLocaleDateString()}.`,
+        title: 'New Transport Request',
+        message: `Please arrange transport for crop batch ${cropBatch.batchCode} from ${cropBatch.farm.name} to ${warehouse.name}. Scheduled for ${data.scheduledDate.toLocaleDateString()}.`,
         metadata: {
-          transportTaskId: transportTask.id,
           cropBatchId: data.cropBatchId,
           warehouseId: data.warehouseId,
-          scheduledDate: data.scheduledDate.toISOString()
+          scheduledDate: data.scheduledDate.toISOString(),
+          pickupLocation: data.pickupLocation,
+          notes: data.notes || ''
         }
       }
     })
@@ -185,9 +174,8 @@ export async function assignTransportTask(
     await logActivity(
       procurementOfficerId,
       'ASSIGN_TRANSPORT',
-      `Assigned transport task for crop batch ${cropBatch.batchCode} to coordinator ${coordinator.name}`,
+      `Requested transport for crop batch ${cropBatch.batchCode} to coordinator ${coordinator.name}`,
       {
-        transportTaskId: transportTask.id,
         cropBatchId: data.cropBatchId,
         coordinatorId: data.coordinatorId,
         warehouseId: data.warehouseId
@@ -196,7 +184,7 @@ export async function assignTransportTask(
 
     revalidatePath('/dashboard/procurement-officer')
     
-    return { success: true, transportTask }
+    return { success: true }
   } catch (error) {
     console.error('Error assigning transport task:', error)
     throw new Error(error instanceof Error ? error.message : 'Failed to assign transport task')
