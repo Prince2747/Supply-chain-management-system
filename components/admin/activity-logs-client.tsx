@@ -37,6 +37,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ActivityLog } from "./activity-logs";
+import { useTranslations } from 'next-intl';
 
 interface ActivityLogsClientProps {
   initialLogs: ActivityLog[];
@@ -59,6 +60,7 @@ const actionTypes = [
 const entityTypes = ["USER", "WAREHOUSE", "UNIT", "SYSTEM"];
 
 export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
+  const t = useTranslations('admin.logsPage');
   const [logs] = useState<ActivityLog[]>(initialLogs);
   const [searchTerm, setSearchTerm] = useState("");
   const [actionFilter, setActionFilter] = useState<string>("all");
@@ -91,7 +93,7 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
   };
 
   const formatDetails = (details: any) => {
-    if (!details) return "No details";
+    if (!details) return t('noDetails');
     if (typeof details === "string") return details;
     return JSON.stringify(details, null, 2);
   };
@@ -146,11 +148,11 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
       XLSX.writeFile(wb, filename);
 
       toast.success(
-        `Activity logs exported successfully! Downloaded as ${filename}`
+        `${t('exportSuccess')} ${filename}`
       );
     } catch (error) {
       console.error("Error exporting to Excel:", error);
-      toast.error("Failed to export activity logs. Please try again.");
+      toast.error(t('exportFailed'));
     }
   };
 
@@ -160,16 +162,15 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Activity Logs</CardTitle>
+              <CardTitle>{t('logs')}</CardTitle>
               <CardDescription>
-                Monitor system activity and user actions for security and
-                auditing
+                {t('description')}
               </CardDescription>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={exportToExcel}>
                 <Download className="mr-2 h-4 w-4" />
-                Export Logs
+                {t('exportLogs')}
               </Button>
             </div>
           </div>
@@ -180,7 +181,7 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search by action, user, or IP address..."
+                placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -188,26 +189,26 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
             </div>
             <Select value={actionFilter} onValueChange={setActionFilter}>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="All Actions" />
+                <SelectValue placeholder={t('allActions')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Actions</SelectItem>
+                <SelectItem value="all">{t('allActions')}</SelectItem>
                 {actionTypes.map((action) => (
                   <SelectItem key={action} value={action}>
-                    {action.replace("_", " ")}
+                    {t(`actions.${action}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={entityFilter} onValueChange={setEntityFilter}>
               <SelectTrigger className="w-32">
-                <SelectValue placeholder="All Types" />
+                <SelectValue placeholder={t('allTypes')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="all">{t('allTypes')}</SelectItem>
                 {entityTypes.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {type}
+                    {t(`entities.${type}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -219,12 +220,12 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Entity</TableHead>
-                  <TableHead>IP Address</TableHead>
-                  <TableHead className="text-right">Details</TableHead>
+                  <TableHead>{t('timestamp')}</TableHead>
+                  <TableHead>{t('user')}</TableHead>
+                  <TableHead>{t('action')}</TableHead>
+                  <TableHead>{t('entity')}</TableHead>
+                  <TableHead>{t('ipAddress')}</TableHead>
+                  <TableHead className="text-right">{t('details')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -234,13 +235,12 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
                       <div className="flex flex-col items-center space-y-2">
                         <div className="text-muted-foreground">
                           {logs.length === 0
-                            ? "No activity logs available. This could be due to database connectivity issues or no logged activities yet."
-                            : "No activity logs match your current filters."}
+                            ? t('noLogsAvailable')
+                            : t('noLogsFound')}
                         </div>
                         {logs.length === 0 && (
                           <div className="text-sm text-muted-foreground">
-                            Activity logs will appear here once the database is
-                            accessible and users perform actions.
+                            {t('logsWillAppear')}
                           </div>
                         )}
                       </div>
@@ -262,7 +262,7 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
                       <TableCell>
                         <div>
                           <div className="font-medium">
-                            {log.user?.name || "Unknown User"}
+                            {log.user?.name || t('unknownUser')}
                           </div>
                           <div className="text-sm text-muted-foreground">
                             {log.user?.email || log.userId.slice(0, 8) + "..."}
@@ -271,13 +271,13 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
                       </TableCell>
                       <TableCell>
                         <Badge variant={getActionBadgeVariant(log.action)}>
-                          {log.action.replace("_", " ")}
+                          {t(`actions.${log.action}`)}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div>
                           {log.entityType && (
-                            <Badge variant="outline">{log.entityType}</Badge>
+                            <Badge variant="outline">{t(`entities.${log.entityType}`)}</Badge>
                           )}
                           {log.entityId && (
                             <div className="text-xs text-muted-foreground mt-1">
@@ -288,7 +288,7 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
                       </TableCell>
                       <TableCell>
                         <div className="font-mono text-sm">
-                          {log.ipAddress || "Unknown"}
+                          {log.ipAddress || t('unknown')}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
@@ -313,9 +313,9 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
       <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Activity Log Details</DialogTitle>
+            <DialogTitle>{t('logDetails')}</DialogTitle>
             <DialogDescription>
-              Detailed information about this activity log entry
+              {t('logDetailsDescription')}
             </DialogDescription>
           </DialogHeader>
           
@@ -325,30 +325,30 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
                 <div className="space-y-4">
                   <div>
                     <h4 className="font-semibold text-sm text-muted-foreground mb-2">
-                      Basic Information
+                      {t('basicInformation')}
                     </h4>
                     <div className="space-y-3 text-sm">
                       <div className="flex flex-col">
-                        <span className="text-xs text-muted-foreground">Action</span>
+                        <span className="text-xs text-muted-foreground">{t('action')}</span>
                         <Badge variant={getActionBadgeVariant(selectedLog.action)} className="w-fit mt-1">
-                          {selectedLog.action.replace("_", " ")}
+                          {t(`actions.${selectedLog.action}`)}
                         </Badge>
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-xs text-muted-foreground">User</span>
-                        <span className="font-medium">{selectedLog.user?.name || "Unknown"}</span>
+                        <span className="text-xs text-muted-foreground">{t('user')}</span>
+                        <span className="font-medium">{selectedLog.user?.name || t('unknown')}</span>
                         <span className="text-xs text-muted-foreground">{selectedLog.user?.email || selectedLog.userId}</span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-xs text-muted-foreground">Timestamp</span>
+                        <span className="text-xs text-muted-foreground">{t('timestamp')}</span>
                         <span className="font-medium">
                           {new Date(selectedLog.createdAt).toLocaleString()}
                         </span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-xs text-muted-foreground">IP Address</span>
+                        <span className="text-xs text-muted-foreground">{t('ipAddress')}</span>
                         <span className="font-mono text-sm">
-                          {selectedLog.ipAddress || "Unknown"}
+                          {selectedLog.ipAddress || t('unknown')}
                         </span>
                       </div>
                     </div>
@@ -358,27 +358,27 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
                 <div className="space-y-4">
                   <div>
                     <h4 className="font-semibold text-sm text-muted-foreground mb-2">
-                      Entity Information
+                      {t('entityInformation')}
                     </h4>
                     <div className="space-y-3 text-sm">
                       <div className="flex flex-col">
-                        <span className="text-xs text-muted-foreground">Entity Type</span>
+                        <span className="text-xs text-muted-foreground">{t('entityType')}</span>
                         {selectedLog.entityType ? (
                           <Badge variant="outline" className="w-fit mt-1">
-                            {selectedLog.entityType}
+                            {t(`entities.${selectedLog.entityType}`)}
                           </Badge>
                         ) : (
-                          <span className="text-muted-foreground">None</span>
+                          <span className="text-muted-foreground">{t('none')}</span>
                         )}
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-xs text-muted-foreground">Entity ID</span>
+                        <span className="text-xs text-muted-foreground">{t('entityId')}</span>
                         <span className="font-mono text-xs break-all">
-                          {selectedLog.entityId || "None"}
+                          {selectedLog.entityId || t('none')}
                         </span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-xs text-muted-foreground">Log ID</span>
+                        <span className="text-xs text-muted-foreground">{t('logId')}</span>
                         <span className="font-mono text-xs break-all text-muted-foreground">
                           {selectedLog.id}
                         </span>
@@ -391,7 +391,7 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
               {selectedLog.userAgent && (
                 <div>
                   <h4 className="font-semibold text-sm text-muted-foreground mb-2">
-                    User Agent
+                    {t('userAgent')}
                   </h4>
                   <div className="text-xs font-mono bg-muted p-3 rounded border break-all">
                     {selectedLog.userAgent}
@@ -402,7 +402,7 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
               {selectedLog.details && (
                 <div>
                   <h4 className="font-semibold text-sm text-muted-foreground mb-2">
-                    Additional Details
+                    {t('additionalDetails')}
                   </h4>
                   <pre className="text-xs bg-muted p-4 rounded border overflow-auto max-h-60">
                     {formatDetails(selectedLog.details)}
