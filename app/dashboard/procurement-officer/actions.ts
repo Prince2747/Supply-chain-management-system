@@ -152,7 +152,7 @@ export async function assignTransportTask(
         scheduledDate: data.scheduledDate,
         pickupLocation: data.pickupLocation,
         notes: data.notes,
-        status: 'ASSIGNED'
+        status: 'SCHEDULED'
       }
     })
 
