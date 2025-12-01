@@ -13,12 +13,13 @@ import {
 } from "lucide-react";
 import { getTransportStats, getTransportTasks, getTransportIssues, getTransportCoordinatorDashboardData, assignDriverToTransportTask, updateTransportTaskStatusAction } from "./actions";
 import { TransportCoordinatorDashboard } from '@/components/transport-coordinator/transport-coordinator-dashboard';
-import { auth } from '@/lib/auth';
+import { createClient } from '@/utils/supabase/server';
 
 export default async function TransportCoordinatorDashboard() {
-  const session = await auth()
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   
-  if (!session?.user?.id) {
+  if (!user?.id) {
     return <div>Unauthorized</div>
   }
 
@@ -26,7 +27,7 @@ export default async function TransportCoordinatorDashboard() {
     getTransportStats(),
     getTransportTasks().then(tasks => tasks.slice(0, 5)),
     getTransportIssues().then(issues => issues.slice(0, 5)),
-    getTransportCoordinatorDashboardData(session.user.id).catch(() => null)
+    getTransportCoordinatorDashboardData(user.id).catch(() => null)
   ]);
 
   const statCards = [

@@ -7,12 +7,13 @@ import { getDriverIssues, getAssignedTasks } from "../actions";
 import { ReportIssueDialog } from "@/components/transport-driver/report-issue-dialog";
 
 interface IssuesPageProps {
-  searchParams: {
+  searchParams: Promise<{
     taskId?: string;
-  };
+  }>;
 }
 
 export default async function IssuesPage({ searchParams }: IssuesPageProps) {
+  const { taskId } = await searchParams;
   const [issues, tasks] = await Promise.all([
     getDriverIssues(),
     getAssignedTasks()
@@ -42,7 +43,7 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
             Report and track transport-related issues
           </p>
         </div>
-        <ReportIssueDialog tasks={tasks} preSelectedTaskId={searchParams.taskId} />
+        <ReportIssueDialog tasks={tasks} preSelectedTaskId={taskId} />
       </div>
 
       {/* Summary Stats */}
