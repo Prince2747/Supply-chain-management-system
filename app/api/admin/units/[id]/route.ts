@@ -24,7 +24,7 @@ async function checkAdminPermission() {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { error: permissionError, user } = await checkAdminPermission();
@@ -35,7 +35,7 @@ export async function PUT(
       );
     }
 
-    const unitId = params.id;
+    const { id: unitId } = await params;
     const formData = await request.formData();
     const name = formData.get('name') as string;
     const code = formData.get('code') as string;
@@ -102,7 +102,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { error: permissionError, user } = await checkAdminPermission();
@@ -113,7 +113,7 @@ export async function DELETE(
       );
     }
 
-    const unitId = params.id;
+    const { id: unitId } = await params;
 
     // Check if unit exists
     const existingUnit = await prisma.unitOfMeasurement.findUnique({
