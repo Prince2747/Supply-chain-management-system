@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { UnitOfMeasurement } from "./units-management";
+import { useTranslations } from 'next-intl';
 
 interface UnitsManagementClientProps {
   initialUnits: UnitOfMeasurement[];
@@ -54,6 +55,7 @@ const categories = [
 export function UnitsManagementClient({
   initialUnits,
 }: UnitsManagementClientProps) {
+  const t = useTranslations('admin.unitsPage');
   const [units, setUnits] = useState<UnitOfMeasurement[]>(initialUnits);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -212,9 +214,9 @@ export function UnitsManagementClient({
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Units of Measurement</CardTitle>
+              <CardTitle>{t('units')}</CardTitle>
               <CardDescription>
-                Define and manage measurement units for inventory tracking
+                {t('description')}
               </CardDescription>
             </div>
             <Button
@@ -222,7 +224,7 @@ export function UnitsManagementClient({
               disabled={isPending}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Unit
+              {t('addUnit')}
             </Button>
           </div>
         </CardHeader>
@@ -232,7 +234,7 @@ export function UnitsManagementClient({
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle>
-                  {editingUnit ? "Edit Unit" : "Create New Unit"}
+                  {editingUnit ? t('editUnit') : t('createNewUnit')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -242,59 +244,58 @@ export function UnitsManagementClient({
                 >
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name">Unit Name</Label>
+                      <Label htmlFor="name">{t('unitName')}</Label>
                       <Input
                         id="name"
                         name="name"
                         required
-                        placeholder="Kilogram"
+                        placeholder={t('kilogram')}
                         defaultValue={editingUnit?.name || ""}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="code">Unit Code</Label>
+                      <Label htmlFor="code">{t('unitCode')}</Label>
                       <Input
                         id="code"
                         name="code"
                         required
-                        placeholder="kg"
+                        placeholder={t('kg')}
                         defaultValue={editingUnit?.code || ""}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="category">Category</Label>
+                      <Label htmlFor="category">{t('category')}</Label>
                       <Select
                         name="category"
                         defaultValue={editingUnit?.category || ""}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder={t('selectCategory')} />
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((category) => (
                             <SelectItem key={category} value={category}>
-                              {category.charAt(0).toUpperCase() +
-                                category.slice(1)}
+                              {t(category)}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="baseUnit">Base Unit (Optional)</Label>
+                      <Label htmlFor="baseUnit">{t('baseUnit')}</Label>
                       <Input
                         id="baseUnit"
                         name="baseUnit"
-                        placeholder="gram"
+                        placeholder={t('gram')}
                         defaultValue={editingUnit?.baseUnit || ""}
                       />
                     </div>
                   </div>
                   <div>
                     <Label htmlFor="conversionFactor">
-                      Conversion Factor (Optional)
+                      {t('conversionFactor')}
                     </Label>
                     <Input
                       id="conversionFactor"
@@ -305,17 +306,16 @@ export function UnitsManagementClient({
                       defaultValue={editingUnit?.conversionFactor || ""}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Factor to convert to base unit (e.g., 1000 grams = 1
-                      kilogram)
+                      {t('conversionFactorHelp')}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <Button type="submit" disabled={isPending}>
                       {isPending
-                        ? "Saving..."
+                        ? t('saving')
                         : editingUnit
-                        ? "Update Unit"
-                        : "Create Unit"}
+                        ? t('updateUnit')
+                        : t('createUnit')}
                     </Button>
                     <Button
                       type="button"
@@ -325,7 +325,7 @@ export function UnitsManagementClient({
                         setEditingUnit(null);
                       }}
                     >
-                      Cancel
+                      {t('cancel')}
                     </Button>
                   </div>
                 </form>
@@ -338,7 +338,7 @@ export function UnitsManagementClient({
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search units by name, code, or category..."
+                placeholder={t('searchUnits')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -349,10 +349,10 @@ export function UnitsManagementClient({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">{t('allCategories')}</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                    {t(category)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -364,23 +364,23 @@ export function UnitsManagementClient({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Unit</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Base Unit</TableHead>
-                  <TableHead>Conversion</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('unit')}</TableHead>
+                  <TableHead>{t('category')}</TableHead>
+                  <TableHead>{t('baseUnit')}</TableHead>
+                  <TableHead>{t('conversion')}</TableHead>
+                  <TableHead>{t('status')}</TableHead>
+                  <TableHead>{t('created')}</TableHead>
+                  <TableHead className="text-right">{t('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUnits.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={7}
+                      colSpan={6}
                       className="text-center py-8 text-muted-foreground"
                     >
-                      No units found
+                      {t('noUnitsFound')}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -399,21 +399,20 @@ export function UnitsManagementClient({
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {unit.category.charAt(0).toUpperCase() +
-                            unit.category.slice(1)}
+                          {t(unit.category)}
                         </Badge>
                       </TableCell>
-                      <TableCell>{unit.baseUnit || "None"}</TableCell>
+                      <TableCell>{unit.baseUnit || t('none')}</TableCell>
                       <TableCell>
                         {unit.conversionFactor
                           ? `1 = ${unit.conversionFactor} ${unit.baseUnit}`
-                          : "N/A"}
+                          : t('na')}
                       </TableCell>
                       <TableCell>
                         <Badge
                           variant={unit.isActive ? "success" : "secondary"}
                         >
-                          {unit.isActive ? "Active" : "Inactive"}
+                          {unit.isActive ? t('active') : t('inactive')}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -437,7 +436,7 @@ export function UnitsManagementClient({
                             }
                             disabled={isPending}
                           >
-                            {unit.isActive ? "Deactivate" : "Activate"}
+                            {unit.isActive ? t('deactivate') : t('activate')}
                           </Button>
                           <Button
                             variant="outline"

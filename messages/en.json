@@ -621,7 +621,12 @@
       "deactivate": "Deactivate",
       "activate": "Activate",
       "noWarehousesFound": "No warehouses found",
-      "code": "Code"
+      "code": "Code",
+      "sqFt": "sq ft",
+      "mainWarehouse": "Main Warehouse",
+      "storageStreet": "123 Storage Street",
+      "newYork": "New York",
+      "usa": "USA"
     },
     "unitsPage": {
       "title": "Units of Measurement",
@@ -642,7 +647,8 @@
       "updateUnit": "Update Unit",
       "createUnit": "Create Unit",
       "cancel": "Cancel",
-      "searchUnits": "Search units...",
+      "searchUnits": "Search units by name, code, or category...",
+      "allCategories": "All Categories",
       "unit": "Unit",
       "conversion": "Conversion",
       "status": "Status",
@@ -659,7 +665,12 @@
       "quantity": "Quantity",
       "area": "Area",
       "time": "Time",
-      "temperature": "Temperature"
+      "temperature": "Temperature",
+      "kilogram": "Kilogram",
+      "gram": "gram",
+      "kg": "kg",
+      "na": "N/A",
+      "none": "None"
     },
     "logsPage": {
       "title": "Activity Logs",

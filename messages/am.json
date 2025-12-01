@@ -576,7 +576,12 @@
       "deactivate": "አሰናክል",
       "activate": "አንቃ",
       "noWarehousesFound": "ምንም መጋዘኖች አልተገኙም",
-      "code": "ኮድ"
+      "code": "ኮድ",
+      "sqFt": "ካሬ ጫማ",
+      "mainWarehouse": "ዋና መጋዘን",
+      "storageStreet": "123 የማከማቻ መንገድ",
+      "newYork": "ኒው ዮርክ",
+      "usa": "አሜሪካ"
     },
     "unitsPage": {
       "title": "የመለኪያ አሃዶች",
@@ -597,7 +602,8 @@
       "updateUnit": "አሃድ አዘምን",
       "createUnit": "አሃድ ፍጠር",
       "cancel": "ሰርዝ",
-      "searchUnits": "አሃዶችን ይፈልጉ...",
+      "searchUnits": "አሃዶችን በስም፣ ኮድ ወይም ምድብ ይፈልጉ...",
+      "allCategories": "ሁሉም ምድቦች",
       "unit": "አሃድ",
       "conversion": "ልወጣ",
       "status": "ሁኔታ",
@@ -614,7 +620,12 @@
       "quantity": "ብዛት",
       "area": "አካባቢ",
       "time": "ጊዜ",
-      "temperature": "የሙቀት መጠን"
+      "temperature": "የሙቀት መጠን",
+      "kilogram": "ኪሎግራም",
+      "gram": "ግራም",
+      "kg": "ኪግ",
+      "na": "አ/ሚ",
+      "none": "ምንም"
     },
     "logsPage": {
       "title": "የእንቅስቃሴ ምዝገባዎች",

@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
 import { Warehouse } from "./warehouse-management";
+import { useTranslations } from 'next-intl';
 
 interface WarehouseManagementClientProps {
   initialWarehouses: Warehouse[];
@@ -43,6 +44,7 @@ interface WarehouseManagementClientProps {
 export function WarehouseManagementClient({
   initialWarehouses,
 }: WarehouseManagementClientProps) {
+  const t = useTranslations('admin.warehousesPage');
   const [warehouses, setWarehouses] = useState<Warehouse[]>(initialWarehouses);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -157,9 +159,9 @@ export function WarehouseManagementClient({
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Warehouses</CardTitle>
+              <CardTitle>{t('warehouses')}</CardTitle>
               <CardDescription>
-                Manage warehouse locations and storage facilities
+                {t('description')}
               </CardDescription>
             </div>
             <Button
@@ -167,7 +169,7 @@ export function WarehouseManagementClient({
               disabled={isPending}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Warehouse
+              {t('addWarehouse')}
             </Button>
           </div>
         </CardHeader>
@@ -177,7 +179,7 @@ export function WarehouseManagementClient({
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle>
-                  {editingWarehouse ? "Edit Warehouse" : "Create New Warehouse"}
+                  {editingWarehouse ? t('editWarehouse') : t('createNewWarehouse')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -191,17 +193,17 @@ export function WarehouseManagementClient({
                 >
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name">Warehouse Name</Label>
+                      <Label htmlFor="name">{t('warehouseName')}</Label>
                       <Input
                         id="name"
                         name="name"
                         required
-                        placeholder="Main Warehouse"
+                        placeholder={t('mainWarehouse')}
                         defaultValue={editingWarehouse?.name || ""}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="code">Warehouse Code</Label>
+                      <Label htmlFor="code">{t('warehouseCode')}</Label>
                       <Input
                         id="code"
                         name="code"
@@ -212,35 +214,35 @@ export function WarehouseManagementClient({
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="address">Address</Label>
+                    <Label htmlFor="address">{t('address')}</Label>
                     <Input
                       id="address"
                       name="address"
-                      placeholder="123 Storage Street"
+                      placeholder={t('storageStreet')}
                       defaultValue={editingWarehouse?.address || ""}
                     />
                   </div>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor="city">City</Label>
+                      <Label htmlFor="city">{t('city')}</Label>
                       <Input
                         id="city"
                         name="city"
-                        placeholder="New York"
+                        placeholder={t('newYork')}
                         defaultValue={editingWarehouse?.city || ""}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="country">Country</Label>
+                      <Label htmlFor="country">{t('country')}</Label>
                       <Input
                         id="country"
                         name="country"
-                        placeholder="USA"
+                        placeholder={t('usa')}
                         defaultValue={editingWarehouse?.country || ""}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="capacity">Capacity (sq ft)</Label>
+                      <Label htmlFor="capacity">{t('capacity')}</Label>
                       <Input
                         id="capacity"
                         name="capacity"
@@ -253,10 +255,10 @@ export function WarehouseManagementClient({
                   <div className="flex gap-2">
                     <Button type="submit" disabled={isPending}>
                       {isPending
-                        ? "Saving..."
+                        ? t('saving')
                         : editingWarehouse
-                        ? "Update Warehouse"
-                        : "Create Warehouse"}
+                        ? t('updateWarehouse')
+                        : t('createWarehouse')}
                     </Button>
                     <Button
                       type="button"
@@ -266,7 +268,7 @@ export function WarehouseManagementClient({
                         setEditingWarehouse(null);
                       }}
                     >
-                      Cancel
+                      {t('cancel')}
                     </Button>
                   </div>
                 </form>
@@ -292,12 +294,12 @@ export function WarehouseManagementClient({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Warehouse</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Capacity</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('warehouse')}</TableHead>
+                  <TableHead>{t('location')}</TableHead>
+                  <TableHead>{t('capacity')}</TableHead>
+                  <TableHead>{t('status')}</TableHead>
+                  <TableHead>{t('created')}</TableHead>
+                  <TableHead className="text-right">{t('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -381,7 +383,7 @@ export function WarehouseManagementClient({
                             }
                             disabled={isPending}
                           >
-                            {warehouse.isActive ? "Deactivate" : "Activate"}
+                            {warehouse.isActive ? t('deactivate') : t('activate')}
                           </Button>
                           <Button
                             variant="outline"
