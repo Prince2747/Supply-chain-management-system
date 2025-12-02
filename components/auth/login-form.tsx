@@ -41,8 +41,9 @@ export function LoginForm() {
           
           // Wait a moment for the toast to show, then redirect
           setTimeout(() => {
-            // Routes like /admin, /dashboard, /api are not under [locale] and should not be prefixed
-            router.push(result.redirectPath);
+            // Add locale prefix to the redirect path
+            const localizedPath = `/${locale}${result.redirectPath}`;
+            router.push(localizedPath);
           }, 1500);
         } else {
           throw new Error("Authentication failed");

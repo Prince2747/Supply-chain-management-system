@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 
 const ROLE_ROUTES = {
   manager: "/dashboard/manager",
@@ -23,21 +24,22 @@ async function getUserRole(userId: string) {
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const locale = await getLocale();
   
   if (!user) {
-    redirect('/login');
+    redirect(`/${locale}/login`);
   }
 
   const role = await getUserRole(user.id);
 
   if (!role) {
-    redirect('/unauthorized');
+    redirect(`/${locale}/unauthorized`);
   }
 
   // Redirect to role-specific dashboard
   const roleRoute = ROLE_ROUTES[role as keyof typeof ROLE_ROUTES];
   if (roleRoute) {
-    redirect(roleRoute);
+    redirect(`/${locale}${roleRoute}`);
   }
 
   return (
