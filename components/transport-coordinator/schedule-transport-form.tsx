@@ -20,7 +20,7 @@ import {
 import { CalendarIcon, Loader2, MapPin, Truck, User } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { createTransportSchedule } from "@/app/dashboard/transport-coordinator/actions";
+import { createTransportSchedule } from "@/app/[locale]/dashboard/transport-coordinator/actions";
 import { toast } from "sonner";
 
 interface CropBatch {

@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { getHarvestNotifications, markNotificationAsRead } from "@/app/dashboard/field-agent/actions";
+import { getHarvestNotifications, markNotificationAsRead } from "@/app/[locale]/dashboard/field-agent/actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 

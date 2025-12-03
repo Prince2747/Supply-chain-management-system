@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AlertTriangle, Loader2, Plus } from "lucide-react";
-import { reportTransportIssue } from "@/app/dashboard/transport-driver/actions";
+import { reportTransportIssue } from "@/app/[locale]/dashboard/transport-driver/actions";
 import { toast } from "sonner";
 
 interface Task {

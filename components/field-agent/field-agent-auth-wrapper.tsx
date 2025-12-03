@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { checkFieldAgentRole } from "@/app/dashboard/field-agent/actions";
+import { checkFieldAgentRole } from "@/app/[locale]/dashboard/field-agent/actions";
 
 interface FieldAgentAuthWrapperProps {
   children: React.ReactNode;

@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Loader2 } from "lucide-react";
-import { createTransportIssue, getTransportTasks } from "@/app/dashboard/transport-coordinator/actions";
+import { createTransportIssue, getTransportTasks } from "@/app/[locale]/dashboard/transport-coordinator/actions";
 import { toast } from "sonner";
 
 export function CreateIssueDialog() {

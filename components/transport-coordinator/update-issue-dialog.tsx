@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Edit, Loader2 } from "lucide-react";
-import { updateTransportIssue } from "@/app/dashboard/transport-coordinator/actions";
+import { updateTransportIssue } from "@/app/[locale]/dashboard/transport-coordinator/actions";
 import { toast } from "sonner";
 
 interface Issue {

@@ -16,7 +16,7 @@ import {
   Loader2,
   ArrowLeft
 } from "lucide-react";
-import { confirmPickup, confirmDelivery, getAssignedTasks } from "@/app/dashboard/transport-driver/actions";
+import { confirmPickup, confirmDelivery, getAssignedTasks } from "@/app/[locale]/dashboard/transport-driver/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
