@@ -20,8 +20,10 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { ProcurementDashboard } from '@/components/procurement/procurement-dashboard';
 import { getProcurementDashboardData, assignTransportTask } from './actions';
+import { getTranslations } from "next-intl/server";
 
 export default async function ProcurementOfficerDashboard() {
+  const t = await getTranslations("procurementOfficer.dashboard");
   // Get current user authentication
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -103,9 +105,9 @@ export default async function ProcurementOfficerDashboard() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Procurement Officer Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Monitor inventory, review batches, and manage stock requirements
+          {t("description")}
         </p>
       </div>
 
@@ -113,52 +115,52 @@ export default async function ProcurementOfficerDashboard() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("pendingReviews")}</CardTitle>
             <Clock className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{pendingBatches}</div>
             <p className="text-xs text-muted-foreground">
-              Batches awaiting review
+              {t("batchesAwaitingReview")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Approved Batches</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("approvedBatches")}</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{approvedBatches}</div>
             <p className="text-xs text-muted-foreground">
-              Successfully processed
+              {t("successfullyProcessed")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("lowStockItems")}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{inventoryStats.lowStock}</div>
             <p className="text-xs text-muted-foreground">
-              Need restocking
+              {t("needRestocking")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Inventory</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalInventory")}</CardTitle>
             <Package className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{inventoryStats.totalItems}</div>
             <p className="text-xs text-muted-foreground">
-              Items in system
+              {t("itemsInSystem")}
             </p>
           </CardContent>
         </Card>
@@ -170,19 +172,19 @@ export default async function ProcurementOfficerDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckSquare className="h-5 w-5 text-green-600" />
-              Batch Reviews
+              {t("batchReviews")}
             </CardTitle>
             <CardDescription>
-              Review and approve crop batches from field agents
+              {t("reviewAndApprove")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="text-2xl font-bold text-orange-600">{pendingBatches}</div>
-              <p className="text-sm text-muted-foreground">Pending reviews</p>
+              <p className="text-sm text-muted-foreground">{t("pendingReviewsCount")}</p>
               <Link href="/dashboard/procurement-officer/batch-reviews">
                 <Button className="w-full bg-green-600 hover:bg-green-700">
-                  Review Batches
+                  {t("reviewBatches")}
                 </Button>
               </Link>
             </div>
@@ -193,19 +195,19 @@ export default async function ProcurementOfficerDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ClipboardList className="h-5 w-5 text-blue-600" />
-              Stock Requirements
+              {t("stockRequirements")}
             </CardTitle>
             <CardDescription>
-              Set and update crop stock requirements
+              {t("setAndUpdate")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="text-2xl font-bold text-blue-600">{inventoryStats.lowStock}</div>
-              <p className="text-sm text-muted-foreground">Items need attention</p>
+              <p className="text-sm text-muted-foreground">{t("itemsNeedAttention")}</p>
               <Link href="/dashboard/procurement-officer/stock-requirements">
                 <Button variant="outline" className="w-full">
-                  Manage Requirements
+                  {t("manageRequirements")}
                 </Button>
               </Link>
             </div>
@@ -216,10 +218,10 @@ export default async function ProcurementOfficerDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Truck className="h-5 w-5 text-blue-600" />
-              Transport Assignment
+              {t("transportAssignment")}
             </CardTitle>
             <CardDescription>
-              Assign crop batches to transport coordinators
+              {t("assignCropBatches")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -227,10 +229,10 @@ export default async function ProcurementOfficerDashboard() {
               <div className="text-2xl font-bold text-blue-600">
                 {transportData?.cropBatches?.length || 0}
               </div>
-              <p className="text-sm text-muted-foreground">Ready for transport</p>
+              <p className="text-sm text-muted-foreground">{t("readyForTransport")}</p>
               <Button variant="outline" className="w-full" asChild>
                 <Link href="#transport-section">
-                  Assign Transport
+                  {t("assignTransport")}
                 </Link>
               </Button>
             </div>
@@ -243,18 +245,18 @@ export default async function ProcurementOfficerDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-orange-600" />
-            Recent Batches Awaiting Review
+            {t("recentBatchesTitle")}
           </CardTitle>
           <CardDescription>
-            Latest crop batches submitted by field agents
+            {t("recentBatchesDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {recentBatches.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
-              <p>No batches pending review</p>
-              <p className="text-sm">All caught up!</p>
+              <p>{t("noBatchesPending")}</p>
+              <p className="text-sm">{t("allCaughtUp")}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -273,7 +275,7 @@ export default async function ProcurementOfficerDashboard() {
                     <div className="flex flex-col">
                       <div className="text-sm font-medium">{batch.farm.name}</div>
                       <div className="text-sm text-muted-foreground">
-                        By: {batch.farmer.name}
+                        {t("by")}: {batch.farmer.name}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -288,11 +290,11 @@ export default async function ProcurementOfficerDashboard() {
                   
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline" className="text-orange-600">
-                      Pending Review
+                      {t("pendingReview")}
                     </Badge>
                     <Link href={`/dashboard/procurement-officer/batch-reviews?batch=${batch.id}`}>
                       <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                        Review
+                        {t("review")}
                       </Button>
                     </Link>
                   </div>
@@ -303,7 +305,7 @@ export default async function ProcurementOfficerDashboard() {
                 <div className="text-center pt-4">
                   <Link href="/dashboard/procurement-officer/batch-reviews">
                     <Button variant="outline">
-                      View All Pending Reviews
+                      {t("viewAllPending")}
                     </Button>
                   </Link>
                 </div>

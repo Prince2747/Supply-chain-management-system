@@ -2,47 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Truck, Users, Package, AlertTriangle, BarChart3, Calendar } from "lucide-react";
-
-// Navigation items for the side bar
-const navigation = [
-  {
-    name: "Dashboard",
-    href: "/dashboard/transport-coordinator",
-    icon: BarChart3,
-  },
-  {
-    name: "Schedule Tasks",
-    href: "/dashboard/transport-coordinator/schedule",
-    icon: Calendar,
-  },
-  {
-    name: "Transport Tasks",
-    href: "/dashboard/transport-coordinator/tasks",
-    icon: Package,
-  },
-  {
-    name: "Vehicles",
-    href: "/dashboard/transport-coordinator/vehicles",
-    icon: Truck,
-  },
-  {
-    name: "Drivers",
-    href: "/dashboard/transport-coordinator/drivers",
-    icon: Users,
-  },
-  {
-    name: "Issues",
-    href: "/dashboard/transport-coordinator/issues",
-    icon: AlertTriangle,
-  },
-  {
-    name: "Reports",
-    href: "/dashboard/transport-coordinator/reports",
-    icon: BarChart3,
-  },
-];
 
 export function TransportCoordinatorNavigation({
   children,
@@ -50,6 +12,47 @@ export function TransportCoordinatorNavigation({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const locale = useLocale();
+  const t = useTranslations("transportCoordinator.navigation");
+  
+  // Navigation items for the side bar
+  const navigation = [
+    {
+      name: t("dashboard"),
+      href: `/${locale}/dashboard/transport-coordinator`,
+      icon: BarChart3,
+    },
+    {
+      name: t("scheduleTasks"),
+      href: `/${locale}/dashboard/transport-coordinator/schedule`,
+      icon: Calendar,
+    },
+    {
+      name: t("transportTasks"),
+      href: `/${locale}/dashboard/transport-coordinator/tasks`,
+      icon: Package,
+    },
+    {
+      name: t("vehicles"),
+      href: `/${locale}/dashboard/transport-coordinator/vehicles`,
+      icon: Truck,
+    },
+    {
+      name: t("drivers"),
+      href: `/${locale}/dashboard/transport-coordinator/drivers`,
+      icon: Users,
+    },
+    {
+      name: t("issues"),
+      href: `/${locale}/dashboard/transport-coordinator/issues`,
+      icon: AlertTriangle,
+    },
+    {
+      name: t("reports"),
+      href: `/${locale}/dashboard/transport-coordinator/reports`,
+      icon: BarChart3,
+    },
+  ];
   
   return (
     <div className="flex min-h-[calc(100vh-4rem)] bg-gray-50">

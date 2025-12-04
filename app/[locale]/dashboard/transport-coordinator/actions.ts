@@ -29,27 +29,36 @@ async function getCurrentUser() {
 export async function getTransportStats() {
   const profile = await getCurrentUser();
 
-  const [
-    totalTasks,
-    scheduledTasks,
-    inTransitTasks,
-    completedTasks,
-    totalVehicles,
-    availableVehicles,
-    totalDrivers,
-    availableDrivers,
-    openIssues
-  ] = await Promise.all([
-    prisma.transportTask.count(),
-    prisma.transportTask.count({ where: { status: "SCHEDULED" } }),
-    prisma.transportTask.count({ where: { status: "IN_TRANSIT" } }),
-    prisma.transportTask.count({ where: { status: "DELIVERED" } }),
-    prisma.vehicle.count(),
-    prisma.vehicle.count({ where: { status: "AVAILABLE" } }),
-    prisma.driver.count(),
-    prisma.driver.count({ where: { status: "AVAILABLE" } }),
+  // Optimize by using groupBy and aggregations instead of multiple counts
+  const [taskStats, vehicleStats, driverStats, issueCount] = await Promise.all([
+    prisma.transportTask.groupBy({
+      by: ['status'],
+      _count: true
+    }),
+    prisma.vehicle.groupBy({
+      by: ['status'],
+      _count: true
+    }),
+    prisma.driver.groupBy({
+      by: ['status'],
+      _count: true
+    }),
     prisma.transportIssue.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } })
   ]);
+
+  // Process task stats
+  const totalTasks = taskStats.reduce((sum, stat) => sum + stat._count, 0);
+  const scheduledTasks = taskStats.find(s => s.status === "SCHEDULED")?._count || 0;
+  const inTransitTasks = taskStats.find(s => s.status === "IN_TRANSIT")?._count || 0;
+  const completedTasks = taskStats.find(s => s.status === "DELIVERED")?._count || 0;
+
+  // Process vehicle stats
+  const totalVehicles = vehicleStats.reduce((sum, stat) => sum + stat._count, 0);
+  const availableVehicles = vehicleStats.find(s => s.status === "AVAILABLE")?._count || 0;
+
+  // Process driver stats
+  const totalDrivers = driverStats.reduce((sum, stat) => sum + stat._count, 0);
+  const availableDrivers = driverStats.find(s => s.status === "AVAILABLE")?._count || 0;
 
   return {
     totalTasks,
@@ -60,7 +69,7 @@ export async function getTransportStats() {
     availableVehicles,
     totalDrivers,
     availableDrivers,
-    openIssues
+    openIssues: issueCount
   };
 }
 
@@ -242,6 +251,38 @@ export async function updateVehicleStatus(vehicleId: string, status: string) {
   }
 }
 
+export async function updateVehicle(vehicleId: string, formData: FormData) {
+  const profile = await getCurrentUser();
+
+  const vehicleType = formData.get("type") as string;
+  const data = {
+    plateNumber: formData.get("plateNumber") as string,
+    type: vehicleType as any, // Type assertion to handle enum
+    capacity: parseFloat(formData.get("capacity") as string),
+  };
+
+  try {
+    const vehicle = await prisma.vehicle.update({
+      where: { id: vehicleId },
+      data
+    });
+
+    await logActivity({
+      userId: profile.userId,
+      action: "UPDATE_VEHICLE",
+      entityType: "Vehicle",
+      entityId: vehicle.id,
+      details: { plateNumber: data.plateNumber, type: data.type, capacity: data.capacity }
+    });
+
+    revalidatePath("/dashboard/transport-coordinator/vehicles");
+    return { success: true, vehicle };
+  } catch (error) {
+    console.error("Error updating vehicle:", error);
+    return { success: false, error: "Failed to update vehicle" };
+  }
+}
+
 // Drivers
 export async function getDrivers() {
   await getCurrentUser();
@@ -313,6 +354,38 @@ export async function updateDriverStatus(driverId: string, status: string) {
   } catch (error) {
     console.error("Error updating driver status:", error);
     return { success: false, error: "Failed to update driver status" };
+  }
+}
+
+export async function updateDriver(driverId: string, formData: FormData) {
+  const profile = await getCurrentUser();
+
+  const data = {
+    name: formData.get("name") as string,
+    licenseNumber: formData.get("licenseNumber") as string,
+    phone: formData.get("phone") as string,
+    email: formData.get("email") as string || null,
+  };
+
+  try {
+    const driver = await prisma.driver.update({
+      where: { id: driverId },
+      data
+    });
+
+    await logActivity({
+      userId: profile.userId,
+      action: "UPDATE_DRIVER",
+      entityType: "Driver",
+      entityId: driver.id,
+      details: { name: data.name, licenseNumber: data.licenseNumber }
+    });
+
+    revalidatePath("/dashboard/transport-coordinator/drivers");
+    return { success: true, driver };
+  } catch (error) {
+    console.error("Error updating driver:", error);
+    return { success: false, error: "Failed to update driver" };
   }
 }
 

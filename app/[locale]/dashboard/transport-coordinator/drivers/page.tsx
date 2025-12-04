@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Users, 
   Plus, 
@@ -25,10 +27,11 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  Heart
+  Heart,
+  Pencil
 } from "lucide-react";
 import { toast } from "sonner";
-import { getDrivers, createDriver, updateDriverStatus } from "../actions";
+import { getDrivers, createDriver, updateDriver, updateDriverStatus } from "../actions";
 
 interface Driver {
   id: string;
@@ -42,9 +45,11 @@ interface Driver {
 }
 
 export default function DriversPage() {
+  const t = useTranslations("transportCoordinator.drivers");
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
 
   useEffect(() => {
     loadDrivers();
@@ -73,6 +78,24 @@ export default function DriversPage() {
       }
     } catch (error) {
       toast.error("Failed to create driver");
+    }
+  };
+
+  const handleUpdateDriver = async (formData: FormData) => {
+    if (!editingDriver) return;
+    
+    try {
+      const result = await updateDriver(editingDriver.id, formData);
+      if (result.success) {
+        toast.success("Driver updated successfully");
+        setIsDialogOpen(false);
+        setEditingDriver(null);
+        loadDrivers();
+      } else {
+        toast.error(result.error || "Failed to update driver");
+      }
+    } catch (error) {
+      toast.error("Failed to update driver");
     }
   };
 
@@ -121,7 +144,46 @@ export default function DriversPage() {
   };
 
   if (loading) {
-    return <div>Loading drivers...</div>;
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-64" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-64" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -129,68 +191,74 @@ export default function DriversPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Driver Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Manage your team of drivers for transportation tasks
+            {t("subtitle")}
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setEditingDriver(null);
+        }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => setEditingDriver(null)}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Driver
+              {t("addDriver")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Driver</DialogTitle>
+              <DialogTitle>{editingDriver ? t("editDriver") : t("addNewDriver")}</DialogTitle>
               <DialogDescription>
-                Add a new driver to your team for transport assignments.
+                {editingDriver ? t("editDriverDescription") : t("addDriverDescription")}
               </DialogDescription>
             </DialogHeader>
-            <form action={handleCreateDriver} className="space-y-4">
+            <form action={editingDriver ? handleUpdateDriver : handleCreateDriver} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">{t("driverName")}</Label>
                 <Input
                   id="name"
                   name="name"
-                  placeholder="John Doe"
+                  defaultValue={editingDriver?.name || ""}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="licenseNumber">License Number</Label>
+                <Label htmlFor="licenseNumber">{t("licenseNumber")}</Label>
                 <Input
                   id="licenseNumber"
                   name="licenseNumber"
-                  placeholder="DL123456789"
+                  defaultValue={editingDriver?.licenseNumber || ""}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone">{t("phoneNumber")}</Label>
                 <Input
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="+1234567890"
+                  defaultValue={editingDriver?.phone || ""}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email (Optional)</Label>
+                <Label htmlFor="email">{t("emailAddress")}</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="john@example.com"
+                  defaultValue={editingDriver?.email || ""}
                 />
               </div>
               <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
+                <Button type="button" variant="outline" onClick={() => {
+                  setIsDialogOpen(false);
+                  setEditingDriver(null);
+                }}>
+                  {t("cancel")}
                 </Button>
-                <Button type="submit">Add Driver</Button>
+                <Button type="submit">{editingDriver ? t("updateDriver") : t("createDriver")}</Button>
               </div>
             </form>
           </DialogContent>
@@ -200,22 +268,22 @@ export default function DriversPage() {
       {/* Drivers Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Drivers</CardTitle>
+          <CardTitle>{t("driverList")}</CardTitle>
           <CardDescription>
-            All drivers in your team with their current status and assignments
+            {t("allDrivers")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>License Number</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Current Task</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("name")}</TableHead>
+                <TableHead>{t("license")}</TableHead>
+                <TableHead>{t("phone")}</TableHead>
+                <TableHead>{t("email")}</TableHead>
+                <TableHead>{t("status")}</TableHead>
+                <TableHead>{t("tasks")}</TableHead>
+                <TableHead>{t("actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -262,20 +330,31 @@ export default function DriversPage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Select
-                      value={driver.status}
-                      onValueChange={(status) => handleStatusChange(driver.id, status)}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="AVAILABLE">Available</SelectItem>
-                        <SelectItem value="ON_DUTY">On Duty</SelectItem>
-                        <SelectItem value="OFF_DUTY">Off Duty</SelectItem>
-                        <SelectItem value="SICK_LEAVE">Sick Leave</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditingDriver(driver);
+                          setIsDialogOpen(true);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Select
+                        value={driver.status}
+                        onValueChange={(status) => handleStatusChange(driver.id, status)}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="AVAILABLE">Available</SelectItem>
+                          <SelectItem value="ON_DUTY">On Duty</SelectItem>
+                          <SelectItem value="OFF_DUTY">Off Duty</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

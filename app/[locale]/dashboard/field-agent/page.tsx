@@ -14,6 +14,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/utils/supabase/server";
 import { CropBatchStatus, NotificationType } from "@/lib/generated/prisma/client";
+import { getTranslations, getLocale } from 'next-intl/server';
 
 async function getDashboardStats(userId: string) {
   try {
@@ -130,7 +131,7 @@ async function getRecentActivities(userId: string) {
       id: activity.id,
       action: activity.action,
       details: activity.details as any,
-      time: formatTimeAgo(activity.createdAt)
+      createdAt: activity.createdAt
     }));
   } catch (error) {
     console.error('Error fetching recent activities:', error);
@@ -138,25 +139,27 @@ async function getRecentActivities(userId: string) {
   }
 }
 
-function formatTimeAgo(date: Date): string {
+function formatTimeAgo(date: Date, t: any): string {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
   
   if (diffInSeconds < 3600) {
     const minutes = Math.floor(diffInSeconds / 60);
-    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    return `${minutes} ${t(minutes === 1 ? 'minute' : 'minutes')} ${t('ago')}`;
   } else if (diffInSeconds < 86400) {
     const hours = Math.floor(diffInSeconds / 3600);
-    return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    return `${hours} ${t(hours === 1 ? 'hour' : 'hours')} ${t('ago')}`;
   } else {
     const days = Math.floor(diffInSeconds / 86400);
-    return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    return `${days} ${t(days === 1 ? 'day' : 'days')} ${t('ago')}`;
   }
 }
 
 export default async function FieldAgentDashboard() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const t = await getTranslations('fieldAgent.dashboard');
+  const locale = await getLocale();
   
   if (!user) {
     return <div>Please log in to access this page.</div>;
@@ -168,59 +171,59 @@ export default async function FieldAgentDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Field Agent Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
       </div>
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Farms</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalFarms')}</CardTitle>
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalFarms}</div>
             <p className="text-xs text-muted-foreground">
-              +{stats.thisMonthRegistrations} new this month
+              +{stats.thisMonthRegistrations} {t('newThisMonth')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Registered Farmers</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('registeredFarmers')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalFarmers}</div>
             <p className="text-xs text-muted-foreground">
-              Active partnerships
+              {t('activePartnerships')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Batches</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('activeBatches')}</CardTitle>
             <Sprout className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.activeCropBatches}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.pendingHarvests} pending harvest
+              {stats.pendingHarvests} {t('pendingHarvest')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">QR Codes</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('qrCodes')}</CardTitle>
             <QrCode className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.qrCodesGenerated}</div>
             <p className="text-xs text-muted-foreground">
-              Generated this month
+              {t('generatedThisMonth')}
             </p>
           </CardContent>
         </Card>
@@ -232,16 +235,16 @@ export default async function FieldAgentDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Users className="mr-2 h-5 w-5" />
-              Farmer Management
+              {t('farmerManagement')}
             </CardTitle>
             <CardDescription>
-              Register new farmers and manage existing profiles
+              {t('farmerManagementDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/dashboard/field-agent/farmers">
-                View All Farmers
+              <Link href={`/${locale}/dashboard/field-agent/farmers`}>
+                {t('viewAllFarmers')}
               </Link>
             </Button>
           </CardContent>
@@ -251,16 +254,16 @@ export default async function FieldAgentDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Building className="mr-2 h-5 w-5" />
-              Farm Operations
+              {t('farmOperations')}
             </CardTitle>
             <CardDescription>
-              Record farm details and track operations
+              {t('farmOperationsDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/dashboard/field-agent/farms">
-                Manage Farms
+              <Link href={`/${locale}/dashboard/field-agent/farms`}>
+                {t('manageFarms')}
               </Link>
             </Button>
           </CardContent>
@@ -270,16 +273,16 @@ export default async function FieldAgentDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Sprout className="mr-2 h-5 w-5" />
-              Crop Batches
+              {t('cropBatches')}
             </CardTitle>
             <CardDescription>
-              Create and track crop batches with QR codes
+              {t('cropBatchesDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/dashboard/field-agent/crops">
-                View Batches
+              <Link href={`/${locale}/dashboard/field-agent/crops`}>
+                {t('viewBatches')}
               </Link>
             </Button>
           </CardContent>
@@ -291,10 +294,10 @@ export default async function FieldAgentDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Clock className="mr-2 h-5 w-5" />
-            Recent Activities
+            {t('recentActivities')}
           </CardTitle>
           <CardDescription>
-            Your latest field operations and updates
+            {t('recentActivitiesDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -316,14 +319,14 @@ export default async function FieldAgentDashboard() {
                     )}
                   </div>
                   <div className="flex-shrink-0 text-xs text-gray-400">
-                    {activity.time}
+                    {formatTimeAgo(activity.createdAt, t)}
                   </div>
                 </div>
               ))
             ) : (
               <div className="text-center text-gray-500 py-4">
-                <p className="text-sm">No recent activities</p>
-                <p className="text-xs">Start by registering farmers or creating crop batches</p>
+                <p className="text-sm">{t('noRecentActivities')}</p>
+                <p className="text-xs">{t('noRecentActivitiesDesc')}</p>
               </div>
             )}
           </div>

@@ -11,37 +11,40 @@ import {
   Scan,
   Archive
 } from "lucide-react";
-
-// Navigation items for the side bar
-const navigation = [
-  {
-    name: "Dashboard",
-    href: "/dashboard/warehouse-manager",
-    icon: BarChart3,
-  },
-  {
-    name: "Packaging",
-    href: "/dashboard/warehouse-manager/packaging",
-    icon: PackageCheck,
-  },
-  {
-    name: "Receipt Scanner",
-    href: "/dashboard/warehouse-manager/scanner",
-    icon: Scan,
-  },
-  {
-    name: "Storage",
-    href: "/dashboard/warehouse-manager/storage",
-    icon: Archive,
-  },
-];
+import { useTranslations, useLocale } from "next-intl";
 
 export function WarehouseManagerNavigation({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const t = useTranslations("warehouseManager.navigation");
+  const locale = useLocale();
   const pathname = usePathname();
+  
+  // Navigation items for the side bar
+  const navigation = [
+    {
+      name: t("dashboard"),
+      href: `/${locale}/dashboard/warehouse-manager`,
+      icon: BarChart3,
+    },
+    {
+      name: t("packaging"),
+      href: `/${locale}/dashboard/warehouse-manager/packaging`,
+      icon: PackageCheck,
+    },
+    {
+      name: t("receiptScanner"),
+      href: `/${locale}/dashboard/warehouse-manager/scanner`,
+      icon: Scan,
+    },
+    {
+      name: t("storage"),
+      href: `/${locale}/dashboard/warehouse-manager/storage`,
+      icon: Archive,
+    },
+  ];
   
   return (
     <div className="flex min-h-[calc(100vh-4rem)] bg-gray-50">

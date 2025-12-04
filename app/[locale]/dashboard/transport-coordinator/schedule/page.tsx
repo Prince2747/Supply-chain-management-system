@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScheduleTransportForm } from "@/components/transport-coordinator/schedule-transport-form";
 import { PendingSchedules } from "@/components/transport-coordinator/pending-schedules";
@@ -81,13 +82,15 @@ export default async function SchedulePage() {
     },
   });
 
+  const t = await getTranslations("transportCoordinator.schedule");
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Schedule Transport Tasks</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Create and manage transport schedules for approved crop batches
+          {t("subtitle")}
         </p>
       </div>
 
@@ -95,20 +98,20 @@ export default async function SchedulePage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Batches</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("availableCrops")}</CardTitle>
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{availableCropBatches.length}</div>
             <p className="text-xs text-muted-foreground">
-              Ready for transport
+              {t("cropsReadyForTransport")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Resources</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("availableResources")}</CardTitle>
             <Truck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -116,20 +119,20 @@ export default async function SchedulePage() {
               {availableDrivers.length}/{availableVehicles.length}
             </div>
             <p className="text-xs text-muted-foreground">
-              Drivers/Vehicles ready
+              {t("driversReadyForAssignment")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("scheduleNewTask")}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingTasks.length}</div>
             <p className="text-xs text-muted-foreground">
-              Scheduled for pickup
+              {t("availableResources")}
             </p>
           </CardContent>
         </Card>

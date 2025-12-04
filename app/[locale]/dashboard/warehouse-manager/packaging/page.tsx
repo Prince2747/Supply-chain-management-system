@@ -4,8 +4,10 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PackagingManagementClient } from "@/components/warehouse-manager/packaging-management-client";
 import { Package, PackageCheck, Clock } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export default async function PackagingPage() {
+  const t = await getTranslations("warehouseManager.packaging");
   // Get current user and their warehouse assignment
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -55,9 +57,9 @@ export default async function PackagingPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Packaging Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Oversee packaging operations and update batch packaging status
+          {t("description")}
         </p>
       </div>
 
@@ -65,39 +67,39 @@ export default async function PackagingPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ready for Packaging</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("readyForPackaging")}</CardTitle>
             <Package className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.readyForPackaging}</div>
             <p className="text-xs text-muted-foreground">
-              Batches awaiting packaging
+              {t("batchesAwaitingPackaging")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("inProgress")}</CardTitle>
             <Clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{stats.currentlyPackaging}</div>
             <p className="text-xs text-muted-foreground">
-              Currently being packaged
+              {t("currentlyBeingPackaged")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("completed")}</CardTitle>
             <PackageCheck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.packaged}</div>
             <p className="text-xs text-muted-foreground">
-              Ready for shipment
+              {t("readyForShipment")}
             </p>
           </CardContent>
         </Card>
@@ -106,9 +108,9 @@ export default async function PackagingPage() {
       {/* Packaging Management */}
       <Card>
         <CardHeader>
-          <CardTitle>Crop Batch Packaging</CardTitle>
+          <CardTitle>{t("cropBatchPackaging")}</CardTitle>
           <CardDescription>
-            Monitor and update packaging status for crop batches
+            {t("monitorAndUpdate")}
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, AlertTriangle, Plus } from "lucide-react";
 import { getDriverIssues, getAssignedTasks } from "../actions";
 import { ReportIssueDialog } from "@/components/transport-driver/report-issue-dialog";
+import { getTranslations } from "next-intl/server";
 
 interface IssuesPageProps {
   searchParams: Promise<{
@@ -13,6 +14,7 @@ interface IssuesPageProps {
 }
 
 export default async function IssuesPage({ searchParams }: IssuesPageProps) {
+  const t = await getTranslations("transportDriver.issues");
   const { taskId } = await searchParams;
   const [issues, tasks] = await Promise.all([
     getDriverIssues(),
@@ -38,9 +40,9 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Transport Issues</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Report and track transport-related issues
+            {t("description")}
           </p>
         </div>
         <ReportIssueDialog tasks={tasks} preSelectedTaskId={taskId} />
@@ -50,7 +52,7 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Issues</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalIssues")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{issues.length}</div>
@@ -58,7 +60,7 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Open</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("open")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -68,7 +70,7 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("inProgress")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -78,7 +80,7 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Resolved</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("resolved")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -91,8 +93,8 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
       {/* Issues List */}
       <Card>
         <CardHeader>
-          <CardTitle>Reported Issues</CardTitle>
-          <CardDescription>All transport issues you have reported</CardDescription>
+          <CardTitle>{t("reportedIssues")}</CardTitle>
+          <CardDescription>{t("reportedIssuesDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -122,17 +124,17 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
 
                 <div className="space-y-3">
                   <div>
-                    <span className="text-sm font-medium">Description:</span>
+                    <span className="text-sm font-medium">{t("issueDescription")}:</span>
                     <p className="text-sm text-muted-foreground mt-1">{issue.description}</p>
                   </div>
 
                   {issue.resolution && (
                     <div>
-                      <span className="text-sm font-medium text-green-600">Resolution:</span>
+                      <span className="text-sm font-medium text-green-600">{t("resolution")}:</span>
                       <p className="text-sm text-muted-foreground mt-1">{issue.resolution}</p>
                       {issue.resolvedAt && (
                         <p className="text-xs text-muted-foreground mt-1">
-                          Resolved on {new Date(issue.resolvedAt).toLocaleString()}
+                          {t("resolvedOn", { date: new Date(issue.resolvedAt).toLocaleString() })}
                         </p>
                       )}
                     </div>
@@ -150,15 +152,15 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
             {issues.length === 0 && (
               <div className="text-center py-12">
                 <AlertTriangle className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Issues Reported</h3>
+                <h3 className="text-lg font-semibold mb-2">{t("noIssuesTitle")}</h3>
                 <p className="text-muted-foreground mb-4">
-                  You haven't reported any transport issues yet.
+                  {t("noIssuesDesc")}
                 </p>
                 {tasks.length > 0 && (
                   <ReportIssueDialog tasks={tasks}>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
-                      Report Your First Issue
+                      {t("reportFirstIssue")}
                     </Button>
                   </ReportIssueDialog>
                 )}
@@ -171,45 +173,45 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
       {/* Issue Types Help */}
       <Card>
         <CardHeader>
-          <CardTitle>Issue Types</CardTitle>
-          <CardDescription>Common types of transport issues you can report</CardDescription>
+          <CardTitle>{t("issueTypes")}</CardTitle>
+          <CardDescription>{t("issueTypesDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
-              <h4 className="font-medium">Vehicle Breakdown</h4>
+              <h4 className="font-medium">{t("vehicleBreakdown")}</h4>
               <p className="text-sm text-muted-foreground">
-                Mechanical issues, flat tires, engine problems
+                {t("vehicleBreakdownDesc")}
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-medium">Traffic Delay</h4>
+              <h4 className="font-medium">{t("trafficDelay")}</h4>
               <p className="text-sm text-muted-foreground">
-                Unexpected traffic jams, road closures
+                {t("trafficDelayDesc")}
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-medium">Weather Delay</h4>
+              <h4 className="font-medium">{t("weatherDelay")}</h4>
               <p className="text-sm text-muted-foreground">
-                Rain, storm, or other weather conditions
+                {t("weatherDelayDesc")}
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-medium">Damaged Goods</h4>
+              <h4 className="font-medium">{t("damagedGoods")}</h4>
               <p className="text-sm text-muted-foreground">
-                Crop damage during transport
+                {t("damagedGoodsDesc")}
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-medium">Route Change</h4>
+              <h4 className="font-medium">{t("routeChange")}</h4>
               <p className="text-sm text-muted-foreground">
-                Need to change pickup or delivery location
+                {t("routeChangeDesc")}
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-medium">Other</h4>
+              <h4 className="font-medium">{t("other")}</h4>
               <p className="text-sm text-muted-foreground">
-                Any other issues not listed above
+                {t("otherDesc")}
               </p>
             </div>
           </div>

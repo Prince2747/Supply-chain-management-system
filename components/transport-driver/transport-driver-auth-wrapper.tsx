@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { Loader2 } from "lucide-react";
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -51,14 +50,7 @@ export function TransportDriverAuthWrapper({ children }: AuthWrapperProps) {
   }, [router]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Checking authorization...</p>
-        </div>
-      </div>
-    );
+    return null; // Let the page skeleton handle loading state
   }
 
   if (!isAuthorized) {

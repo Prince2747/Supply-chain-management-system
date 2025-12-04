@@ -20,6 +20,7 @@ import { confirmPickup, confirmDelivery, getAssignedTasks } from "@/app/[locale]
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 
 interface QRScannerProps {
   taskId?: string;
@@ -27,6 +28,8 @@ interface QRScannerProps {
 }
 
 export function QRScanner({ taskId, action }: QRScannerProps) {
+  const t = useTranslations("transportDriver.scanner");
+  const locale = useLocale();
   const [qrCode, setQrCode] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,23 +48,23 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
       const assignedTasks = await getAssignedTasks();
       setTasks(assignedTasks);
     } catch (error) {
-      toast.error("Failed to load tasks");
+      toast.error(t("loadTasksFailed"));
     }
   };
 
   const handleConfirm = async () => {
     if (!qrCode.trim()) {
-      toast.error("Please enter or scan a QR code");
+      toast.error(t("errorQRCode"));
       return;
     }
 
     if (!selectedTaskId) {
-      toast.error("Please select a task");
+      toast.error(t("errorSelectTask"));
       return;
     }
 
     if (!selectedAction) {
-      toast.error("Please select an action (pickup or delivery)");
+      toast.error(t("errorSelectAction"));
       return;
     }
 
@@ -79,15 +82,15 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
       if (result.success) {
         toast.success(
           selectedAction === "pickup" 
-            ? "Pickup confirmed successfully!" 
-            : "Delivery confirmed successfully!"
+            ? t("pickupConfirmed")
+            : t("deliveryConfirmed")
         );
-        router.push("/dashboard/transport-driver");
+        router.push(`/${locale}/dashboard/transport-driver`);
       } else {
-        toast.error(result.error || "Failed to confirm action");
+        toast.error(result.error || t("confirmFailed"));
       }
     } catch (error) {
-      toast.error("An error occurred");
+      toast.error(t("errorOccurred"));
     }
 
     setLoading(false);
@@ -97,10 +100,10 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
 
   return (
     <div className="space-y-6">
-      <Link href="/dashboard/transport-driver">
+      <Link href={`/${locale}/dashboard/transport-driver`}>
         <Button variant="outline" size="sm" className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
+          {t("backToDashboard")}
         </Button>
       </Link>
 
@@ -108,8 +111,8 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
       {!taskId && (
         <Card>
           <CardHeader>
-            <CardTitle>Select Task</CardTitle>
-            <CardDescription>Choose the transport task you want to update</CardDescription>
+            <CardTitle>{t("selectTask")}</CardTitle>
+            <CardDescription>{t("selectTaskDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -154,8 +157,8 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
       {!action && selectedTask && (
         <Card>
           <CardHeader>
-            <CardTitle>Select Action</CardTitle>
-            <CardDescription>What would you like to do?</CardDescription>
+            <CardTitle>{t("selectAction")}</CardTitle>
+            <CardDescription>{t("selectActionDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
@@ -166,7 +169,7 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
                 className="h-20 flex-col"
               >
                 <QrCode className="h-6 w-6 mb-2" />
-                Confirm Pickup
+                {t("confirmPickup")}
               </Button>
               <Button
                 variant={selectedAction === "delivery" ? "default" : "outline"}
@@ -175,7 +178,7 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
                 className="h-20 flex-col"
               >
                 <CheckCircle className="h-6 w-6 mb-2" />
-                Confirm Delivery
+                {t("confirmDelivery")}
               </Button>
             </div>
           </CardContent>
@@ -189,11 +192,11 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
             <CardTitle className="flex items-center space-x-2">
               <QrCode className="h-5 w-5" />
               <span>
-                {selectedAction === "pickup" ? "Confirm Pickup" : "Confirm Delivery"}
+                {t("scanQRTitle", { action: selectedAction === "pickup" ? t("confirmPickup") : t("confirmDelivery") })}
               </span>
             </CardTitle>
             <CardDescription>
-              Scan the QR code on the batch or enter it manually
+              {t("scanQRDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -202,9 +205,9 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Task:</strong> {selectedTask.cropBatch.batchCode} - {selectedTask.cropBatch.farm.name}
+                  <strong>{t("task")}:</strong> {selectedTask.cropBatch.batchCode} - {selectedTask.cropBatch.farm.name}
                   <br />
-                  <strong>Expected QR Code:</strong> {selectedTask.cropBatch.batchCode}
+                  <strong>{t("expectedQRCode")}:</strong> {selectedTask.cropBatch.batchCode}
                 </AlertDescription>
               </Alert>
             )}
@@ -217,7 +220,7 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
                 size="sm"
               >
                 <Camera className="h-4 w-4 mr-2" />
-                Camera Scan
+                {t("cameraScan")}
               </Button>
               <Button
                 variant={isManualInput ? "default" : "outline"}
@@ -225,7 +228,7 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
                 size="sm"
               >
                 <Type className="h-4 w-4 mr-2" />
-                Manual Input
+                {t("manualInput")}
               </Button>
             </div>
 
@@ -233,16 +236,16 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
             {!isManualInput && (
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                 <Camera className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500">Camera scanning would be implemented here</p>
+                <p className="text-gray-500">{t("cameraPlaceholder")}</p>
                 <p className="text-sm text-gray-400 mt-2">
-                  For now, please use manual input below
+                  {t("cameraPlaceholderDesc")}
                 </p>
                 <Button 
                   variant="outline" 
                   onClick={() => setIsManualInput(true)}
                   className="mt-4"
                 >
-                  Switch to Manual Input
+                  {t("switchToManual")}
                 </Button>
               </div>
             )}
@@ -251,23 +254,23 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
             {isManualInput && (
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="qrCode">QR Code / Batch Code</Label>
+                  <Label htmlFor="qrCode">{t("qrCodeLabel")}</Label>
                   <Input
                     id="qrCode"
                     value={qrCode}
                     onChange={(e) => setQrCode(e.target.value)}
-                    placeholder="Enter the QR code or batch code"
+                    placeholder={t("qrCodePlaceholder")}
                     className="font-mono"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="notes">Notes (Optional)</Label>
+                  <Label htmlFor="notes">{t("notesLabel")}</Label>
                   <Textarea
                     id="notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add any additional notes..."
+                    placeholder={t("notesPlaceholder")}
                     rows={3}
                   />
                 </div>
@@ -278,7 +281,7 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
                   className="w-full"
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {selectedAction === "pickup" ? "Confirm Pickup" : "Confirm Delivery"}
+                  {selectedAction === "pickup" ? t("confirmPickupButton") : t("confirmDeliveryButton")}
                 </Button>
               </div>
             )}
@@ -289,14 +292,14 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
       {/* Instructions */}
       <Card>
         <CardHeader>
-          <CardTitle>Instructions</CardTitle>
+          <CardTitle>{t("instructions")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2 text-sm text-muted-foreground">
-            <p>• For pickup: Scan the QR code at the pickup location to confirm you've collected the batch</p>
-            <p>• For delivery: Scan the QR code at the delivery location to confirm successful delivery</p>
-            <p>• Make sure the QR code matches the expected batch code for the selected task</p>
-            <p>• Add notes if there are any special circumstances or issues</p>
+            <p>{t("instructionPickup")}</p>
+            <p>{t("instructionDelivery")}</p>
+            <p>{t("instructionMatch")}</p>
+            <p>{t("instructionNotes")}</p>
           </div>
         </CardContent>
       </Card>

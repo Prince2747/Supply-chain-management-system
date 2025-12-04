@@ -4,6 +4,7 @@ import { LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/client";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export default function DashboardLayout({
   children,
@@ -20,13 +21,14 @@ export default function DashboardLayout({
             <div className="flex items-center space-x-2">
               <img src="/logo.png" alt="Company Logo" className="h-8 w-auto" />
               <span className="text-lg font-semibold text-gray-900">
-                Supply Chain Management
+                Azmeraw Bekele
               </span>
             </div>
           </div>
 
           {/* Right side buttons */}
           <div className="flex items-center space-x-4">
+            <LanguageSwitcher />
             <Button variant="outline" size="sm" asChild>
               <Link href="/profile">
                 <User className="h-4 w-4 mr-2" />

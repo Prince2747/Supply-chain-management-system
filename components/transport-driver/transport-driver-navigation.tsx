@@ -10,37 +10,40 @@ import {
   AlertTriangle, 
   BarChart3 
 } from "lucide-react";
-
-// Navigation items for the side bar
-const navigation = [
-  {
-    name: "Dashboard",
-    href: "/dashboard/transport-driver",
-    icon: BarChart3,
-  },
-  {
-    name: "My Tasks",
-    href: "/dashboard/transport-driver/tasks",
-    icon: CheckSquare,
-  },
-  {
-    name: "QR Scanner",
-    href: "/dashboard/transport-driver/scanner",
-    icon: QrCode,
-  },
-  {
-    name: "Issues",
-    href: "/dashboard/transport-driver/issues",
-    icon: AlertTriangle,
-  },
-];
+import { useTranslations, useLocale } from "next-intl";
 
 export function TransportDriverNavigation({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const t = useTranslations("transportDriver.navigation");
+  const locale = useLocale();
   const pathname = usePathname();
+  
+  // Navigation items for the side bar
+  const navigation = [
+    {
+      name: t("dashboard"),
+      href: `/${locale}/dashboard/transport-driver`,
+      icon: BarChart3,
+    },
+    {
+      name: t("myTasks"),
+      href: `/${locale}/dashboard/transport-driver/tasks`,
+      icon: CheckSquare,
+    },
+    {
+      name: t("qrScanner"),
+      href: `/${locale}/dashboard/transport-driver/scanner`,
+      icon: QrCode,
+    },
+    {
+      name: t("issues"),
+      href: `/${locale}/dashboard/transport-driver/issues`,
+      icon: AlertTriangle,
+    },
+  ];
   
   return (
     <div className="flex min-h-[calc(100vh-4rem)] bg-gray-50">

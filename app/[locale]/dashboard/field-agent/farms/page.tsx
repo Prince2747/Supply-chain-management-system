@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +25,7 @@ import { useState, useEffect } from "react";
 import { getFarmers, createFarm, getFarms } from "../actions";
 
 export default function FarmsPage() {
+  const t = useTranslations('fieldAgent.farms');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [farmers, setFarmers] = useState<any[]>([]);
@@ -93,36 +95,36 @@ export default function FarmsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Farms</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Record and manage farm details
+            {t('description')}
           </p>
         </div>
         <Button onClick={() => setShowCreateForm(true)}>
           <Tractor className="mr-2 h-4 w-4" />
-          Add New Farm
+          {t('addNewFarm')}
         </Button>
       </div>
 
       {showCreateForm && (
         <Card>
           <CardHeader>
-            <CardTitle>Add New Farm</CardTitle>
+            <CardTitle>{t('addNewFarmTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="farmerId">Farmer</Label>
+                  <Label htmlFor="farmerId">{t('farmer')}</Label>
                   <Select name="farmerId" required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select farmer" />
+                      <SelectValue placeholder={t('selectFarmer')} />
                     </SelectTrigger>
                     <SelectContent>
                       {loading ? (
-                        <SelectItem value="loading" disabled>Loading farmers...</SelectItem>
+                        <SelectItem value="loading" disabled>{t('loadingFarmers')}</SelectItem>
                       ) : farmers.length === 0 ? (
-                        <SelectItem value="no-farmers" disabled>No farmers registered</SelectItem>
+                        <SelectItem value="no-farmers" disabled>{t('noFarmersRegistered')}</SelectItem>
                       ) : (
                         farmers.map((farmer) => (
                           <SelectItem key={farmer.id} value={farmer.id}>
@@ -134,52 +136,44 @@ export default function FarmsPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="name">Farm Name</Label>
+                  <Label htmlFor="name">{t('farmName')}</Label>
                   <Input
                     id="name"
                     name="name"
                     required
-                    placeholder="Farm name"
+                    placeholder={t('farmNamePlaceholder')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="location">Location</Label>
+                  <Label htmlFor="location">{t('location')}</Label>
                   <Input
                     id="location"
                     name="location"
-                    placeholder="Farm location"
+                    placeholder={t('locationPlaceholder')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="area">Area (hectares)</Label>
+                  <Label htmlFor="area">{t('size')}</Label>
                   <Input
                     id="area"
                     name="area"
                     type="number"
                     step="0.01"
-                    placeholder="Farm area"
+                    placeholder={t('sizePlaceholder')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="soilType">Soil Type</Label>
+                  <Label htmlFor="soilType">{t('soilType')}</Label>
                   <Input
                     id="soilType"
                     name="soilType"
-                    placeholder="Type of soil"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="coordinates">Coordinates (optional)</Label>
-                  <Input
-                    id="coordinates"
-                    name="coordinates"
-                    placeholder="Latitude, Longitude"
+                    placeholder={t('soilTypePlaceholder')}
                   />
                 </div>
               </div>
               <div className="flex gap-2">
                 <Button type="submit" disabled={submitting}>
-                  {submitting ? "Adding..." : "Add Farm"}
+                  {submitting ? t('loading') : t('createFarm')}
                 </Button>
                 <Button
                   type="button"
@@ -187,7 +181,7 @@ export default function FarmsPage() {
                   onClick={() => setShowCreateForm(false)}
                   disabled={submitting}
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
               </div>
             </form>
@@ -200,7 +194,7 @@ export default function FarmsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search farms by name, location, or farmer..."
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -214,20 +208,20 @@ export default function FarmsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Farm Code</TableHead>
-                <TableHead>Farm Name</TableHead>
-                <TableHead>Farmer</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Area (ha)</TableHead>
-                <TableHead>Soil Type</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('farmCode')}</TableHead>
+                <TableHead>{t('farmName')}</TableHead>
+                <TableHead>{t('farmer')}</TableHead>
+                <TableHead>{t('location')}</TableHead>
+                <TableHead>{t('size')}</TableHead>
+                <TableHead>{t('soilType')}</TableHead>
+                <TableHead className="text-right">{t('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredFarms.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
-                    {searchTerm ? "No farms found matching your search." : "No farms recorded yet."}
+                    {searchTerm ? t('tryAdjustingSearch') : t('noFarmsFound')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -236,12 +230,12 @@ export default function FarmsPage() {
                     <TableCell className="font-medium">{farm.farmCode}</TableCell>
                     <TableCell>{farm.name}</TableCell>
                     <TableCell>{farm.farmer.name}</TableCell>
-                    <TableCell>{farm.location || "Not specified"}</TableCell>
-                    <TableCell>{farm.area ? `${farm.area} ha` : "Not specified"}</TableCell>
-                    <TableCell>{farm.soilType || "Not specified"}</TableCell>
+                    <TableCell>{farm.location || "-"}</TableCell>
+                    <TableCell>{farm.area ? `${farm.area} ha` : "-"}</TableCell>
+                    <TableCell>{farm.soilType || "-"}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="outline" size="sm">
-                        View Details
+                        {t('farmDetails')}
                       </Button>
                     </TableCell>
                   </TableRow>

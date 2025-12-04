@@ -2,8 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { InventoryMonitorClient } from "@/components/procurement-officer/inventory-monitor-client";
+import { getTranslations } from "next-intl/server";
 
 export default async function InventoryMonitorPage() {
+  const t = await getTranslations("procurementOfficer.inventory");
   // Get current user authentication
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -167,9 +169,9 @@ export default async function InventoryMonitorPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Inventory Monitor</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Real-time inventory levels, stock trends, and warehouse distribution
+          {t("description")}
         </p>
       </div>
 

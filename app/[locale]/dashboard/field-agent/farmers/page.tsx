@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -53,6 +55,7 @@ interface Farmer {
 }
 
 export default function FarmersPage() {
+  const t = useTranslations('fieldAgent.farmers');
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -91,15 +94,15 @@ export default function FarmersPage() {
     try {
       const result = await createFarmer(formData);
       if (result.success) {
-        toast.success("Farmer created successfully");
+        toast.success(t('farmerCreatedSuccess'));
         setIsCreateDialogOpen(false);
         loadFarmers();
         (event.target as HTMLFormElement).reset();
       } else {
-        toast.error(result.error || "Failed to create farmer");
+        toast.error(result.error || t('farmerCreatedError'));
       }
     } catch (error) {
-      toast.error("Failed to create farmer");
+      toast.error(t('farmerCreatedError'));
     }
   };
 
@@ -114,30 +117,30 @@ export default function FarmersPage() {
     try {
       const result = await updateFarmer(formData);
       if (result.success) {
-        toast.success("Farmer updated successfully");
+        toast.success(t('farmerUpdatedSuccess'));
         setIsEditDialogOpen(false);
         setEditingFarmer(null);
         loadFarmers();
       } else {
-        toast.error(result.error || "Failed to update farmer");
+        toast.error(result.error || t('farmerUpdatedError'));
       }
     } catch (error) {
-      toast.error("Failed to update farmer");
+      toast.error(t('farmerUpdatedError'));
     }
   };
 
   const handleDeleteFarmer = async (farmerId: string, farmerName: string) => {
-    if (confirm(`Are you sure you want to delete farmer "${farmerName}"?`)) {
+    if (confirm(t('deleteConfirm', { name: farmerName }))) {
       try {
         const result = await deleteFarmer(farmerId);
         if (result.success) {
-          toast.success("Farmer deleted successfully");
+          toast.success(t('farmerDeletedSuccess'));
           loadFarmers();
         } else {
-          toast.error(result.error || "Failed to delete farmer");
+          toast.error(result.error || t('farmerDeletedError'));
         }
       } catch (error) {
-        toast.error("Failed to delete farmer");
+        toast.error(t('farmerDeletedError'));
       }
     }
   };
@@ -149,8 +152,35 @@ export default function FarmersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-8 w-16" />
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardHeader className="space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-96" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -159,65 +189,65 @@ export default function FarmersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Farmer Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Register and manage farmer profiles
+            {t('description')}
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Add Farmer
+              {t('addFarmer')}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Add New Farmer</DialogTitle>
+              <DialogTitle>{t('addNewFarmer')}</DialogTitle>
               <DialogDescription>
-                Register a new farmer in the system. All fields marked with * are required.
+                {t('addNewFarmerDesc')}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateFarmer} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
+                  <Label htmlFor="name">{t('name')} *</Label>
                   <Input id="name" name="name" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('email')}</Label>
                   <Input id="email" name="email" type="email" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">{t('phone')}</Label>
                   <Input id="phone" name="phone" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city">{t('city')}</Label>
                   <Input id="city" name="city" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
+                <Label htmlFor="address">{t('address')}</Label>
                 <Input id="address" name="address" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="state">State</Label>
+                  <Label htmlFor="state">{t('state')}</Label>
                   <Input id="state" name="state" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
+                  <Label htmlFor="country">{t('country')}</Label>
                   <Input id="country" name="country" />
                 </div>
               </div>
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
-                <Button type="submit">Create Farmer</Button>
+                <Button type="submit">{t('createFarmer')}</Button>
               </div>
             </form>
           </DialogContent>
@@ -228,20 +258,20 @@ export default function FarmersPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Farmers</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalFarmers')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{farmers.length}</div>
             <p className="text-xs text-muted-foreground">
-              Active registrations
+              {t('activeRegistrations')}
             </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Farms</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalFarms')}</CardTitle>
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -249,14 +279,14 @@ export default function FarmersPage() {
               {farmers.reduce((sum, farmer) => sum + farmer._count.farms, 0)}
             </div>
             <p className="text-xs text-muted-foreground">
-              Registered farms
+              {t('registeredFarms')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Crop Batches</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('cropBatches')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -264,7 +294,7 @@ export default function FarmersPage() {
               {farmers.reduce((sum, farmer) => sum + farmer._count.cropBatches, 0)}
             </div>
             <p className="text-xs text-muted-foreground">
-              Active batches
+              {t('activeBatches')}
             </p>
           </CardContent>
         </Card>
@@ -275,15 +305,15 @@ export default function FarmersPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Farmers Directory</CardTitle>
+              <CardTitle>{t('farmersDirectory')}</CardTitle>
               <CardDescription>
-                Manage all registered farmers and their information
+                {t('farmersDirectoryDesc')}
               </CardDescription>
             </div>
             <div className="flex items-center space-x-2">
               <Search className="h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search farmers..."
+                placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-[250px]"
@@ -295,13 +325,13 @@ export default function FarmersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Farmer ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Farms</TableHead>
-                <TableHead>Batches</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t('farmerId')}</TableHead>
+                <TableHead>{t('name')}</TableHead>
+                <TableHead>{t('contact')}</TableHead>
+                <TableHead>{t('location')}</TableHead>
+                <TableHead>{t('farms')}</TableHead>
+                <TableHead>{t('batches')}</TableHead>
+                <TableHead>{t('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -369,9 +399,9 @@ export default function FarmersPage() {
           {filteredFarmers.length === 0 && (
             <div className="text-center py-8">
               <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">No farmers found</h3>
+              <h3 className="mt-2 text-sm font-semibold text-gray-900">{t('noFarmersFound')}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                {searchTerm ? "Try adjusting your search terms." : "Get started by adding your first farmer."}
+                {searchTerm ? t('tryAdjustingSearch') : t('noFarmersFoundDesc')}
               </p>
             </div>
           )}
@@ -382,16 +412,16 @@ export default function FarmersPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit Farmer</DialogTitle>
+            <DialogTitle>{t('editFarmer')}</DialogTitle>
             <DialogDescription>
-              Update farmer information. All fields marked with * are required.
+              {t('editFarmerDesc')}
             </DialogDescription>
           </DialogHeader>
           {editingFarmer && (
             <form onSubmit={handleUpdateFarmer} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-name">Name *</Label>
+                  <Label htmlFor="edit-name">{t('name')} *</Label>
                   <Input 
                     id="edit-name" 
                     name="name" 
@@ -400,7 +430,7 @@ export default function FarmersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-email">Email</Label>
+                  <Label htmlFor="edit-email">{t('email')}</Label>
                   <Input 
                     id="edit-email" 
                     name="email" 
@@ -411,7 +441,7 @@ export default function FarmersPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-phone">Phone</Label>
+                  <Label htmlFor="edit-phone">{t('phone')}</Label>
                   <Input 
                     id="edit-phone" 
                     name="phone"
@@ -419,7 +449,7 @@ export default function FarmersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-city">City</Label>
+                  <Label htmlFor="edit-city">{t('city')}</Label>
                   <Input 
                     id="edit-city" 
                     name="city"
@@ -428,7 +458,7 @@ export default function FarmersPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-address">Address</Label>
+                <Label htmlFor="edit-address">{t('address')}</Label>
                 <Input 
                   id="edit-address" 
                   name="address"
@@ -437,7 +467,7 @@ export default function FarmersPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-state">State</Label>
+                  <Label htmlFor="edit-state">{t('state')}</Label>
                   <Input 
                     id="edit-state" 
                     name="state"
@@ -445,7 +475,7 @@ export default function FarmersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-country">Country</Label>
+                  <Label htmlFor="edit-country">{t('country')}</Label>
                   <Input 
                     id="edit-country" 
                     name="country"
@@ -462,9 +492,9 @@ export default function FarmersPage() {
                     setEditingFarmer(null);
                   }}
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
-                <Button type="submit">Update Farmer</Button>
+                <Button type="submit">{t('updateFarmer')}</Button>
               </div>
             </form>
           )}

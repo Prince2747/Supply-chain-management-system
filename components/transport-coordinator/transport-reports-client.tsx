@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ interface TransportReportsClientProps {
 }
 
 export function TransportReportsClient({ initialReports }: TransportReportsClientProps) {
+  const t = useTranslations("transportCoordinator.reports");
   const [reports, setReports] = useState<TransportReports>(initialReports);
   const [loading, setLoading] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -66,33 +68,33 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
 
   const kpiCards = [
     {
-      title: "Completion Rate",
+      title: t("completionRate"),
       value: `${reports.overview.completionRate}%`,
-      description: `${reports.overview.completedTasks}/${reports.overview.totalTasks} tasks completed`,
+      description: `${reports.overview.completedTasks}/${reports.overview.totalTasks} ${t("completionRateDesc")}`,
       icon: CheckCircle,
       color: "text-green-600",
       trend: reports.overview.completionRate >= 80 ? "up" : "down"
     },
     {
-      title: "On-Time Performance",
+      title: t("onTimePerformance"),
       value: `${reports.overview.onTimeRate}%`,
-      description: "Tasks delivered on schedule",
+      description: t("onTimePerformanceDesc"),
       icon: Clock,
       color: reports.overview.onTimeRate >= 85 ? "text-green-600" : "text-amber-600",
       trend: reports.overview.onTimeRate >= 85 ? "up" : "down"
     },
     {
-      title: "Issue Rate",
+      title: t("issueRate"),
       value: `${reports.overview.issueRate}%`,
-      description: `${reports.overview.totalIssues} issues reported`,
+      description: `${reports.overview.totalIssues} ${t("issueRateDesc")}`,
       icon: AlertTriangle,
       color: reports.overview.issueRate <= 10 ? "text-green-600" : "text-red-600",
       trend: reports.overview.issueRate <= 10 ? "up" : "down"
     },
     {
-      title: "Task Volume",
+      title: t("taskVolume"),
       value: reports.overview.totalTasks,
-      description: "Total tasks this period",
+      description: t("taskVolumeDesc"),
       icon: Activity,
       color: "text-blue-600",
       trend: "up"
@@ -110,12 +112,12 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
       if (response.ok) {
         const newReports = await response.json();
         setReports(newReports);
-        toast.success("Reports updated successfully");
+        toast.success(t("reportsFetched"));
       } else {
-        toast.error("Failed to fetch reports");
+        toast.error(t("fetchError"));
       }
     } catch (error) {
-      toast.error("Failed to fetch reports");
+      toast.error(t("fetchError"));
     }
     setLoading(false);
   };
@@ -156,19 +158,19 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
     link.download = `transport-reports-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     link.click();
     window.URL.revokeObjectURL(url);
-    toast.success("Report exported successfully");
+    toast.success(t("reportExported"));
   };
 
   return (
     <div className="p-8 space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Transport Reports</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Performance analytics and insights
+            {t("subtitle")}
             {dateRange?.from && dateRange?.to && (
               <span className="ml-1">
-                from {format(dateRange.from, "MMM d, yyyy")} to {format(dateRange.to, "MMM d, yyyy")}
+                {t("from")} {format(dateRange.from, "MMM d, yyyy")} {t("to")} {format(dateRange.to, "MMM d, yyyy")}
               </span>
             )}
           </p>
@@ -196,7 +198,7 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
                       format(dateRange.from, "LLL dd, y")
                     )
                   ) : (
-                    "Pick a date range"
+                    t("selectDateRange")
                   )}
                 </span>
               </Button>
@@ -222,7 +224,7 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
             ) : (
               <Download className="h-4 w-4" />
             )}
-            <span>Export</span>
+            <span>{t("exportReport")}</span>
           </Button>
         </div>
       </div>
@@ -265,8 +267,8 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Daily Performance Trends</CardTitle>
-            <CardDescription>Task completion and issues over time</CardDescription>
+            <CardTitle>{t("dailyTaskTrends")}</CardTitle>
+            <CardDescription>{t("viewTaskTrends")}</CardDescription>
           </CardHeader>
           <CardContent>
             <TransportChart data={reports.dailyTrends} />
@@ -275,8 +277,8 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
 
         <Card>
           <CardHeader>
-            <CardTitle>Issue Breakdown</CardTitle>
-            <CardDescription>Types of transport issues encountered</CardDescription>
+            <CardTitle>{t("issueBreakdown")}</CardTitle>
+            <CardDescription>{t("issuesReportedByCategory")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -300,7 +302,7 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
               ))}
               {Object.keys(reports.issueBreakdown).length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No issues reported in this period
+                  {t("noData")}
                 </p>
               )}
             </div>
@@ -311,8 +313,8 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
       {/* Vehicle Utilization */}
       <Card>
         <CardHeader>
-          <CardTitle>Vehicle Utilization</CardTitle>
-          <CardDescription>Performance metrics for each vehicle</CardDescription>
+          <CardTitle>{t("vehicleUtilization")}</CardTitle>
+          <CardDescription>{t("vehicleUsageAndEfficiency")}</CardDescription>
         </CardHeader>
         <CardContent>
           <VehicleUtilizationChart data={reports.vehicleUtilization} />
@@ -322,8 +324,8 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
       {/* Driver Performance */}
       <Card>
         <CardHeader>
-          <CardTitle>Driver Performance</CardTitle>
-          <CardDescription>Individual driver statistics and ratings</CardDescription>
+          <CardTitle>{t("driverPerformance")}</CardTitle>
+          <CardDescription>{t("driverProductivityMetrics")}</CardDescription>
         </CardHeader>
         <CardContent>
           <DriverPerformanceTable data={reports.driverPerformance} />
@@ -334,8 +336,8 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Recent Transport Tasks</CardTitle>
-            <CardDescription>Latest completed and ongoing tasks</CardDescription>
+            <CardTitle>{t("recentTasks")}</CardTitle>
+            <CardDescription>{t("latestCompletedTasks")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -365,7 +367,7 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
               ))}
               {reports.recentTasks.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No recent tasks
+                  {t("noData")}
                 </p>
               )}
             </div>
@@ -374,8 +376,8 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Issues</CardTitle>
-            <CardDescription>Latest transport issues and resolutions</CardDescription>
+            <CardTitle>{t("recentIssuesReported")}</CardTitle>
+            <CardDescription>{t("latestReportedIssues")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -411,7 +413,7 @@ export function TransportReportsClient({ initialReports }: TransportReportsClien
               ))}
               {reports.recentIssues.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No recent issues
+                  {t("noData")}
                 </p>
               )}
             </div>

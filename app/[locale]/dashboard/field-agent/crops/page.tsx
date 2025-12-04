@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -100,6 +101,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function CropsPage() {
+  const t = useTranslations('fieldAgent.crops');
   const [cropBatches, setCropBatches] = useState<CropBatch[]>([]);
   const [farms, setFarms] = useState<Farm[]>([]);
   const [units, setUnits] = useState<Array<{ id: string; name: string; code: string }>>([]);
@@ -128,7 +130,7 @@ export default function CropsPage() {
       setFarms(farmsData);
       setUnits(unitsData);
     } catch (error) {
-      toast.error("Failed to load data");
+      toast.error(t('dataLoadError'));
     }
   };
 
@@ -152,15 +154,15 @@ export default function CropsPage() {
     try {
       const result = await createCropBatch(formData);
       if (result.success) {
-        toast.success("Crop batch created successfully");
+        toast.success(t('batchCreatedSuccess'));
         setIsCreateDialogOpen(false);
         loadData();
         (event.target as HTMLFormElement).reset();
       } else {
-        toast.error(result.error || "Failed to create crop batch");
+        toast.error(result.error || t('batchCreatedError'));
       }
     } catch (error) {
-      toast.error("Failed to create crop batch");
+      toast.error(t('batchCreatedError'));
     }
   };
 
@@ -168,13 +170,13 @@ export default function CropsPage() {
     try {
       const result = await updateCropBatchStatus(batchId, newStatus);
       if (result.success) {
-        toast.success("Status updated successfully");
+        toast.success(t('statusUpdatedSuccess'));
         loadData();
       } else {
-        toast.error(result.error || "Failed to update status");
+        toast.error(result.error || t('statusUpdatedError'));
       }
     } catch (error) {
-      toast.error("Failed to update status");
+      toast.error(t('statusUpdatedError'));
     }
   };
 
@@ -192,7 +194,7 @@ export default function CropsPage() {
         additionalData
       );
       if (result.success) {
-        toast.success("Crop status updated successfully");
+        toast.success(t('statusUpdatedSuccess'));
         loadData();
         setIsStatusModalOpen(false);
         setSelectedBatchForStatusUpdate(null);
@@ -219,7 +221,7 @@ export default function CropsPage() {
       setSelectedQR(qrData);
     } catch (error) {
       console.error('Error generating QR code:', error);
-      toast.error("Failed to generate QR code preview");
+      toast.error(t('qrGeneratedError'));
     } finally {
       setGeneratingQR(null);
     }
@@ -245,10 +247,10 @@ export default function CropsPage() {
       link.click();
       document.body.removeChild(link);
       
-      toast.success("QR code downloaded successfully");
+      toast.success(t('qrGeneratedSuccess'));
     } catch (error) {
       console.error('Error downloading QR code:', error);
-      toast.error("Failed to download QR code");
+      toast.error(t('qrGeneratedError'));
     } finally {
       setGeneratingQR(null);
     }
@@ -317,9 +319,9 @@ export default function CropsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Crop Batch Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Create and track crop batches with QR codes
+            {t('description')}
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -333,38 +335,38 @@ export default function CropsPage() {
             ) : (
               <Download className="mr-2 h-4 w-4" />
             )}
-            Download All QR Codes
+            {t('downloadQRCode')}
           </Button>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                New Batch
+                {t('addCropBatch')}
               </Button>
             </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Create New Crop Batch</DialogTitle>
+              <DialogTitle>{t('createNewBatch')}</DialogTitle>
               <DialogDescription>
-                Register a new crop batch with automatic QR code generation.
+                {t('createNewBatchDesc')}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateCropBatch} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="cropType">Crop Type *</Label>
-                  <Input id="cropType" name="cropType" required />
+                  <Label htmlFor="cropType">{t('cropType')} *</Label>
+                  <Input id="cropType" name="cropType" required placeholder={t('cropTypePlaceholder')} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="variety">Variety</Label>
-                  <Input id="variety" name="variety" />
+                  <Label htmlFor="variety">{t('variety')}</Label>
+                  <Input id="variety" name="variety" placeholder={t('varietyPlaceholder')} />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="farmId">Farm *</Label>
+                <Label htmlFor="farmId">{t('farm')} *</Label>
                 <Select name="farmId" required>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select farm" />
+                    <SelectValue placeholder={t('selectFarm')} />
                   </SelectTrigger>
                   <SelectContent>
                     {farms.map((farm) => (
@@ -377,24 +379,24 @@ export default function CropsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="plantingDate">Planting Date</Label>
+                  <Label htmlFor="plantingDate">{t('plantingDate')}</Label>
                   <Input id="plantingDate" name="plantingDate" type="date" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="expectedHarvest">Expected Harvest</Label>
+                  <Label htmlFor="expectedHarvest">{t('expectedHarvest')}</Label>
                   <Input id="expectedHarvest" name="expectedHarvest" type="date" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="quantity">Quantity</Label>
-                  <Input id="quantity" name="quantity" type="number" step="0.01" />
+                  <Label htmlFor="quantity">{t('quantity')}</Label>
+                  <Input id="quantity" name="quantity" type="number" step="0.01" placeholder={t('quantityPlaceholder')} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="unit">Unit</Label>
+                  <Label htmlFor="unit">{t('unit')}</Label>
                   <Select name="unit">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select unit" />
+                      <SelectValue placeholder={t('selectUnit')} />
                     </SelectTrigger>
                     <SelectContent>
                       {units.length > 0 ? (
@@ -417,14 +419,14 @@ export default function CropsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" name="notes" placeholder="Additional notes..." />
+                <Label htmlFor="notes">{t('notes')}</Label>
+                <Textarea id="notes" name="notes" placeholder={t('notesPlaceholder')} />
               </div>
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
-                <Button type="submit">Create Batch</Button>
+                <Button type="submit">{t('createBatch')}</Button>
               </div>
             </form>
           </DialogContent>
@@ -477,9 +479,9 @@ export default function CropsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Crop Batches</CardTitle>
+              <CardTitle>{t('title')}</CardTitle>
               <CardDescription>
-                Track all crop batches and their status
+                {t('allCropBatchesDesc')}
               </CardDescription>
             </div>
             <div className="flex items-center space-x-2">
@@ -488,16 +490,16 @@ export default function CropsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="PLANTED">Planted</SelectItem>
-                  <SelectItem value="GROWING">Growing</SelectItem>
-                  <SelectItem value="READY_FOR_HARVEST">Ready</SelectItem>
-                  <SelectItem value="HARVESTED">Harvested</SelectItem>
+                  <SelectItem value="all">{t('allStatuses')}</SelectItem>
+                  <SelectItem value="PLANTED">{t('plantedStatus')}</SelectItem>
+                  <SelectItem value="GROWING">{t('growingStatus')}</SelectItem>
+                  <SelectItem value="READY_FOR_HARVEST">{t('readyForHarvestStatus')}</SelectItem>
+                  <SelectItem value="HARVESTED">{t('harvestedStatus')}</SelectItem>
                 </SelectContent>
               </Select>
               <Search className="h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search batches..."
+                placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-[250px]"
@@ -509,15 +511,15 @@ export default function CropsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Batch Code</TableHead>
-                <TableHead>Crop</TableHead>
-                <TableHead>Farm</TableHead>
-                <TableHead>Farmer</TableHead>
-                <TableHead>Planted</TableHead>
-                <TableHead>Expected Harvest</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>QR Code</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t('batchCode')}</TableHead>
+                <TableHead>{t('cropType')}</TableHead>
+                <TableHead>{t('farm')}</TableHead>
+                <TableHead>{t('farmer')}</TableHead>
+                <TableHead>{t('plantingDate')}</TableHead>
+                <TableHead>{t('expectedHarvest')}</TableHead>
+                <TableHead>{t('status')}</TableHead>
+                <TableHead>{t('qrCode')}</TableHead>
+                <TableHead>{t('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -576,7 +578,7 @@ export default function CropsPage() {
                         className="flex items-center gap-1"
                       >
                         <Edit className="h-3 w-3" />
-                        Update Status
+                        {t('updateStatus')}
                       </Button>
                     </div>
                   </TableCell>
@@ -594,7 +596,7 @@ export default function CropsPage() {
                           ) : (
                             <QrCode className="h-3 w-3 mr-1" />
                           )}
-                          View
+                          {t('viewQR')}
                         </Button>
                         <Button
                           variant="outline"
@@ -607,7 +609,7 @@ export default function CropsPage() {
                           ) : (
                             <Download className="h-3 w-3 mr-1" />
                           )}
-                          Download
+                          {t('downloadQR')}
                         </Button>
                       </div>
                     ) : (
@@ -632,9 +634,9 @@ export default function CropsPage() {
           {filteredBatches.length === 0 && (
             <div className="text-center py-8">
               <Sprout className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">No crop batches found</h3>
+              <h3 className="mt-2 text-sm font-semibold text-gray-900">{t('noBatchesFound')}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                {searchTerm ? "Try adjusting your search terms." : "Get started by creating your first crop batch."}
+                {searchTerm ? t('tryAdjustingFilters') : t('noBatchesFoundDesc')}
               </p>
             </div>
           )}
@@ -648,9 +650,9 @@ export default function CropsPage() {
       }}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>QR Code Preview</DialogTitle>
+            <DialogTitle>{t('qrCodePreview')}</DialogTitle>
             <DialogDescription>
-              Scan this QR code to track the crop batch
+              {t('allCropBatchesDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center space-y-4 p-6">

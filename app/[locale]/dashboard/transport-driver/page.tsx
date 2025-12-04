@@ -14,8 +14,10 @@ import {
   Calendar
 } from "lucide-react";
 import { getDriverStats, getAssignedTasks } from "./actions";
+import { getTranslations } from "next-intl/server";
 
 export default async function TransportDriverDashboard() {
+  const t = await getTranslations("transportDriver.dashboard");
   const [stats, assignedTasks] = await Promise.all([
     getDriverStats(),
     getAssignedTasks()
@@ -23,30 +25,30 @@ export default async function TransportDriverDashboard() {
 
   const statCards = [
     {
-      title: "Assigned Tasks",
+      title: t("assignedTasks"),
       value: stats.scheduledTasks + stats.inTransitTasks,
-      description: `${stats.scheduledTasks} scheduled, ${stats.inTransitTasks} in transit`,
+      description: t("assignedTasksDesc"),
       icon: Package,
       color: "text-blue-600"
     },
     {
-      title: "Completed Tasks",
+      title: t("completedTasks"),
       value: stats.completedTasks,
-      description: "Successfully delivered",
+      description: t("completedTasksDesc"),
       icon: CheckCircle,
       color: "text-green-600"
     },
     {
-      title: "Total Tasks",
+      title: t("totalTasks"),
       value: stats.totalTasks,
-      description: "All time tasks assigned",
+      description: t("totalTasksDesc"),
       icon: Truck,
       color: "text-purple-600"
     },
     {
-      title: "Open Issues",
+      title: t("openIssues"),
       value: stats.openIssues,
-      description: "Requiring attention",
+      description: t("openIssuesDesc"),
       icon: AlertTriangle,
       color: stats.openIssues > 0 ? "text-red-600" : "text-green-600"
     },
@@ -57,9 +59,9 @@ export default async function TransportDriverDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Driver Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Welcome back, {stats.driverInfo.name}
+            {t("description")}
           </p>
         </div>
         <div className="flex items-center space-x-4">
@@ -96,8 +98,8 @@ export default async function TransportDriverDashboard() {
       {/* Assigned Tasks */}
       <Card>
         <CardHeader>
-          <CardTitle>Today's Assigned Tasks</CardTitle>
-          <CardDescription>Your current transport assignments</CardDescription>
+          <CardTitle>{t("currentTasks")}</CardTitle>
+          <CardDescription>{t("currentTasksDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -138,14 +140,14 @@ export default async function TransportDriverDashboard() {
                     {task.status === "SCHEDULED" && (
                       <Link href={`/dashboard/transport-driver/scanner?taskId=${task.id}&action=pickup`}>
                         <Button size="sm" variant="outline">
-                          Confirm Pickup
+                          {t("confirmPickup")}
                         </Button>
                       </Link>
                     )}
                     {task.status === "IN_TRANSIT" && (
                       <Link href={`/dashboard/transport-driver/scanner?taskId=${task.id}&action=delivery`}>
                         <Button size="sm">
-                          Confirm Delivery
+                          {t("confirmDelivery")}
                         </Button>
                       </Link>
                     )}
@@ -156,8 +158,8 @@ export default async function TransportDriverDashboard() {
             {assignedTasks.length === 0 && (
               <div className="text-center py-8">
                 <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No assigned tasks today</p>
-                <p className="text-sm text-muted-foreground">Check back later for new assignments</p>
+                <p className="text-muted-foreground">{t("noTasksTitle")}</p>
+                <p className="text-sm text-muted-foreground">{t("noTasksDesc")}</p>
               </div>
             )}
           </div>

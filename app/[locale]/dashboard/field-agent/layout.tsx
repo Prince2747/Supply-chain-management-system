@@ -2,40 +2,13 @@
 
 import { FieldAgentAuthWrapper } from "@/components/field-agent/field-agent-auth-wrapper";
 import { NotificationBell } from "@/components/field-agent/notification-bell";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Users, Building2, Sprout, QrCode } from "lucide-react";
-
-// Navigation items for the side bar
-const navigation = [
-  {
-    name: "Dashboard",
-    href: "/dashboard/field-agent",
-    icon: Building2,
-  },
-  {
-    name: "Farmers",
-    href: "/dashboard/field-agent/farmers",
-    icon: Users,
-  },
-  {
-    name: "Farms",
-    href: "/dashboard/field-agent/farms",
-    icon: Building2,
-  },
-  {
-    name: "Crop Batches",
-    href: "/dashboard/field-agent/crops",
-    icon: Sprout,
-  },
-  {
-    name: "QR Codes",
-    href: "/dashboard/field-agent/qr-codes",
-    icon: QrCode,
-  },
-];
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function FieldAgentLayout({
   children,
@@ -43,6 +16,37 @@ export default function FieldAgentLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const t = useTranslations('fieldAgent.navigation');
+  const locale = useLocale();
+
+  // Navigation items for the side bar
+  const navigation = [
+    {
+      name: t('dashboard'),
+      href: `/${locale}/dashboard/field-agent`,
+      icon: Building2,
+    },
+    {
+      name: t('farmers'),
+      href: `/${locale}/dashboard/field-agent/farmers`,
+      icon: Users,
+    },
+    {
+      name: t('farms'),
+      href: `/${locale}/dashboard/field-agent/farms`,
+      icon: Building2,
+    },
+    {
+      name: t('cropBatches'),
+      href: `/${locale}/dashboard/field-agent/crops`,
+      icon: Sprout,
+    },
+    {
+      name: t('qrCodes'),
+      href: `/${locale}/dashboard/field-agent/qr-codes`,
+      icon: QrCode,
+    },
+  ];
   
   return (
     <FieldAgentAuthWrapper>
@@ -87,8 +91,9 @@ export default function FieldAgentLayout({
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden h-[calc(100vh-4rem)]">
           <div className="p-6">
-            {/* Notification Bell */}
-            <div className="flex justify-end mb-4">
+            {/* Notification Bell and Language Switcher */}
+            <div className="flex justify-end gap-4 mb-4">
+              <LanguageSwitcher />
               <NotificationBell />
             </div>
             {children}

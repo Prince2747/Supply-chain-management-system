@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   QrCode, 
@@ -61,6 +63,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function QrCodesPage() {
+  const t = useTranslations('fieldAgent.qrCodes');
   const [cropBatches, setCropBatches] = useState<CropBatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -79,7 +82,7 @@ export default function QrCodesPage() {
       const batchesData = await getCropBatches();
       setCropBatches(batchesData);
     } catch (error) {
-      toast.error("Failed to load crop batches");
+      toast.error(t('failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -122,7 +125,7 @@ export default function QrCodesPage() {
       setShowPreview(true);
     } catch (error) {
       console.error("Error generating QR code preview:", error);
-      toast.error("Failed to generate QR code preview");
+      toast.error(t('qrPreviewFailed'));
     } finally {
       setGeneratingQR(null);
     }
@@ -151,10 +154,10 @@ export default function QrCodesPage() {
       link.click();
       document.body.removeChild(link);
       
-      toast.success(`QR Code for ${batch.batchCode} downloaded successfully!`);
+      toast.success(t('qrDownloadSuccess', { batchCode: batch.batchCode }));
     } catch (error) {
       console.error("Error generating QR code:", error);
-      toast.error("Failed to generate QR code");
+      toast.error(t('qrGenerationFailed'));
     } finally {
       setGeneratingQR(null);
     }
@@ -169,7 +172,7 @@ export default function QrCodesPage() {
       link.click();
       document.body.removeChild(link);
       
-      toast.success(`QR Code for ${selectedBatch.batchCode} downloaded successfully!`);
+      toast.success(t('qrDownloadSuccess', { batchCode: selectedBatch.batchCode }));
       setShowPreview(false);
     }
   };
@@ -194,8 +197,35 @@ export default function QrCodesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-8 w-16" />
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardHeader className="space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-96" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -204,9 +234,9 @@ export default function QrCodesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">QR Code Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Generate and manage QR codes for crop batch tracking
+            {t('description')}
           </p>
         </div>
       </div>
@@ -215,20 +245,20 @@ export default function QrCodesPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Batches</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalBatches')}</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{cropBatches.length}</div>
             <p className="text-xs text-muted-foreground">
-              Available for QR generation
+              {t('availableForQR')}
             </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Batches</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('activeBatches')}</CardTitle>
             <Sprout className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -236,14 +266,14 @@ export default function QrCodesPage() {
               {cropBatches.filter(b => b.status === 'GROWING' || b.status === 'PLANTED').length}
             </div>
             <p className="text-xs text-muted-foreground">
-              Currently growing
+              {t('currentlyGrowing')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ready for Harvest</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('readyForHarvest')}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -251,14 +281,14 @@ export default function QrCodesPage() {
               {cropBatches.filter(b => b.status === 'READY_FOR_HARVEST').length}
             </div>
             <p className="text-xs text-muted-foreground">
-              Need QR codes for harvest
+              {t('needQRForHarvest')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Harvested</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('harvested')}</CardTitle>
             <QrCode className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -266,7 +296,7 @@ export default function QrCodesPage() {
               {cropBatches.filter(b => b.status === 'HARVESTED' || b.status === 'PROCESSED').length}
             </div>
             <p className="text-xs text-muted-foreground">
-              Completed harvests
+              {t('completedHarvests')}
             </p>
           </CardContent>
         </Card>
@@ -275,9 +305,9 @@ export default function QrCodesPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>QR Code Generator</CardTitle>
+          <CardTitle>{t('qrCodeGenerator')}</CardTitle>
           <CardDescription>
-            Generate QR codes for crop batch tracking and supply chain transparency
+            {t('qrCodeGeneratorDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -286,7 +316,7 @@ export default function QrCodesPage() {
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by batch code, crop type, farm, or farmer..."
+                  placeholder={t('searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-8"
@@ -299,7 +329,7 @@ export default function QrCodesPage() {
                 size="sm"
                 onClick={() => setStatusFilter("all")}
               >
-                All Status
+                {t('allStatus')}
               </Button>
               {uniqueStatuses.map((status) => (
                 <Button
@@ -364,7 +394,7 @@ export default function QrCodesPage() {
                       ) : (
                         <QrCode className="mr-2 h-4 w-4" />
                       )}
-                      Generate QR
+                      {t('download')}
                     </Button>
                     <Button 
                       variant="outline" 
@@ -383,12 +413,9 @@ export default function QrCodesPage() {
           {filteredBatches.length === 0 && (
             <div className="text-center py-8">
               <QrCode className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">No crop batches found</h3>
+              <h3 className="mt-2 text-sm font-semibold text-gray-900">{t('noBatchesFound')}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                {searchTerm || statusFilter !== "all"
-                  ? "Try adjusting your search criteria."
-                  : "Create some crop batches to generate QR codes."
-                }
+                {t('noBatchesFoundDesc')}
               </p>
             </div>
           )}
@@ -399,9 +426,9 @@ export default function QrCodesPage() {
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>QR Code Preview</DialogTitle>
+            <DialogTitle>{t('qrCodePreview')}</DialogTitle>
             <DialogDescription>
-              {selectedBatch && `QR Code for ${selectedBatch.batchCode}`}
+              {selectedBatch && `${t('batchInformation')}: ${selectedBatch.batchCode}`}
             </DialogDescription>
           </DialogHeader>
           
@@ -428,10 +455,10 @@ export default function QrCodesPage() {
               <div className="flex space-x-2">
                 <Button onClick={downloadFromPreview} className="flex-1">
                   <Download className="mr-2 h-4 w-4" />
-                  Download
+                  {t('downloadQRCode')}
                 </Button>
                 <Button variant="outline" onClick={() => setShowPreview(false)}>
-                  Close
+                  {t('close')}
                 </Button>
               </div>
             </div>

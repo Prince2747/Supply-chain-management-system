@@ -17,8 +17,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { getTranslations } from "next-intl/server";
 
 export default async function WarehouseManagerDashboard() {
+  const t = await getTranslations("warehouseManager.dashboard");
   // Get current user and their warehouse assignment
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -147,15 +149,12 @@ export default async function WarehouseManagerDashboard() {
         <div className="flex items-center gap-3 mb-2">
           <Warehouse className="h-8 w-8 text-green-600" />
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Warehouse Manager Dashboard</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
             <p className="text-lg font-medium text-green-600">
               {currentProfile.warehouse?.name} ({currentProfile.warehouse?.code})
             </p>
           </div>
         </div>
-        <p className="text-muted-foreground">
-          Oversee packaging operations, receive deliveries, and manage warehouse storage
-        </p>
         {currentProfile.warehouse?.address && (
           <p className="text-sm text-muted-foreground mt-1">
             📍 {currentProfile.warehouse.address}
@@ -168,52 +167,52 @@ export default async function WarehouseManagerDashboard() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ready for Packaging</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("readyForPackaging")}</CardTitle>
             <Package className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{readyForPackaging}</div>
             <p className="text-xs text-muted-foreground">
-              Batches awaiting packaging
+              {t("readyForPackagingDesc")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Currently Packaging</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("currentlyPackaging")}</CardTitle>
             <PackageCheck className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{currentlyPackaging}</div>
             <p className="text-xs text-muted-foreground">
-              In packaging process
+              {t("currentlyPackagingDesc")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Packaged</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("packaged")}</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{packaged}</div>
             <p className="text-xs text-muted-foreground">
-              Ready for shipment
+              {t("packagedDesc")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Stored</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stored")}</CardTitle>
             <Archive className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{stored}</div>
             <p className="text-xs text-muted-foreground">
-              In warehouse storage
+              {t("storedDesc")}
             </p>
           </CardContent>
         </Card>
@@ -225,16 +224,16 @@ export default async function WarehouseManagerDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <PackageCheck className="h-5 w-5 mr-2 text-blue-500" />
-              Packaging Management
+              {t("packagingManagement")}
             </CardTitle>
             <CardDescription>
-              Oversee packaging operations and update status
+              {t("viewPackagingDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
               <Link href="/dashboard/warehouse-manager/packaging">
-                Manage Packaging
+                {t("managePackaging")}
               </Link>
             </Button>
           </CardContent>
@@ -244,16 +243,16 @@ export default async function WarehouseManagerDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Scan className="h-5 w-5 mr-2 text-green-500" />
-              Receipt Scanner
+              {t("receiptScanner")}
             </CardTitle>
             <CardDescription>
-              Scan QR codes to confirm delivery receipt
+              {t("scanReceiptButton")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
               <Link href="/dashboard/warehouse-manager/scanner">
-                Open Scanner
+                {t("openScanner")}
               </Link>
             </Button>
           </CardContent>
@@ -263,16 +262,16 @@ export default async function WarehouseManagerDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Archive className="h-5 w-5 mr-2 text-purple-500" />
-              Storage Management
+              {t("storageManagement")}
             </CardTitle>
             <CardDescription>
-              Update batch status to stored after verification
+              {t("updateStorage")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
               <Link href="/dashboard/warehouse-manager/storage">
-                Manage Storage
+                {t("manageStorage")}
               </Link>
             </Button>
           </CardContent>
@@ -284,16 +283,16 @@ export default async function WarehouseManagerDashboard() {
         {/* Recent Deliveries for Receipt */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Deliveries</CardTitle>
+            <CardTitle>{t("recentDeliveries")}</CardTitle>
             <CardDescription>
-              Delivered batches awaiting receipt confirmation
+              {t("recentDeliveriesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {recentTransportTasks.length === 0 ? (
               <div className="text-center py-6 text-muted-foreground">
                 <Warehouse className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No recent deliveries</p>
+                <p>{t("noRecentDeliveries")}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -305,17 +304,17 @@ export default async function WarehouseManagerDashboard() {
                         {task.cropBatch.farm.name} • {task.driver.name} • {task.vehicle.plateNumber}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Delivered: {task.actualDeliveryDate ? format(new Date(task.actualDeliveryDate), "PPp") : "N/A"}
+                        {t("delivered")}: {task.actualDeliveryDate ? format(new Date(task.actualDeliveryDate), "PPp") : "N/A"}
                       </div>
                     </div>
                     <Badge variant="outline" className="text-green-600 border-green-600">
-                      Ready to receive
+                      {t("readyToReceive")}
                     </Badge>
                   </div>
                 ))}
                 <Button asChild variant="outline" className="w-full mt-4">
                   <Link href="/dashboard/warehouse-manager/scanner">
-                    Scan QR to Confirm Receipt
+                    {t("scanToConfirm")}
                   </Link>
                 </Button>
               </div>
@@ -326,16 +325,16 @@ export default async function WarehouseManagerDashboard() {
         {/* Recent Packaging Activities */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Packaging Activities</CardTitle>
+            <CardTitle>{t("recentPackagingActivities")}</CardTitle>
             <CardDescription>
-              Latest packaging operations and status updates
+              {t("recentPackagingActivitiesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {recentPackaging.length === 0 ? (
               <div className="text-center py-6 text-muted-foreground">
                 <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No recent packaging activities</p>
+                <p>{t("noRecentPackaging")}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -347,7 +346,7 @@ export default async function WarehouseManagerDashboard() {
                         {batch.farm.name} • {batch.quantity || 0}kg
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Updated: {format(new Date(batch.updatedAt), "PPp")}
+                        {t("updated")}: {format(new Date(batch.updatedAt), "PPp")}
                       </div>
                     </div>
                     <Badge 
@@ -358,13 +357,13 @@ export default async function WarehouseManagerDashboard() {
                           : "text-yellow-600 border-yellow-600"
                       }
                     >
-                      {batch.status === "PACKAGING" ? "In Progress" : "Packaged"}
+                      {batch.status === "PACKAGING" ? t("packagingInProgress") : t("packaged")}
                     </Badge>
                   </div>
                 ))}
                 <Button asChild variant="outline" className="w-full mt-4">
                   <Link href="/dashboard/warehouse-manager/packaging">
-                    Manage All Packaging
+                    {t("manageAllPackaging")}
                   </Link>
                 </Button>
               </div>

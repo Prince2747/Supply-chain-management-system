@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { getTranslations } from "next-intl/server";
 import { 
   AlertTriangle, 
   Clock, 
@@ -16,6 +17,7 @@ import { IssuesTable } from "@/components/transport-coordinator/issues-table";
 import { CreateIssueDialog } from "@/components/transport-coordinator/create-issue-dialog";
 
 export default async function IssuesPage() {
+  const t = await getTranslations("transportCoordinator.issues");
   const issues = await getTransportIssues();
 
   // Calculate stats
@@ -29,30 +31,30 @@ export default async function IssuesPage() {
 
   const statCards = [
     {
-      title: "Total Issues",
+      title: t("totalIssues"),
       value: stats.total,
-      description: "All transport issues",
+      description: t("allTransportIssues"),
       icon: AlertTriangle,
       color: "text-orange-600"
     },
     {
-      title: "Open Issues",
+      title: t("openIssues"),
       value: stats.open,
-      description: "Requiring attention",
+      description: t("requiringAttention"),
       icon: Clock,
       color: "text-red-600"
     },
     {
-      title: "In Progress",
+      title: t("inProgress"),
       value: stats.inProgress,
-      description: "Being resolved",
+      description: t("beingResolved"),
       icon: ArrowUpRight,
       color: "text-blue-600"
     },
     {
-      title: "Resolved",
+      title: t("resolved"),
       value: stats.resolved,
-      description: "Successfully fixed",
+      description: t("successfullyResolved"),
       icon: CheckCircle,
       color: "text-green-600"
     },
@@ -62,9 +64,9 @@ export default async function IssuesPage() {
     <div className="p-8 space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Transport Issues</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Monitor and resolve transport-related issues
+            {t("subtitle")}
           </p>
         </div>
         <CreateIssueDialog />
@@ -94,8 +96,8 @@ export default async function IssuesPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Issues by Type</CardTitle>
-            <CardDescription>Breakdown of issue categories</CardDescription>
+            <CardTitle>{t("issuesByType")}</CardTitle>
+            <CardDescription>{t("breakdownOfCategories")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -118,8 +120,8 @@ export default async function IssuesPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Issues</CardTitle>
-            <CardDescription>Latest reported transport issues</CardDescription>
+            <CardTitle>{t("recentIssues")}</CardTitle>
+            <CardDescription>{t("latestReportedIssues")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -166,7 +168,7 @@ export default async function IssuesPage() {
               ))}
               {issues.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No issues reported
+                  {t("noIssuesReported")}
                 </p>
               )}
             </div>
@@ -177,8 +179,8 @@ export default async function IssuesPage() {
       {/* Issues Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Issues</CardTitle>
-          <CardDescription>Complete list of transport issues</CardDescription>
+          <CardTitle>{t("allIssues")}</CardTitle>
+          <CardDescription>{t("completeListOfIssues")}</CardDescription>
         </CardHeader>
         <CardContent>
           <IssuesTable issues={issues} />

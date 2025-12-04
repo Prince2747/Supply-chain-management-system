@@ -6,8 +6,10 @@ import { QRScannerClient } from "@/components/warehouse-manager/qr-scanner-clien
 import { Badge } from "@/components/ui/badge";
 import { Scan, Package, Truck } from "lucide-react";
 import { format } from "date-fns";
+import { getTranslations } from "next-intl/server";
 
 export default async function QRScannerPage() {
+  const t = await getTranslations("warehouseManager.scanner");
   // Get current user and their warehouse assignment
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -66,9 +68,9 @@ export default async function QRScannerPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Receipt Scanner</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Scan QR codes to confirm receipt of delivered crop batches
+          {t("description")}
         </p>
       </div>
 
@@ -79,10 +81,10 @@ export default async function QRScannerPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Scan className="h-5 w-5 mr-2 text-green-500" />
-              QR Code Scanner
+              {t("qrCodeScanner")}
             </CardTitle>
             <CardDescription>
-              Position the QR code within the scanner area
+              {t("positionQRCode")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -93,9 +95,9 @@ export default async function QRScannerPage() {
         {/* Instructions */}
         <Card>
           <CardHeader>
-            <CardTitle>How to Use</CardTitle>
+            <CardTitle>{t("howToUse")}</CardTitle>
             <CardDescription>
-              Follow these steps to confirm batch receipt
+              {t("followSteps")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -105,9 +107,9 @@ export default async function QRScannerPage() {
                   1
                 </div>
                 <div>
-                  <p className="font-medium">Verify Delivery</p>
+                  <p className="font-medium">{t("step1Title")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Ensure the delivered crop batch matches the transport documentation
+                    {t("step1Desc")}
                   </p>
                 </div>
               </div>
@@ -117,9 +119,9 @@ export default async function QRScannerPage() {
                   2
                 </div>
                 <div>
-                  <p className="font-medium">Scan QR Code</p>
+                  <p className="font-medium">{t("step2Title")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Use the scanner to scan the QR code on the crop batch package
+                    {t("step2Desc")}
                   </p>
                 </div>
               </div>
@@ -129,9 +131,9 @@ export default async function QRScannerPage() {
                   3
                 </div>
                 <div>
-                  <p className="font-medium">Verify Information</p>
+                  <p className="font-medium">{t("step3Title")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Review the batch details and confirm they match the physical delivery
+                    {t("step3Desc")}
                   </p>
                 </div>
               </div>
@@ -141,9 +143,9 @@ export default async function QRScannerPage() {
                   4
                 </div>
                 <div>
-                  <p className="font-medium">Confirm Receipt</p>
+                  <p className="font-medium">{t("step4Title")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Mark the batch as received and ready for storage processing
+                    {t("step4Desc")}
                   </p>
                 </div>
               </div>
@@ -155,16 +157,16 @@ export default async function QRScannerPage() {
       {/* Recent Delivered Batches */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Deliveries Awaiting Receipt</CardTitle>
+          <CardTitle>{t("recentDeliveriesTitle")}</CardTitle>
           <CardDescription>
-            Delivered batches that need receipt confirmation
+            {t("recentDeliveriesDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {deliveredTasks.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No deliveries awaiting receipt confirmation</p>
+              <p>{t("noDeliveries")}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -174,7 +176,7 @@ export default async function QRScannerPage() {
                     <div className="flex items-center space-x-3 mb-2">
                       <h4 className="font-medium">{task.cropBatch.batchCode}</h4>
                       <Badge variant="outline" className="text-blue-600 border-blue-600">
-                        Delivered
+                        {t("delivered")}
                       </Badge>
                     </div>
                     
@@ -190,20 +192,20 @@ export default async function QRScannerPage() {
                       </div>
                       
                       <div>
-                        <span>Delivered: {task.actualDeliveryDate ? format(new Date(task.actualDeliveryDate), "PPp") : "N/A"}</span>
+                        <span>{t("deliveredOn")}: {task.actualDeliveryDate ? format(new Date(task.actualDeliveryDate), "PPp") : "N/A"}</span>
                       </div>
                     </div>
                     
                     {task.cropBatch.quantity && (
                       <div className="text-sm text-muted-foreground mt-1">
-                        Quantity: {task.cropBatch.quantity}kg
+                        {t("quantity")}: {task.cropBatch.quantity}kg
                       </div>
                     )}
                   </div>
                   
                   <div className="text-right">
                     <Badge variant="secondary">
-                      Ready to scan
+                      {t("readyToScan")}
                     </Badge>
                   </div>
                 </div>

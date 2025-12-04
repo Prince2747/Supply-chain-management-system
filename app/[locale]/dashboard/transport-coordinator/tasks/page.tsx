@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TransportTasksClient } from "@/components/transport-coordinator/transport-tasks-client";
 import { Calendar, Package, Truck, AlertTriangle, CheckCircle, Clock, XCircle } from "lucide-react";
 
 export default async function TransportTasksPage() {
+  const t = await getTranslations("transportCoordinator.tasks");
+  
   // Get all transport tasks with related data
   const transportTasks = await prisma.transportTask.findMany({
     include: {
@@ -61,9 +64,9 @@ export default async function TransportTasksPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Transport Tasks</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Manage and monitor all transport tasks across your fleet
+          {t("subtitle")}
         </p>
       </div>
 
@@ -71,52 +74,52 @@ export default async function TransportTasksPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalTasks")}</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground">
-              All transport tasks
+              {t("allTransportTasks")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("pending")}</CardTitle>
             <Truck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.scheduled + stats.inTransit}</div>
             <p className="text-xs text-muted-foreground">
-              Scheduled + In Transit
+              {t("awaitingAssignment")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("completed")}</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.delivered}</div>
             <p className="text-xs text-muted-foreground">
-              Successfully delivered
+              {t("successfullyDelivered")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Issues</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("delayed")}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.withIssues}</div>
             <p className="text-xs text-muted-foreground">
-              Tasks with open issues
+              {t("behindSchedule")}
             </p>
           </CardContent>
         </Card>

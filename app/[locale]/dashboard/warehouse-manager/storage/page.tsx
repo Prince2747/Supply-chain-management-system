@@ -4,8 +4,10 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { StorageManagementClient } from "@/components/warehouse-manager/storage-management-client";
 import { Archive, Package, CheckCircle } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export default async function StoragePage() {
+  const t = await getTranslations("warehouseManager.storage");
   // Get current user and their warehouse assignment
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -57,9 +59,9 @@ export default async function StoragePage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Storage Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Update batch status to stored after verification and manage warehouse inventory
+          {t("description")}
         </p>
       </div>
 
@@ -67,39 +69,39 @@ export default async function StoragePage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Received</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("received")}</CardTitle>
             <Package className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.received}</div>
             <p className="text-xs text-muted-foreground">
-              Ready for storage verification
+              {t("readyForStorageVerification")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Stored</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stored")}</CardTitle>
             <Archive className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.stored}</div>
             <p className="text-xs text-muted-foreground">
-              Verified and stored
+              {t("verifiedAndStored")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Inventory</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalInventory")}</CardTitle>
             <CheckCircle className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{stats.totalQuantity}kg</div>
             <p className="text-xs text-muted-foreground">
-              In warehouse storage
+              {t("inWarehouseStorage")}
             </p>
           </CardContent>
         </Card>
@@ -108,9 +110,9 @@ export default async function StoragePage() {
       {/* Storage Management */}
       <Card>
         <CardHeader>
-          <CardTitle>Batch Storage Management</CardTitle>
+          <CardTitle>{t("batchStorageManagement")}</CardTitle>
           <CardDescription>
-            Verify received batches and update their status to stored
+            {t("verifyAndUpdate")}
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -2,8 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { StockRequirementsClient } from "@/components/procurement-officer/stock-requirements-client";
+import { getTranslations } from "next-intl/server";
 
 export default async function StockRequirementsPage() {
+  const t = await getTranslations("procurementOfficer.stockRequirements");
   // Get current user authentication
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -91,9 +93,9 @@ export default async function StockRequirementsPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Stock Requirements</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Set minimum stock levels and monitor inventory requirements
+          {t("description")}
         </p>
       </div>
 

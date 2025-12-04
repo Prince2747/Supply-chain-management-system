@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -114,6 +115,7 @@ export function InventoryMonitorClient({
   statusDistribution,
   recentActivity
 }: InventoryMonitorClientProps) {
+  const t = useTranslations("procurementOfficer.inventory");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCropType, setSelectedCropType] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
@@ -173,52 +175,52 @@ export function InventoryMonitorClient({
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Inventory</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalInventory")}</CardTitle>
             <Package className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalQuantity.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              kg across all crops
+              {t("kgAcrossAllCrops")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Batches</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalBatches")}</CardTitle>
             <BarChart3 className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalBatches}</div>
             <p className="text-xs text-muted-foreground">
-              Available batches
+              {t("availableBatches")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Crop Types</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("cropTypes")}</CardTitle>
             <TrendingUp className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{uniqueCropTypes.length}</div>
             <p className="text-xs text-muted-foreground">
-              Different crop types
+              {t("differentCropTypes")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Batch Size</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("avgBatchSize")}</CardTitle>
             <Package className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{averageBatchSize}</div>
             <p className="text-xs text-muted-foreground">
-              kg per batch
+              {t("kgPerBatch")}
             </p>
           </CardContent>
         </Card>
@@ -229,10 +231,10 @@ export function InventoryMonitorClient({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-green-600" />
-            Crop-wise Inventory Summary
+            {t("cropWiseInventorySummary")}
           </CardTitle>
           <CardDescription>
-            Stock levels by crop type and variety
+            {t("stockLevelsByCropType")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -247,26 +249,26 @@ export function InventoryMonitorClient({
                     <div className="font-medium">{crop.cropType}</div>
                     {crop.variety && (
                       <div className="text-sm text-muted-foreground">
-                        Variety: {crop.variety}
+                        {t("variety")}: {crop.variety}
                       </div>
                     )}
                   </div>
                   
                   <div className="flex flex-col">
                     <div className="text-sm font-medium">
-                      Total: {crop._sum?.quantity?.toLocaleString() || 0} kg
+                      {t("total")}: {crop._sum?.quantity?.toLocaleString() || 0} kg
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {crop._count.id} batches
+                      {crop._count.id} {t("batches")}
                     </div>
                   </div>
 
                   <div className="flex flex-col">
                     <div className="text-sm font-medium">
-                      Avg: {Math.round(crop._avg?.quantity || 0)} kg
+                      {t("avg")}: {Math.round(crop._avg?.quantity || 0)} kg
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      per batch
+                      {t("perBatch")}
                     </div>
                   </div>
                 </div>
@@ -295,17 +297,17 @@ export function InventoryMonitorClient({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5 text-blue-600" />
-            Inventory Details
+            {t("inventoryDetails")}
           </CardTitle>
           <CardDescription>
-            Search and filter inventory items
+            {t("searchAndFilter")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4 mb-6">
             <div className="flex-1 min-w-[200px]">
               <Input
-                placeholder="Search by batch code, crop type, or farm..."
+                placeholder={t("searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full"
@@ -314,10 +316,10 @@ export function InventoryMonitorClient({
             
             <Select value={selectedCropType} onValueChange={setSelectedCropType}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="All Crop Types" />
+                <SelectValue placeholder={t("allCropTypes")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Crop Types</SelectItem>
+                <SelectItem value="all">{t("allCropTypes")}</SelectItem>
                 {uniqueCropTypes.map(type => (
                   <SelectItem key={type} value={type}>{type}</SelectItem>
                 ))}
@@ -326,10 +328,10 @@ export function InventoryMonitorClient({
 
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
               <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="All Status" />
+                <SelectValue placeholder={t("allStatus")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="all">{t("allStatus")}</SelectItem>
                 {uniqueStatuses.map(status => (
                   <SelectItem key={status} value={status}>{status}</SelectItem>
                 ))}
@@ -338,10 +340,10 @@ export function InventoryMonitorClient({
 
             <Select value={selectedWarehouse} onValueChange={setSelectedWarehouse}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="All Warehouses" />
+                <SelectValue placeholder={t("allWarehouses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Warehouses</SelectItem>
+                <SelectItem value="all">{t("allWarehouses")}</SelectItem>
                 {uniqueWarehouses.map(warehouse => (
                   <SelectItem key={warehouse} value={warehouse}>{warehouse}</SelectItem>
                 ))}
@@ -354,8 +356,8 @@ export function InventoryMonitorClient({
             {filteredInventory.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Package className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p>No inventory items found</p>
-                <p className="text-sm">Try adjusting your search or filters</p>
+                <p>{t("noInventoryItems")}</p>
+                <p className="text-sm">{t("tryAdjustingFilters")}</p>
               </div>
             ) : (
               filteredInventory.map((item) => (
@@ -376,28 +378,28 @@ export function InventoryMonitorClient({
                         {item.quantity || 0} {item.unit || 'kg'}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        From: {item.farm.name}
+                        {t("from")}: {item.farm.name}
                       </div>
                     </div>
 
                     <div className="flex flex-col">
                       <div className="text-sm font-medium flex items-center">
                         <Warehouse className="h-4 w-4 mr-1" />
-                        {item.warehouse?.name || 'Not assigned'}
+                        {item.warehouse?.name || t("notAssigned")}
                       </div>
                       <div className="text-sm text-muted-foreground flex items-center">
                         <MapPin className="h-4 w-4 mr-1" />
-                        {item.warehouse?.address || 'No location'}
+                        {item.warehouse?.address || t("noLocation")}
                       </div>
                     </div>
 
                     <div className="flex flex-col">
                       <div className="text-sm font-medium flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {item.actualHarvest ? format(new Date(item.actualHarvest), "PPP") : "No date"}
+                        {item.actualHarvest ? format(new Date(item.actualHarvest), "PPP") : t("noDate")}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Updated: {format(new Date(item.updatedAt), "PP")}
+                        {t("updated")}: {format(new Date(item.updatedAt), "PP")}
                       </div>
                     </div>
                   </div>
@@ -421,10 +423,10 @@ export function InventoryMonitorClient({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-orange-600" />
-            Recent Activity
+            {t("recentActivity")}
           </CardTitle>
           <CardDescription>
-            Latest inventory changes in the past 30 days
+            {t("latestInventoryChanges")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -432,7 +434,7 @@ export function InventoryMonitorClient({
             {recentActivity.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Clock className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p>No recent activity</p>
+                <p>{t("noRecentActivity")}</p>
               </div>
             ) : (
               recentActivity.map((activity) => (
@@ -451,7 +453,7 @@ export function InventoryMonitorClient({
                     <div className="flex flex-col">
                       <div className="text-sm font-medium">{activity.farm.name}</div>
                       <div className="text-sm text-muted-foreground">
-                        By: {activity.farmer.name}
+                        {t("by")}: {activity.farmer.name}
                       </div>
                     </div>
                   </div>

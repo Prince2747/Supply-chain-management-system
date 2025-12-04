@@ -8,77 +8,93 @@ import {
   ClipboardList,
   Package,
   CheckSquare,
-  Bell,
-  FileText
+  Bell
 } from "lucide-react";
-
-// Navigation items for the side bar
-const navigation = [
-  {
-    name: "Dashboard",
-    href: "/dashboard/procurement-officer",
-    icon: BarChart3,
-  },
-  {
-    name: "Stock Requirements",
-    href: "/dashboard/procurement-officer/stock-requirements",
-    icon: ClipboardList,
-  },
-  {
-    name: "Inventory Monitor",
-    href: "/dashboard/procurement-officer/inventory",
-    icon: Package,
-  },
-  {
-    name: "Batch Reviews",
-    href: "/dashboard/procurement-officer/batch-reviews",
-    icon: CheckSquare,
-  },
-  {
-    name: "Notifications",
-    href: "/dashboard/procurement-officer/notifications",
-    icon: Bell,
-  },
-];
+import { useTranslations, useLocale } from "next-intl";
 
 export function ProcurementOfficerNavigation({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLElement>) {
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const t = useTranslations("procurementOfficer.navigation");
+  const locale = useLocale();
   const pathname = usePathname();
-
+  
+  // Navigation items for the side bar
+  const navigation = [
+    {
+      name: t("dashboard"),
+      href: `/${locale}/dashboard/procurement-officer`,
+      icon: BarChart3,
+    },
+    {
+      name: t("stockRequirements"),
+      href: `/${locale}/dashboard/procurement-officer/stock-requirements`,
+      icon: ClipboardList,
+    },
+    {
+      name: t("inventoryMonitor"),
+      href: `/${locale}/dashboard/procurement-officer/inventory`,
+      icon: Package,
+    },
+    {
+      name: t("batchReviews"),
+      href: `/${locale}/dashboard/procurement-officer/batch-reviews`,
+      icon: CheckSquare,
+    },
+    {
+      name: t("notifications"),
+      href: `/${locale}/dashboard/procurement-officer/notifications`,
+      icon: Bell,
+    },
+  ];
+  
   return (
-    <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden">
-      <nav
-        className={cn("flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1 p-4", className)}
-        {...props}
-      >
-        {navigation.map((item) => {
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
-          
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                isActive
-                  ? "bg-green-100 text-green-700 hover:bg-green-200"
-                  : "text-muted-foreground"
-              )}
-            >
-              <Icon 
-                className={cn(
-                  "h-4 w-4 shrink-0",
-                  isActive ? "text-green-600" : ""
-                )} 
-              />
-              <span className="truncate">{item.name}</span>
-            </Link>
-          );
-        })}
-      </nav>
+    <div className="flex min-h-[calc(100vh-4rem)] bg-gray-50">
+      {/* Side Navigation */}
+      <div className="group w-16 hover:w-64 bg-white border-r transition-all duration-300 ease-in-out overflow-hidden sticky top-16 h-[calc(100vh-4rem)]">
+        <div className="flex flex-col h-full">
+          <nav className="flex-1 space-y-1 py-4 overflow-y-auto">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    isActive
+                      ? "bg-green-100 text-green-900 border-r-2 border-green-500"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                    "group/item flex items-center px-4 py-3 text-sm font-medium whitespace-nowrap relative"
+                  )}
+                  title={item.name}
+                >
+                  <item.icon
+                    className={cn(
+                      isActive
+                        ? "text-green-500"
+                        : "text-gray-400 group-hover/item:text-gray-500",
+                      "flex-shrink-0 h-5 w-5"
+                    )}
+                    aria-hidden="true"
+                  />
+                  <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden h-[calc(100vh-4rem)]">
+        <div className="p-6">
+          {children}
+        </div>
+      </div>
     </div>
   );
 }

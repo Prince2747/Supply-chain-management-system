@@ -22,6 +22,7 @@ import {
 import { AlertTriangle, Loader2, Plus } from "lucide-react";
 import { reportTransportIssue } from "@/app/[locale]/dashboard/transport-driver/actions";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface Task {
   id: string;
@@ -46,16 +47,17 @@ interface ReportIssueDialogProps {
 }
 
 export function ReportIssueDialog({ tasks, preSelectedTaskId, children }: ReportIssueDialogProps) {
+  const t = useTranslations("transportDriver.reportIssueDialog");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const issueTypes = [
-    { value: "VEHICLE_BREAKDOWN", label: "Vehicle Breakdown" },
-    { value: "TRAFFIC_DELAY", label: "Traffic Delay" },
-    { value: "WEATHER_DELAY", label: "Weather Delay" },
-    { value: "DAMAGED_GOODS", label: "Damaged Goods" },
-    { value: "ROUTE_CHANGE", label: "Route Change" },
-    { value: "OTHER", label: "Other" },
+    { value: "VEHICLE_BREAKDOWN", label: t("vehicleBreakdown") },
+    { value: "TRAFFIC_DELAY", label: t("trafficDelay") },
+    { value: "WEATHER_DELAY", label: t("weatherDelay") },
+    { value: "DAMAGED_GOODS", label: t("damagedGoods") },
+    { value: "ROUTE_CHANGE", label: t("routeChange") },
+    { value: "OTHER", label: t("other") },
   ];
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -68,15 +70,15 @@ export function ReportIssueDialog({ tasks, preSelectedTaskId, children }: Report
       const result = await reportTransportIssue(formData);
       
       if (result.success) {
-        toast.success("Issue reported successfully");
+        toast.success(t("successMessage"));
         setOpen(false);
         // Reset form
         (e.target as HTMLFormElement).reset();
       } else {
-        toast.error(result.error || "Failed to report issue");
+        toast.error(result.error || t("errorMessage"));
       }
     } catch (error) {
-      toast.error("Failed to report issue");
+      toast.error(t("errorMessage"));
     }
     
     setLoading(false);
@@ -90,7 +92,7 @@ export function ReportIssueDialog({ tasks, preSelectedTaskId, children }: Report
         ) : (
           <Button className="flex items-center space-x-2">
             <Plus className="h-4 w-4" />
-            <span>Report Issue</span>
+            <span>{t("submit")}</span>
           </Button>
         )}
       </DialogTrigger>
@@ -98,19 +100,19 @@ export function ReportIssueDialog({ tasks, preSelectedTaskId, children }: Report
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <AlertTriangle className="h-5 w-5 text-orange-500" />
-            <span>Report Transport Issue</span>
+            <span>{t("title")}</span>
           </DialogTitle>
           <DialogDescription>
-            Report any problems or delays with your transport tasks.
+            {t("description")}
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="transportTaskId">Transport Task</Label>
+            <Label htmlFor="transportTaskId">{t("transportTask")}</Label>
             <Select name="transportTaskId" defaultValue={preSelectedTaskId} required>
               <SelectTrigger>
-                <SelectValue placeholder="Select the affected task" />
+                <SelectValue placeholder={t("selectTask")} />
               </SelectTrigger>
               <SelectContent>
                 {tasks.length > 0 ? (
@@ -121,7 +123,7 @@ export function ReportIssueDialog({ tasks, preSelectedTaskId, children }: Report
                   ))
                 ) : (
                   <div className="p-2 text-sm text-muted-foreground">
-                    No active tasks available
+                    {t("noActiveTasks")}
                   </div>
                 )}
               </SelectContent>
@@ -129,10 +131,10 @@ export function ReportIssueDialog({ tasks, preSelectedTaskId, children }: Report
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="issueType">Issue Type</Label>
+            <Label htmlFor="issueType">{t("issueType")}</Label>
             <Select name="issueType" required>
               <SelectTrigger>
-                <SelectValue placeholder="Select the type of issue" />
+                <SelectValue placeholder={t("selectIssueType")} />
               </SelectTrigger>
               <SelectContent>
                 {issueTypes.map((type) => (
@@ -145,15 +147,15 @@ export function ReportIssueDialog({ tasks, preSelectedTaskId, children }: Report
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("descriptionLabel")}</Label>
             <Textarea
               name="description"
-              placeholder="Describe the issue in detail..."
+              placeholder={t("descriptionPlaceholder")}
               required
               className="min-h-[120px]"
             />
             <p className="text-xs text-muted-foreground">
-              Please provide as much detail as possible to help coordinators resolve the issue quickly.
+              {t("descriptionHint")}
             </p>
           </div>
 
@@ -164,18 +166,18 @@ export function ReportIssueDialog({ tasks, preSelectedTaskId, children }: Report
               onClick={() => setOpen(false)}
               disabled={loading}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={loading || tasks.length === 0}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Report Issue
+              {t("submit")}
             </Button>
           </div>
         </form>
 
         {tasks.length === 0 && (
           <div className="text-center py-4 text-muted-foreground">
-            <p>No active transport tasks to report issues for.</p>
+            <p>{t("noTasksToReport")}</p>
           </div>
         )}
       </DialogContent>

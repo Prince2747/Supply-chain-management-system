@@ -26,6 +26,7 @@ import {
   Minus
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface StockRequirement {
   cropType: string;
@@ -41,6 +42,7 @@ interface StockRequirementsClientProps {
 }
 
 export function StockRequirementsClient({ requirements }: StockRequirementsClientProps) {
+  const t = useTranslations("procurementOfficer.stockRequirements");
   const [stockRequirements, setStockRequirements] = useState<StockRequirement[]>(requirements);
   const [editingRequirement, setEditingRequirement] = useState<StockRequirement | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -70,7 +72,7 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
     setIsEditDialogOpen(false);
     setEditingRequirement(null);
     
-    toast.success(`Updated minimum stock requirement for ${editingRequirement.cropType}`);
+    toast.success(`${t("updatedRequirement")} ${editingRequirement.cropType}`);
   };
 
   const getStatusColor = (status: string) => {
@@ -102,11 +104,11 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
   const getStatusText = (status: string) => {
     switch (status) {
       case 'sufficient':
-        return 'Sufficient';
+        return t('sufficient');
       case 'low':
-        return 'Low Stock';
+        return t('low');
       case 'no_requirement':
-        return 'No Requirement';
+        return t('noRequirement');
       default:
         return 'Unknown';
     }
@@ -139,52 +141,52 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Crops</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalCrops")}</CardTitle>
             <Package className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground">
-              Crop types in system
+              {t("cropTypesInSystem")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sufficient Stock</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("sufficientStock")}</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.sufficient}</div>
             <p className="text-xs text-muted-foreground">
-              Above minimum levels
+              {t("aboveMinimum")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("lowStock")}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{stats.low}</div>
             <p className="text-xs text-muted-foreground">
-              Below minimum levels
+              {t("belowMinimum")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">No Requirements</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("noRequirements")}</CardTitle>
             <Minus className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-600">{stats.noRequirement}</div>
             <p className="text-xs text-muted-foreground">
-              Need requirements set
+              {t("needRequirementsSet")}
             </p>
           </CardContent>
         </Card>
@@ -193,9 +195,9 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
       {/* Requirements Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Stock Requirements</CardTitle>
+          <CardTitle>{t("stockRequirementsTitle")}</CardTitle>
           <CardDescription>
-            Manage minimum stock levels for each crop type
+            {t("manageMinimumStock")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -209,16 +211,16 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
                   <div className="flex flex-col">
                     <div className="font-medium">{requirement.cropType}</div>
                     <div className="text-sm text-muted-foreground">
-                      {requirement.batchCount} batches available
+                      {requirement.batchCount} {t("batchesAvailable")}
                     </div>
                   </div>
                   
                   <div className="flex flex-col">
                     <div className="text-sm font-medium">
-                      Current: {requirement.currentStock} {requirement.unit}
+                      {t("current")}: {requirement.currentStock} {requirement.unit}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Minimum: {requirement.minStock > 0 ? `${requirement.minStock} ${requirement.unit}` : 'Not set'}
+                      {t("minimum")}: {requirement.minStock > 0 ? `${requirement.minStock} ${requirement.unit}` : t("notSet")}
                     </div>
                   </div>
 
@@ -228,7 +230,7 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
                         {Math.round((requirement.currentStock / requirement.minStock) * 100)}%
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        of minimum
+                        {t("ofMinimum")}
                       </div>
                     </div>
                   )}
@@ -251,7 +253,7 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
                     onClick={() => handleEditRequirement(requirement)}
                   >
                     <Edit className="h-4 w-4 mr-1" />
-                    Edit
+                    {t("edit")}
                   </Button>
                 </div>
               </div>
@@ -264,16 +266,16 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Stock Requirement</DialogTitle>
+            <DialogTitle>{t("editStockRequirement")}</DialogTitle>
             <DialogDescription>
-              Set the minimum stock level for {editingRequirement?.cropType}
+              {t("setMinimumStockLevel")} {editingRequirement?.cropType}
             </DialogDescription>
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="current-stock" className="text-right">
-                Current Stock
+                {t("currentStock")}
               </Label>
               <Input
                 id="current-stock"
@@ -285,7 +287,7 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
             
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="min-stock" className="text-right">
-                Minimum Stock
+                {t("minimumStock")}
               </Label>
               <Input
                 id="min-stock"
@@ -293,7 +295,7 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
                 value={newMinStock}
                 onChange={(e) => setNewMinStock(parseInt(e.target.value) || 0)}
                 className="col-span-3"
-                placeholder="Enter minimum stock level"
+                placeholder={t("enterMinimumStockLevel")}
               />
             </div>
             
@@ -310,10 +312,10 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button onClick={handleSaveRequirement} className="bg-green-600 hover:bg-green-700">
-              Save Requirement
+              {t("saveRequirement")}
             </Button>
           </DialogFooter>
         </DialogContent>
