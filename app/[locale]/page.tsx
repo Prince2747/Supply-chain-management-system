@@ -2,6 +2,7 @@ import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { AnimatedGlobe } from "@/components/animated-globe";
 import { ProductImage } from "@/components/product-image";
+import { ParallaxSection, ParallaxLayer } from "@/components/parallax-section";
 import { Button } from "@/components/ui/button";
 import { getTranslations } from 'next-intl/server';
 import {
@@ -35,13 +36,16 @@ export default async function Home() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-green-50 via-white to-green-50/30 py-24 md:py-32">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden opacity-30">
+        {/* Animated background elements with parallax */}
+        <ParallaxLayer speed={0.2} className="opacity-30">
           <div className="absolute -top-1/2 -right-1/4 w-96 h-96 bg-green-200/40 rounded-full blur-3xl animate-pulse" />
+        </ParallaxLayer>
+        <ParallaxLayer speed={0.15} className="opacity-30">
           <div className="absolute -bottom-1/2 -left-1/4 w-96 h-96 bg-green-100/30 rounded-full blur-3xl animate-pulse delay-1000" />
-        </div>
+        </ParallaxLayer>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ParallaxSection speed={0.1}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left side - Text content */}
             <div className="text-center lg:text-left">
@@ -107,6 +111,7 @@ export default async function Home() {
               </div>
             </div>
           </div>
+          </ParallaxSection>
         </div>
       </section>
 
@@ -210,6 +215,7 @@ export default async function Home() {
       {/* Product Showcase with Images */}
       <section className="py-24 bg-gradient-to-br from-green-50/50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ParallaxSection speed={0.15}>
           <div className="text-center mb-16">
             <div className="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
               {tHome('products.badge')}
@@ -221,8 +227,10 @@ export default async function Home() {
               {tHome('products.description')}
             </p>
           </div>
+          </ParallaxSection>
 
           {/* Image Grid */}
+          <ParallaxSection speed={0.08}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Coffee Beans */}
             <ProductImage
@@ -290,15 +298,19 @@ export default async function Home() {
               gradientTo="slate-100"
             />
           </div>
+          </ParallaxSection>
         </div>
       </section>
 
       {/* Services Section */}
       <section className="relative py-24 bg-gradient-to-br from-gray-50 via-white to-gray-50/30 overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+        {/* Background decoration with parallax */}
+        <ParallaxLayer speed={0.1} className="opacity-5">
+          <div className="absolute inset-0 bg-grid-pattern" />
+        </ParallaxLayer>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ParallaxSection speed={0.12}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
               <div className="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-2">
@@ -413,18 +425,22 @@ export default async function Home() {
               </Card>
             </div>
           </div>
+          </ParallaxSection>
         </div>
       </section>
 
       {/* CTA Section */}
       <section className="relative py-24 bg-gradient-to-br from-green-700 via-green-600 to-green-700 text-white overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
+        {/* Animated background elements with parallax */}
+        <ParallaxLayer speed={0.3} className="overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse" />
+        </ParallaxLayer>
+        <ParallaxLayer speed={0.25} className="overflow-hidden">
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse delay-1000" />
-        </div>
+        </ParallaxLayer>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <ParallaxSection speed={0.15}>
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium mb-6">
             <Award className="h-4 w-4" />
             <span>{tHome('cta.badge')}</span>
@@ -484,6 +500,7 @@ export default async function Home() {
               <span className="text-xs">Churchill Avenue<br/>Eshetu Mamo Building - F8 Office 801</span>
             </div>
           </div>
+          </ParallaxSection>
         </div>
       </section>
 
