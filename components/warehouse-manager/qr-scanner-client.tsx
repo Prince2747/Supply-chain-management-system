@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +55,7 @@ interface BatchDetails {
 }
 
 export function QRScannerClient() {
+  const router = useRouter();
   const [isScanning, setIsScanning] = useState(false);
   const [manualCode, setManualCode] = useState("");
   const [batchDetails, setBatchDetails] = useState<BatchDetails | null>(null);
@@ -61,31 +63,56 @@ export function QRScannerClient() {
   const [isConfirming, setIsConfirming] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const scannerControlsRef = useRef<{ stop: () => void } | null>(null);
+  const hasScannedRef = useRef(false);
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      });
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setIsScanning(true);
-      }
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      toast.error('Unable to access camera. Please check permissions.');
-    }
+  const startCamera = () => {
+    setIsScanning(true);
   };
 
   const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
+    try {
+      scannerControlsRef.current?.stop();
+    } catch {
+      // ignore
+    } finally {
+      scannerControlsRef.current = null;
+      setIsScanning(false);
     }
-    setIsScanning(false);
+  };
+
+  const startScanner = async () => {
+    if (!videoRef.current) return;
+    if (scannerControlsRef.current) return;
+
+    hasScannedRef.current = false;
+
+    try {
+      const { BrowserQRCodeReader } = await import("@zxing/browser");
+      const reader = new BrowserQRCodeReader();
+
+      const controls = await reader.decodeFromVideoDevice(
+        undefined,
+        videoRef.current,
+        (result) => {
+          if (!result) return;
+          if (hasScannedRef.current) return;
+
+          hasScannedRef.current = true;
+          const text = result.getText?.() ?? String(result);
+
+          // Stop camera immediately to prevent duplicate reads
+          stopCamera();
+          handleScan(text);
+        }
+      );
+
+      scannerControlsRef.current = controls;
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      toast.error('Unable to access camera. Please check permissions.');
+      stopCamera();
+    }
   };
 
   useEffect(() => {
@@ -93,6 +120,13 @@ export function QRScannerClient() {
       stopCamera();
     };
   }, []);
+
+  useEffect(() => {
+    if (isScanning) {
+      startScanner();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isScanning]);
 
   const handleScan = async (qrCode: string) => {
     if (!qrCode.trim()) {
@@ -111,7 +145,14 @@ export function QRScannerClient() {
       });
 
       if (!response.ok) {
-        throw new Error('Batch not found or invalid QR code');
+        let message = 'Failed to verify batch';
+        try {
+          const data = await response.json();
+          if (data?.error) message = String(data.error);
+        } catch {
+          // ignore
+        }
+        throw new Error(message);
       }
 
       const batch = await response.json();
@@ -121,7 +162,7 @@ export function QRScannerClient() {
       stopCamera();
     } catch (error) {
       console.error('Error verifying batch:', error);
-      toast.error('Invalid QR code or batch not found');
+      toast.error(error instanceof Error ? error.message : 'Invalid QR code or batch not found');
     } finally {
       setIsLoading(false);
     }
@@ -150,9 +191,8 @@ export function QRScannerClient() {
       toast.success(`Batch ${batchDetails.batchCode} receipt confirmed successfully`);
       setBatchDetails(null);
       setShowDetails(false);
-      
-      // Refresh the page to update the deliveries list
-      window.location.reload();
+
+      router.refresh();
     } catch (error) {
       console.error('Error confirming receipt:', error);
       toast.error('Failed to confirm batch receipt');

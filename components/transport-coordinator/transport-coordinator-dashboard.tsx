@@ -151,7 +151,10 @@ function DriverAssignmentModal({
     })
   }
 
-  if (!transportTask) return null
+  // Guard after all hooks to avoid hook-order mismatch
+  if (!transportTask) {
+    return null
+  }
 
   const availableDrivers = drivers.filter(d => d.status === 'AVAILABLE')
   const availableVehicles = vehicles.filter(v => v.status === 'AVAILABLE')

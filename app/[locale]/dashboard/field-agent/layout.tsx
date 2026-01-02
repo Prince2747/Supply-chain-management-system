@@ -1,8 +1,6 @@
 "use client";
 
 import { FieldAgentAuthWrapper } from "@/components/field-agent/field-agent-auth-wrapper";
-import { NotificationBell } from "@/components/field-agent/notification-bell";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -91,11 +89,6 @@ export default function FieldAgentLayout({
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden h-[calc(100vh-4rem)]">
           <div className="p-6">
-            {/* Notification Bell and Language Switcher */}
-            <div className="flex justify-end gap-4 mb-4">
-              <LanguageSwitcher />
-              <NotificationBell />
-            </div>
             {children}
           </div>
         </div>

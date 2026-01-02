@@ -27,12 +27,19 @@ export async function POST(request: NextRequest) {
 
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
-      select: { role: true, name: true }
+      select: { role: true, name: true, warehouseId: true }
     });
 
     if (!profile || profile.role !== 'warehouse_manager') {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
+    }
+
+    if (!profile.warehouseId) {
+      return NextResponse.json(
+        { error: 'No warehouse assigned' },
         { status: 403 }
       );
     }
@@ -51,6 +58,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Batch not found' },
         { status: 404 }
+      );
+    }
+
+    // Ensure batch belongs to manager's warehouse
+    if (!currentBatch.warehouseId || currentBatch.warehouseId !== profile.warehouseId) {
+      return NextResponse.json(
+        { error: 'Batch does not belong to your warehouse' },
+        { status: 403 }
       );
     }
 

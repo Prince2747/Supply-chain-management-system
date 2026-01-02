@@ -27,12 +27,19 @@ export async function POST(request: NextRequest) {
 
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
-      select: { role: true, name: true }
+      select: { role: true, name: true, warehouseId: true }
     });
 
     if (!profile || profile.role !== 'warehouse_manager') {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
+    }
+
+    if (!profile.warehouseId) {
+      return NextResponse.json(
+        { error: 'No warehouse assigned' },
         { status: 403 }
       );
     }
@@ -54,10 +61,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if batch can be received
-    if (currentBatch.status !== 'PACKAGED') {
+    // Ensure batch belongs to manager's warehouse
+    if (!currentBatch.warehouseId || currentBatch.warehouseId !== profile.warehouseId) {
       return NextResponse.json(
-        { error: `Cannot receive batch in ${currentBatch.status} status. Only PACKAGED batches can be received.` },
+        { error: 'Batch does not belong to your warehouse' },
+        { status: 403 }
+      );
+    }
+
+    // Check if batch can be received
+    if (currentBatch.status !== 'SHIPPED' && currentBatch.status !== 'PACKAGED') {
+      return NextResponse.json(
+        { error: `Cannot receive batch in ${currentBatch.status} status. Only SHIPPED (or PACKAGED) batches can be received.` },
         { status: 400 }
       );
     }
@@ -75,6 +90,48 @@ export async function POST(request: NextRequest) {
         }
       }
     });
+
+    // Notify transport coordinator (latest task) and procurement officers that the batch has been received.
+    try {
+      const latestTask = await prisma.transportTask.findFirst({
+        where: { cropBatchId: batchId },
+        orderBy: { updatedAt: 'desc' },
+        include: {
+          coordinator: { select: { userId: true } },
+        },
+      });
+
+      if (latestTask?.coordinator?.userId) {
+        await prisma.harvestNotification.create({
+          data: {
+            cropBatchId: batchId,
+            sentTo: latestTask.coordinator.userId,
+            isRead: false,
+            notificationType: 'GENERAL',
+            message: `Warehouse receipt confirmed: Batch ${updatedBatch.batchCode} has been received at the warehouse.`,
+          },
+        });
+      }
+
+      const procurementOfficers = await prisma.profile.findMany({
+        where: { role: 'procurement_officer', isActive: true },
+        select: { userId: true },
+      });
+
+      if (procurementOfficers.length > 0) {
+        await prisma.harvestNotification.createMany({
+          data: procurementOfficers.map((po) => ({
+            cropBatchId: batchId,
+            sentTo: po.userId,
+            isRead: false,
+            notificationType: 'GENERAL',
+            message: `Batch received: Batch ${updatedBatch.batchCode} has arrived at the warehouse.`,
+          })),
+        });
+      }
+    } catch (e) {
+      console.warn('Failed to send receipt notifications:', e);
+    }
 
     // Log the receipt confirmation activity
     await logActivity({

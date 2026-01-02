@@ -5,6 +5,18 @@ import { Role } from "@/lib/generated/prisma/client";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 import { logActivity } from "@/lib/activity-logger";
+import {
+  getMyHarvestNotifications,
+  markHarvestNotificationAsRead,
+} from "@/lib/notifications/actions";
+
+const DASHBOARD_LOCALES = ["en", "am"] as const;
+
+function revalidateDashboardPath(pathWithoutLocale: string) {
+  for (const locale of DASHBOARD_LOCALES) {
+    revalidatePath(`/${locale}${pathWithoutLocale}`);
+  }
+}
 
 export async function checkFieldAgentRole(userId: string) {
   try {
@@ -78,7 +90,7 @@ export async function createFarmer(formData: FormData) {
       }
     });
 
-    revalidatePath('/dashboard/field-agent/farmers');
+    revalidateDashboardPath('/dashboard/field-agent/farmers');
     return { success: true, farmer };
   } catch (error) {
     console.error('Error creating farmer:', error);
@@ -155,7 +167,7 @@ export async function updateFarmer(formData: FormData) {
       }
     });
 
-    revalidatePath('/dashboard/field-agent/farmers');
+    revalidateDashboardPath('/dashboard/field-agent/farmers');
     return { success: true, farmer };
   } catch (error) {
     console.error('Error updating farmer:', error);
@@ -183,7 +195,7 @@ export async function deleteFarmer(farmerId: string) {
       data: { isActive: false }
     });
 
-    revalidatePath('/dashboard/field-agent/farmers');
+    revalidateDashboardPath('/dashboard/field-agent/farmers');
     return { success: true };
   } catch (error) {
     console.error('Error deleting farmer:', error);
@@ -256,7 +268,7 @@ export async function createFarm(formData: FormData) {
       }
     });
 
-    revalidatePath('/dashboard/field-agent/farms');
+    revalidateDashboardPath('/dashboard/field-agent/farms');
     return { success: true, farm };
   } catch (error) {
     console.error('Error creating farm:', error);
@@ -386,7 +398,7 @@ export async function createCropBatch(formData: FormData) {
       }
     });
 
-    revalidatePath('/dashboard/field-agent/crops');
+    revalidateDashboardPath('/dashboard/field-agent/crops');
     return { success: true, cropBatch };
   } catch (error) {
     console.error('Error creating crop batch:', error);
@@ -451,7 +463,7 @@ export async function updateCropBatchStatus(batchId: string, status: string) {
       }
     });
 
-    revalidatePath('/dashboard/field-agent/crops');
+    revalidateDashboardPath('/dashboard/field-agent/crops');
     return { success: true, cropBatch };
   } catch (error) {
     console.error('Error updating crop batch status:', error);
@@ -462,32 +474,7 @@ export async function updateCropBatchStatus(batchId: string, status: string) {
 // Harvest Notification Actions
 export async function getHarvestNotifications() {
   try {
-    const notifications = await prisma.harvestNotification.findMany({
-      include: {
-        cropBatch: {
-          select: {
-            batchCode: true,
-            cropType: true,
-            status: true,
-            farm: {
-              select: {
-                name: true,
-                farmCode: true,
-              }
-            },
-            farmer: {
-              select: {
-                name: true,
-                farmerId: true,
-              }
-            }
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
-
-    return notifications;
+    return await getMyHarvestNotifications();
   } catch (error) {
     console.error('Error fetching harvest notifications:', error);
     return [];
@@ -496,20 +483,11 @@ export async function getHarvestNotifications() {
 
 export async function markNotificationAsRead(notificationId: string) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      throw new Error('Unauthorized');
+    const result = await markHarvestNotificationAsRead(notificationId);
+    if (result.success) {
+      revalidateDashboardPath('/dashboard/field-agent/notifications');
     }
-
-    await prisma.harvestNotification.update({
-      where: { id: notificationId },
-      data: { isRead: true }
-    });
-
-    revalidatePath('/dashboard/field-agent/notifications');
-    return { success: true };
+    return result;
   } catch (error) {
     console.error('Error marking notification as read:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
@@ -547,6 +525,17 @@ export async function updateCropStatus(
 
     if (!cropBatch) {
       throw new Error('Crop batch not found');
+    }
+
+    // Workflow handoff: once packaged, transport coordinator takes over
+    const terminalForFieldAgent = ['PACKAGED', 'SHIPPED', 'RECEIVED', 'STORED'] as const;
+    if (terminalForFieldAgent.includes(cropBatch.status as any)) {
+      throw new Error('This crop batch is ready for shipment. Transport coordinator will handle the next steps.');
+    }
+
+    const disallowedNewStatuses = ['SHIPPED', 'RECEIVED', 'STORED'] as const;
+    if (disallowedNewStatuses.includes(newStatus as any)) {
+      throw new Error('Field agents cannot set shipment/warehouse statuses. Please stop at PACKAGED.');
     }
 
     // Update crop batch status and additional data
@@ -607,7 +596,7 @@ export async function updateCropStatus(
       }
     });
 
-    revalidatePath('/dashboard/field-agent/crops');
+    revalidateDashboardPath('/dashboard/field-agent/crops');
     return { success: true };
   } catch (error) {
     console.error('Error updating crop status:', error);

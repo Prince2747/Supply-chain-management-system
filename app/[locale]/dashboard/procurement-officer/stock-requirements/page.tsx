@@ -3,15 +3,18 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { StockRequirementsClient } from "@/components/procurement-officer/stock-requirements-client";
 import { getTranslations } from "next-intl/server";
+import { getLocale } from "next-intl/server";
+import { getStockRequirementsFromDb } from "../actions";
 
 export default async function StockRequirementsPage() {
   const t = await getTranslations("procurementOfficer.stockRequirements");
+  const locale = await getLocale();
   // Get current user authentication
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect(`/${locale}/login`);
   }
 
   const currentProfile = await prisma.profile.findUnique({
@@ -19,8 +22,8 @@ export default async function StockRequirementsPage() {
     select: { role: true, name: true }
   });
 
-  if (!currentProfile || currentProfile.role !== 'procurement_officer') {
-    redirect('/unauthorized');
+  if (!currentProfile || !['procurement_officer', 'admin', 'manager'].includes(currentProfile.role)) {
+    redirect(`/${locale}/unauthorized`);
   }
 
   // Get crop types and current stock levels
@@ -34,7 +37,7 @@ export default async function StockRequirementsPage() {
     },
     where: {
       status: {
-        in: ['PROCESSED', 'STORED'] // Available stock
+        in: ['PROCESSED', 'RECEIVED', 'STORED'] // Available stock (include newly received)
       }
     }
   });
@@ -48,46 +51,44 @@ export default async function StockRequirementsPage() {
     distinct: ['cropType']
   });
 
-  // Mock data for stock requirements (in real app, this would be a separate table)
-  const mockRequirements = [
-    { cropType: 'Wheat', minStock: 1000, unit: 'kg', currentStock: 1500 },
-    { cropType: 'Rice', minStock: 800, unit: 'kg', currentStock: 600 },
-    { cropType: 'Corn', minStock: 500, unit: 'kg', currentStock: 750 },
-    { cropType: 'Barley', minStock: 300, unit: 'kg', currentStock: 200 },
-    { cropType: 'Oats', minStock: 400, unit: 'kg', currentStock: 450 },
-  ];
+  const dbRequirements = await getStockRequirementsFromDb();
+  const requirementByCrop = new Map(dbRequirements.map(r => [r.cropType, r] as const));
 
-  // Merge actual stock data with requirements
-  const stockRequirements = mockRequirements.map(req => {
-    const actualStock = cropStats.find(stat => stat.cropType === req.cropType);
-    const currentStock = actualStock?._sum?.quantity || 0;
-    const batchCount = actualStock?._count?.id || 0;
-    return {
-      ...req,
-      currentStock,
-      batchCount,
-      status: currentStock >= req.minStock ? 'sufficient' as const : 'low' as const
-    };
-  });
+  const cropTypesFromDb = dbRequirements.map((r) => ({ cropType: r.cropType, unit: r.unit }));
+  const allCrops = [...allCropTypes, ...cropTypesFromDb]
+    .reduce((acc, item) => {
+      if (!acc.some((x) => x.cropType === item.cropType)) acc.push(item);
+      return acc;
+    }, [] as Array<{ cropType: string; unit: string | null }>);
 
-  // Add any crop types that don't have requirements set
-  const missingCropTypes = allCropTypes.filter(
-    crop => !mockRequirements.find(req => req.cropType === crop.cropType)
-  ).map(crop => {
-    const actualStock = cropStats.find(stat => stat.cropType === crop.cropType);
-    const currentStock = actualStock?._sum?.quantity || 0;
-    const batchCount = actualStock?._count?.id || 0;
-    return {
-      cropType: crop.cropType,
-      minStock: 0,
-      unit: crop.unit || 'kg',
-      currentStock,
-      batchCount,
-      status: 'no_requirement' as const
-    };
-  });
+  // Build a list of crop types + current stock + DB-backed min stock.
+  const allRequirements = allCrops
+    .map((crop) => {
+      const actualStock = cropStats.find((stat) => stat.cropType === crop.cropType);
+      const currentStock = actualStock?._sum?.quantity || 0;
+      const batchCount = actualStock?._count?.id || 0;
 
-  const allRequirements = [...stockRequirements, ...missingCropTypes];
+      const req = requirementByCrop.get(crop.cropType);
+      const minStock = req?.minStock ?? 0;
+      const unit = req?.unit || crop.unit || 'kg';
+
+      const status =
+        !minStock || minStock <= 0
+          ? ('no_requirement' as const)
+          : currentStock >= minStock
+            ? ('sufficient' as const)
+            : ('low' as const);
+
+      return {
+        cropType: crop.cropType,
+        minStock,
+        unit,
+        currentStock,
+        batchCount,
+        status,
+      };
+    })
+    .sort((a, b) => a.cropType.localeCompare(b.cropType));
 
   return (
     <div className="space-y-8">

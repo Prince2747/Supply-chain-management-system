@@ -5,6 +5,14 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { logActivity } from "@/lib/activity-logger";
 
+const DASHBOARD_LOCALES = ["en", "am"] as const;
+
+function revalidateDashboardPath(pathWithoutLocale: string) {
+  for (const locale of DASHBOARD_LOCALES) {
+    revalidatePath(`/${locale}${pathWithoutLocale}`);
+  }
+}
+
 // Get current user profile
 async function getCurrentUser() {
   const supabase = await createClient();
@@ -119,6 +127,33 @@ export async function createTransportTask(formData: FormData) {
       }
     });
 
+    // Notify assigned driver (if linked to a user profile)
+    try {
+      const driverWithProfile = await prisma.driver.findUnique({
+        where: { id: data.driverId },
+        select: {
+          Profile: {
+            select: { userId: true }
+          }
+        }
+      });
+
+      const driverUserId = driverWithProfile?.Profile?.userId;
+      if (driverUserId) {
+        await prisma.harvestNotification.create({
+          data: {
+            cropBatchId: data.cropBatchId,
+            sentTo: driverUserId,
+            isRead: false,
+            notificationType: 'GENERAL',
+            message: `New transport task assigned for batch ${task.cropBatch.batchCode}. Scheduled: ${task.scheduledDate.toLocaleDateString()}.`,
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Failed to notify driver for transport task:', e);
+    }
+
     await logActivity({
       userId: profile.userId,
       action: "CREATE_TRANSPORT_TASK",
@@ -132,7 +167,7 @@ export async function createTransportTask(formData: FormData) {
       }
     });
 
-    revalidatePath("/dashboard/transport-coordinator/tasks");
+    revalidateDashboardPath("/dashboard/transport-coordinator/tasks");
     return { success: true, task };
   } catch (error) {
     console.error("Error creating transport task:", error);
@@ -170,7 +205,7 @@ export async function updateTransportTask(taskId: string, formData: FormData) {
       details: { status: data.status, updatedFields: Object.keys(data) }
     });
 
-    revalidatePath("/dashboard/transport-coordinator/tasks");
+    revalidateDashboardPath("/dashboard/transport-coordinator/tasks");
     return { success: true, task };
   } catch (error) {
     console.error("Error updating transport task:", error);
@@ -218,7 +253,7 @@ export async function createVehicle(formData: FormData) {
       details: { plateNumber: data.plateNumber, type: data.type, capacity: data.capacity }
     });
 
-    revalidatePath("/dashboard/transport-coordinator/vehicles");
+    revalidateDashboardPath("/dashboard/transport-coordinator/vehicles");
     return { success: true, vehicle };
   } catch (error) {
     console.error("Error creating vehicle:", error);
@@ -243,7 +278,7 @@ export async function updateVehicleStatus(vehicleId: string, status: string) {
       details: { status, plateNumber: vehicle.plateNumber }
     });
 
-    revalidatePath("/dashboard/transport-coordinator/vehicles");
+    revalidateDashboardPath("/dashboard/transport-coordinator/vehicles");
     return { success: true, vehicle };
   } catch (error) {
     console.error("Error updating vehicle status:", error);
@@ -275,7 +310,7 @@ export async function updateVehicle(vehicleId: string, formData: FormData) {
       details: { plateNumber: data.plateNumber, type: data.type, capacity: data.capacity }
     });
 
-    revalidatePath("/dashboard/transport-coordinator/vehicles");
+    revalidateDashboardPath("/dashboard/transport-coordinator/vehicles");
     return { success: true, vehicle };
   } catch (error) {
     console.error("Error updating vehicle:", error);
@@ -324,7 +359,7 @@ export async function createDriver(formData: FormData) {
       details: { name: data.name, licenseNumber: data.licenseNumber }
     });
 
-    revalidatePath("/dashboard/transport-coordinator/drivers");
+    revalidateDashboardPath("/dashboard/transport-coordinator/drivers");
     return { success: true, driver };
   } catch (error) {
     console.error("Error creating driver:", error);
@@ -349,7 +384,7 @@ export async function updateDriverStatus(driverId: string, status: string) {
       details: { status, name: driver.name }
     });
 
-    revalidatePath("/dashboard/transport-coordinator/drivers");
+    revalidateDashboardPath("/dashboard/transport-coordinator/drivers");
     return { success: true, driver };
   } catch (error) {
     console.error("Error updating driver status:", error);
@@ -381,7 +416,7 @@ export async function updateDriver(driverId: string, formData: FormData) {
       details: { name: data.name, licenseNumber: data.licenseNumber }
     });
 
-    revalidatePath("/dashboard/transport-coordinator/drivers");
+    revalidateDashboardPath("/dashboard/transport-coordinator/drivers");
     return { success: true, driver };
   } catch (error) {
     console.error("Error updating driver:", error);
@@ -443,7 +478,7 @@ export async function createTransportIssue(formData: FormData) {
       details: { issueType: data.issueType, transportTaskId: data.transportTaskId }
     });
 
-    revalidatePath("/dashboard/transport-coordinator/issues");
+    revalidateDashboardPath("/dashboard/transport-coordinator/issues");
     return { success: true, issue };
   } catch (error) {
     console.error("Error creating transport issue:", error);
@@ -484,7 +519,7 @@ export async function updateTransportIssue(issueId: string, formData: FormData) 
       details: { status: data.status, resolution: data.resolution }
     });
 
-    revalidatePath("/dashboard/transport-coordinator/issues");
+    revalidateDashboardPath("/dashboard/transport-coordinator/issues");
     return { success: true, issue };
   } catch (error) {
     console.error("Error updating transport issue:", error);
@@ -684,14 +719,50 @@ export async function createTransportSchedule(formData: FormData) {
 
     const scheduledDate = new Date(scheduledDateStr);
 
-    // Verify crop batch exists and is ready for transport
+    // Verify crop batch exists and is ready for transport scheduling
     const cropBatch = await prisma.cropBatch.findUnique({
       where: { id: cropBatchId },
-      include: { farm: true }
+      include: {
+        farm: true,
+        warehouse: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            city: true,
+          }
+        }
+      }
     });
 
-    if (!cropBatch || cropBatch.status !== "HARVESTED") {
+    const eligibleCropBatchStatuses = [
+      "HARVESTED",
+      "PROCESSED",
+      "READY_FOR_PACKAGING",
+      "PACKAGED",
+    ] as const;
+
+    if (!cropBatch || !eligibleCropBatchStatuses.includes(cropBatch.status as any)) {
       return { success: false, error: "Crop batch not found or not ready for transport" };
+    }
+
+    if (!cropBatch.warehouseId) {
+      return { success: false, error: "No destination warehouse assigned. Procurement must assign a warehouse before scheduling transport." };
+    }
+
+    // Prevent duplicate scheduling for the same crop batch
+    const existingActiveTaskForBatch = await prisma.transportTask.findFirst({
+      where: {
+        cropBatchId,
+        status: {
+          in: ["SCHEDULED", "IN_TRANSIT"],
+        },
+      },
+      select: { id: true },
+    });
+
+    if (existingActiveTaskForBatch) {
+      return { success: false, error: "This crop batch already has an active transport task" };
     }
 
     // Verify driver exists and is available
@@ -778,9 +849,36 @@ export async function createTransportSchedule(formData: FormData) {
       }
     });
 
-    revalidatePath("/dashboard/transport-coordinator/schedule");
-    revalidatePath("/dashboard/transport-coordinator/tasks");
-    revalidatePath("/dashboard/transport-coordinator");
+    // Notify destination warehouse managers that a delivery is scheduled.
+    try {
+      const warehouseManagers = await prisma.profile.findMany({
+        where: {
+          role: 'warehouse_manager',
+          isActive: true,
+          warehouseId: cropBatch.warehouseId,
+        },
+        select: { userId: true },
+      });
+
+      if (warehouseManagers.length > 0) {
+        const warehouseLabel = cropBatch.warehouse ? `${cropBatch.warehouse.name} (${cropBatch.warehouse.code})` : 'your warehouse';
+        await prisma.harvestNotification.createMany({
+          data: warehouseManagers.map((wm) => ({
+            cropBatchId,
+            sentTo: wm.userId,
+            isRead: false,
+            notificationType: 'GENERAL',
+            message: `Transport scheduled: Batch ${cropBatch.batchCode} is scheduled for delivery to ${warehouseLabel} on ${scheduledDate.toLocaleDateString()}.`,
+          }))
+        });
+      }
+    } catch (e) {
+      console.warn('Failed to notify warehouse managers on scheduling:', e);
+    }
+
+    revalidateDashboardPath("/dashboard/transport-coordinator/schedule");
+    revalidateDashboardPath("/dashboard/transport-coordinator/tasks");
+    revalidateDashboardPath("/dashboard/transport-coordinator");
 
     return { success: true, transportTask };
 
@@ -937,7 +1035,7 @@ export async function assignDriverToTransportTask(
       }
     })
 
-    revalidatePath('/dashboard/transport-coordinator')
+    revalidateDashboardPath('/dashboard/transport-coordinator')
     
     return { success: true, updatedTask }
   } catch (error) {
@@ -981,12 +1079,10 @@ export async function updateTransportTaskStatusAction(
       updateData.actualPickupDate = new Date()
     } else if (status === 'DELIVERED') {
       updateData.actualDeliveryDate = new Date()
-      
-      // Update crop batch status to RECEIVED
-      await prisma.cropBatch.update({
-        where: { id: transportTask.cropBatchId },
-        data: { status: 'RECEIVED' }
-      })
+
+      // IMPORTANT: Do not mark the crop batch as RECEIVED here.
+      // Delivery (driver/coordinator) is not the same as warehouse receipt confirmation.
+      // Warehouse managers confirm receipt via the scanner endpoint, which sets RECEIVED.
 
       // Free up the driver and vehicle
       if (transportTask.driverId) {
@@ -1024,7 +1120,7 @@ export async function updateTransportTaskStatusAction(
       }
     })
 
-    revalidatePath('/dashboard/transport-coordinator')
+    revalidateDashboardPath('/dashboard/transport-coordinator')
     
     return { success: true, updatedTask }
   } catch (error) {

@@ -502,7 +502,8 @@
       "contact": "Contact support if you believe this is an error"
     },
     "loginButton": "Go to Login",
-    "homeButton": "Go to Home"
+    "homeButton": "Go to Home",
+    "returnHome": "Go to Home"
   },
   
   "common": {
@@ -1098,7 +1099,10 @@
       "errorQRCode": "Please enter or scan a QR code",
       "errorSelectTask": "Please select a task",
       "errorSelectAction": "Please select an action (pickup or delivery)",
-      "loadTasksFailed": "Failed to load tasks"
+      "loadTasksFailed": "Failed to load tasks",
+      "qrDetected": "QR code detected",
+      "qrDetectedDesc": "Filled the QR code field automatically.",
+      "cameraPermissionError": "Unable to access camera. Please check permissions."
     },
     "issues": {
       "title": "Transport Issues",
@@ -1393,7 +1397,28 @@
       "enterMinimumStockLevel": "Enter minimum stock level",
       "cancel": "Cancel",
       "saveRequirement": "Save Requirement",
-      "updatedRequirement": "Updated minimum stock requirement for"
+      "updatedRequirement": "Updated minimum stock requirement for",
+      "setMinimumFirst": "Set a minimum stock first",
+      "stockNotLow": "Stock is not below the minimum",
+      "notifyFieldAgents": "Notify Field Agents",
+      "notificationSent": "Notification sent"
+    },
+    "batchReviews": {
+      "title": "Batch Reviews",
+      "description": "Review and approve harvested crop batches",
+      "pendingTitle": "Pending Batch Reviews",
+      "pendingDescription": "Harvested batches currently awaiting procurement approval",
+      "empty": "No batches pending review",
+      "batchCode": "Batch Code",
+      "cropType": "Crop Type",
+      "farm": "Farm",
+      "farmer": "Farmer",
+      "quantity": "Quantity",
+      "status": "Status",
+      "actions": "Actions",
+      "approve": "Approve",
+      "reject": "Reject",
+      "backToDashboard": "Back to dashboard"
     }
   },
   "transportCoordinator": {
@@ -1409,6 +1434,7 @@
     "dashboard": {
       "title": "Transport Coordinator Dashboard",
       "viewAllTasks": "View All Tasks",
+      "tasks": "Tasks",
       "totalTasks": "Total Tasks",
       "inTransit": "in transit",
       "availableVehicles": "Available Vehicles",

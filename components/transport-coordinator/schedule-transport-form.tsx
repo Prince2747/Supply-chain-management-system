@@ -17,9 +17,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Loader2, MapPin, Truck, User } from "lucide-react";
+import { CalendarIcon, Loader2, MapPin, Truck, User, Package } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import { createTransportSchedule } from "@/app/[locale]/dashboard/transport-coordinator/actions";
 import { toast } from "sonner";
 
@@ -27,6 +28,8 @@ interface CropBatch {
   id: string;
   batchCode: string;
   quantity: number | null;
+  status: string;
+  cropType: string;
   farm: {
     name: string;
     location: string | null;
@@ -96,6 +99,20 @@ export function ScheduleTransportForm({
     setSelectedCropBatch(batch || null);
   };
 
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      HARVESTED: 'bg-orange-100 text-orange-800',
+      PROCESSED: 'bg-purple-100 text-purple-800',
+      READY_FOR_PACKAGING: 'bg-indigo-100 text-indigo-800',
+      PACKAGED: 'bg-cyan-100 text-cyan-800',
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getStatusLabel = (status: string) => {
+    return status.replace(/_/g, ' ');
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Crop Batch Selection */}
@@ -109,9 +126,16 @@ export function ScheduleTransportForm({
             {cropBatches.length > 0 ? (
               cropBatches.map((batch) => (
                 <SelectItem key={batch.id} value={batch.id}>
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>{batch.batchCode} - {batch.farm.name} ({batch.quantity || 0}kg)</span>
+                  <div className="flex items-center justify-between gap-3 w-full">
+                    <div className="flex items-center space-x-2">
+                      <Package className="h-4 w-4" />
+                      <span className="font-medium">{batch.batchCode}</span>
+                      <span className="text-muted-foreground">-</span>
+                      <span className="text-sm">{batch.cropType}</span>
+                    </div>
+                    <Badge variant="secondary" className={cn("text-xs", getStatusColor(batch.status))}>
+                      {getStatusLabel(batch.status)}
+                    </Badge>
                   </div>
                 </SelectItem>
               ))
@@ -123,9 +147,23 @@ export function ScheduleTransportForm({
           </SelectContent>
         </Select>
         {selectedCropBatch && (
-          <p className="text-xs text-muted-foreground">
-            📍 Farm Location: {selectedCropBatch.farm.location}
-          </p>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">
+              📍 Farm: {selectedCropBatch.farm.name}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              📦 Quantity: {selectedCropBatch.quantity || 'N/A'} kg
+            </p>
+            <div className="text-xs text-muted-foreground flex items-center gap-1">
+              <span>🏷️ Status:</span>
+              <Badge
+                variant="secondary"
+                className={cn("text-xs", getStatusColor(selectedCropBatch.status))}
+              >
+                {getStatusLabel(selectedCropBatch.status)}
+              </Badge>
+            </div>
+          </div>
         )}
       </div>
 
@@ -252,15 +290,26 @@ export function ScheduleTransportForm({
       </Button>
 
       {(cropBatches.length === 0 || drivers.length === 0 || vehicles.length === 0) && (
-        <div className="text-center py-4 text-muted-foreground">
-          <p className="text-sm">
-            {cropBatches.length === 0 && "No crop batches available for transport. "}
-            {drivers.length === 0 && "No drivers available. "}
-            {vehicles.length === 0 && "No vehicles available. "}
-          </p>
-          <p className="text-xs mt-1">
-            Please ensure resources are available before scheduling.
-          </p>
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <div className="flex items-start space-x-3">
+            <Package className="h-5 w-5 text-amber-600 mt-0.5" />
+            <div className="flex-1 space-y-1">
+              <p className="text-sm font-medium text-amber-900">
+                Resources Required
+              </p>
+              <div className="text-sm text-amber-700 space-y-1">
+                {cropBatches.length === 0 && (
+                  <p>• No crop batches available for transport. Waiting for field agents to mark crops as HARVESTED, PROCESSED, or PACKAGED.</p>
+                )}
+                {drivers.length === 0 && (
+                  <p>• No drivers available. Please ensure drivers are set to AVAILABLE status.</p>
+                )}
+                {vehicles.length === 0 && (
+                  <p>• No vehicles available. Please ensure vehicles are set to AVAILABLE status.</p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </form>

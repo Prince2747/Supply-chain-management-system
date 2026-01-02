@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { redirect } from "next/navigation";
+import { useLocale } from "next-intl";
 
 interface ProcurementOfficerAuthWrapperProps {
   children: React.ReactNode;
 }
 
 export function ProcurementOfficerAuthWrapper({ children }: ProcurementOfficerAuthWrapperProps) {
+  const locale = useLocale();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -19,7 +20,7 @@ export function ProcurementOfficerAuthWrapper({ children }: ProcurementOfficerAu
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
-          window.location.href = '/login';
+          window.location.href = `/${locale}/login`;
           return;
         }
 
@@ -31,22 +32,22 @@ export function ProcurementOfficerAuthWrapper({ children }: ProcurementOfficerAu
 
         const profile = await response.json();
         
-        if (profile.role !== 'procurement_officer') {
-          window.location.href = '/unauthorized';
+        if (!['procurement_officer', 'admin', 'manager'].includes(profile.role)) {
+          window.location.href = `/${locale}/unauthorized`;
           return;
         }
 
         setIsAuthorized(true);
       } catch (error) {
         console.error('Auth check failed:', error);
-        window.location.href = '/login';
+        window.location.href = `/${locale}/login`;
       } finally {
         setIsLoading(false);
       }
     }
 
     checkAuth();
-  }, []);
+  }, [locale]);
 
   if (isLoading) {
     return (

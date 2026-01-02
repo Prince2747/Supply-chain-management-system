@@ -457,7 +457,8 @@
       "contact": "ይህ ስህተት ነው ብለው ካመኑ ድጋፍን ያግኙ"
     },
     "loginButton": "ወደ መግቢያ ይሂዱ",
-    "homeButton": "ወደ ዋና ገጽ ይሂዱ"
+    "homeButton": "ወደ ዋና ገጽ ይሂዱ",
+    "returnHome": "ወደ ዋና ገጽ ይሂዱ"
   },
   
   "common": {
@@ -1053,7 +1054,10 @@
       "errorQRCode": "እባክዎ QR ኮድ ያስገቡ ወይም ይቃኙ",
       "errorSelectTask": "እባክዎ ስራ ይምረጡ",
       "errorSelectAction": "እባክዎ ድርጊት ይምረጡ (መውሰጃ ወይም ማድረስ)",
-      "loadTasksFailed": "ስራዎችን መጫን አልተሳካም"
+      "loadTasksFailed": "ስራዎችን መጫን አልተሳካም",
+      "qrDetected": "QR ኮድ ተገኝቷል",
+      "qrDetectedDesc": "የQR ኮድ መስኩ በራሱ ተሞልቷል።",
+      "cameraPermissionError": "ካሜራን መድረስ አልተቻለም። ፈቃዶችን ይመርምሩ።"
     },
     "issues": {
       "title": "የትራንስፖርት ችግሮች",
@@ -1320,7 +1324,10 @@
     "stockRequirements": {
       "title": "የአክሲዮን መስፈርቶች",
       "description": "ዝቅተኛ የአክሲዮን ደረጃዎችን ያዘጋጁ እና የክምችት መስፈርቶችን ይቆጣጠሩ",
+      "totalCrops": "ጠቅላላ ሰብሎች",
+      "cropTypesInSystem": "በስርዓቱ ውስጥ ያሉ የሰብል ዓይነቶች",
       "sufficientStock": "በቂ አክሲዮን",
+      "aboveMinimum": "ከዝቅተኛ ደረጃ በላይ",
       "meetingRequirements": "መስፈርቶችን ማሟላት",
       "lowStock": "ዝቅተኛ አክሲዮን",
       "belowMinimum": "ከዝቅተኛ ደረጃዎች በታች",
@@ -1336,14 +1343,37 @@
       "sufficient": "በቂ",
       "low": "ዝቅተኛ",
       "noRequirement": "መስፈርት የለም",
+      "edit": "አርትዕ",
       "editRequirement": "መስፈርትን አርትዕ",
       "editStockRequirement": "የአክሲዮን መስፈርትን አርትዕ",
-      "setMinimumStock": "ዝቅተኛ የአክሲዮን ደረጃ ያቀናብሩ",
-      "minimumStockLevel": "ዝቅተኛ የአክሲዮን ደረጃ",
-      "enterMinimum": "ዝቅተኛ የአክሲዮን መጠን ያስገቡ",
+      "setMinimumStockLevel": "ዝቅተኛ የአክሲዮን ደረጃ ያቀናብሩ",
+      "currentStock": "አሁን ያለው አክሲዮን",
+      "minimumStock": "ዝቅተኛ አክሲዮን",
+      "enterMinimumStockLevel": "ዝቅተኛ የአክሲዮን መጠን ያስገቡ",
       "cancel": "ሰርዝ",
-      "saveChanges": "ለውጦችን አስቀምጥ",
-      "updatedRequirement": "የተዘመነ ዝቅተኛ የአክሲዮን መስፈርት ለ"
+      "saveRequirement": "መስፈርቱን አስቀምጥ",
+      "updatedRequirement": "የተዘመነ ዝቅተኛ የአክሲዮን መስፈርት ለ",
+      "setMinimumFirst": "መጀመሪያ ዝቅተኛ አክሲዮን ያቀናብሩ",
+      "stockNotLow": "አክሲዮኑ ከዝቅተኛው በታች አይደለም",
+      "notifyFieldAgents": "ለሜዳ ወኪሎች አሳውቅ",
+      "notificationSent": "ማሳወቂያ ተልኳል"
+    },
+    "batchReviews": {
+      "title": "የቡድን ግምገማዎች",
+      "description": "የተሰበሰቡ የሰብል ቡድኖችን ይገምግሙ እና ያጽድቁ",
+      "pendingTitle": "በመጠባበቅ ላይ ያሉ ግምገማዎች",
+      "pendingDescription": "ከተሰበሰቡ በኋላ የግዢ ማጽደቅ በመጠባበቅ ላይ ያሉ ቡድኖች",
+      "empty": "ግምገማ በመጠባበቅ ላይ ምንም ቡድኖች የሉም",
+      "batchCode": "የቡድን ኮድ",
+      "cropType": "የሰብል ዓይነት",
+      "farm": "እርሻ",
+      "farmer": "ገበሬ",
+      "quantity": "መጠን",
+      "status": "ሁኔታ",
+      "actions": "እርምጃዎች",
+      "approve": "አጽድቅ",
+      "reject": "አትቀበል",
+      "backToDashboard": "ወደ ዳሽቦርድ ተመለስ"
     }
   },
   "transportCoordinator": {
@@ -1359,6 +1389,7 @@
     "dashboard": {
       "title": "የትራንስፖርት አስተባባሪ ዳሽቦርድ",
       "viewAllTasks": "ሁሉንም ተግባራት ይመልከቱ",
+      "tasks": "ተግባራት",
       "totalTasks": "ጠቅላላ ተግባራት",
       "inTransit": "በመጓጓዝ ላይ",
       "availableVehicles": "የሚገኙ ተሽከርካሪዎች",

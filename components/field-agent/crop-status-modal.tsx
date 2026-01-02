@@ -76,9 +76,10 @@ const statusFlow = {
   PROCESSED: ['READY_FOR_PACKAGING'],
   READY_FOR_PACKAGING: ['PACKAGING'],
   PACKAGING: ['PACKAGED'],
-  PACKAGED: ['SHIPPED'],
-  SHIPPED: ['RECEIVED'],
-  RECEIVED: ['STORED']
+  // Handoff point: once PACKAGED, transport coordinator schedules transport
+  PACKAGED: [],
+  SHIPPED: [],
+  RECEIVED: []
 }
 
 export function CropStatusModal({ isOpen, onOpenChange, cropBatch, onUpdateStatus }: CropStatusModalProps) {
@@ -131,7 +132,10 @@ export function CropStatusModal({ isOpen, onOpenChange, cropBatch, onUpdateStatu
     })
   }
 
-  if (!cropBatch) return null
+  // Guard after all hooks to avoid hook-order mismatch
+  if (!cropBatch) {
+    return null
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

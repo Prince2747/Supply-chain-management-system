@@ -51,18 +51,18 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation Bar - Supabase Style */}
       <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="flex h-16 items-center justify-between px-6">
+        <div className="flex h-14 sm:h-16 items-center justify-between px-3 sm:px-6">
           {/* Logo and Brand */}
-          <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-2">
-              <img src="/logo.png" alt="Company Logo" className="h-8 w-auto" />
-              <span className="text-lg font-semibold text-gray-900">
+          <div className="flex items-center space-x-4 sm:space-x-8">
+            <div className="flex items-center space-x-1.5 sm:space-x-2">
+              <img src="/logo.png" alt="Company Logo" className="h-6 sm:h-8 w-auto" />
+              <span className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 truncate max-w-[120px] sm:max-w-none">
                 {t('adminDashboard')}
               </span>
             </div>
 
             {/* Navigation Links */}
-            <nav className="hidden md:flex items-center space-x-1">
+            <nav className="hidden md:flex items-center space-x-0.5 lg:space-x-1">
               {localizedNav.map((item) => {
                 const isActive = pathname === item.href;
                 return (
@@ -70,13 +70,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                      "flex items-center space-x-1.5 rounded-md px-2 lg:px-3 py-1.5 lg:py-2 text-xs lg:text-sm font-medium transition-colors",
                       isActive
                         ? "bg-green-100 text-green-900"
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     )}
                   >
-                    <item.icon className="h-4 w-4" />
+                    <item.icon className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
                     <span>{item.name}</span>
                   </Link>
                 );
@@ -85,7 +85,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </div>
 
           {/* Right side - Language switcher, logout, and mobile menu */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <LanguageSwitcher />
 
             <form action={logout} className="hidden md:block">
@@ -93,9 +93,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 type="submit"
                 variant="ghost"
                 size="sm"
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 text-xs lg:text-sm px-2 lg:px-3"
               >
-                <LogOut className="mr-2 h-4 w-4" />
+                <LogOut className="mr-1.5 h-3.5 w-3.5 lg:h-4 lg:w-4" />
                 {t('logout')}
               </Button>
             </form>
@@ -119,7 +119,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 bg-white">
-            <div className="px-4 py-2 space-y-1">
+            <div className="px-3 py-2 space-y-1">
               {localizedNav.map((item) => {
                 const isActive = pathname === item.href;
                 return (
@@ -128,13 +128,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={cn(
-                      "flex items-center space-x-3 rounded-md px-3 py-2 text-sm font-medium",
+                      "flex items-center space-x-2 rounded-md px-3 py-2 text-xs sm:text-sm font-medium",
                       isActive
                         ? "bg-green-100 text-green-900"
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     )}
                   >
-                    <item.icon className="h-4 w-4" />
+                    <item.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span>{item.name}</span>
                   </Link>
                 );
@@ -150,9 +150,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     type="submit"
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-gray-600 hover:text-gray-900"
+                    className="w-full justify-start text-gray-600 hover:text-gray-900 text-xs sm:text-sm"
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOut className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     {t('logout')}
                   </Button>
                 </form>

@@ -3,15 +3,17 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { InventoryMonitorClient } from "@/components/procurement-officer/inventory-monitor-client";
 import { getTranslations } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 
 export default async function InventoryMonitorPage() {
   const t = await getTranslations("procurementOfficer.inventory");
+  const locale = await getLocale();
   // Get current user authentication
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect(`/${locale}/login`);
   }
 
   const currentProfile = await prisma.profile.findUnique({
@@ -19,15 +21,15 @@ export default async function InventoryMonitorPage() {
     select: { role: true, name: true }
   });
 
-  if (!currentProfile || currentProfile.role !== 'procurement_officer') {
-    redirect('/unauthorized');
+  if (!currentProfile || !['procurement_officer', 'admin', 'manager'].includes(currentProfile.role)) {
+    redirect(`/${locale}/unauthorized`);
   }
 
   // Get detailed inventory data
   const inventoryData = await prisma.cropBatch.findMany({
     where: {
       status: {
-        in: ['PROCESSED', 'STORED'] // Available inventory
+        in: ['PROCESSED', 'RECEIVED', 'STORED'] // Available inventory (include newly received)
       }
     },
     include: {
@@ -68,7 +70,7 @@ export default async function InventoryMonitorPage() {
     },
     where: {
       status: {
-        in: ['PROCESSED', 'STORED']
+        in: ['PROCESSED', 'RECEIVED', 'STORED']
       }
     },
     orderBy: {
@@ -89,7 +91,7 @@ export default async function InventoryMonitorPage() {
     },
     where: {
       status: {
-        in: ['PROCESSED', 'STORED']
+        in: ['PROCESSED', 'RECEIVED', 'STORED']
       },
       warehouseId: {
         not: null

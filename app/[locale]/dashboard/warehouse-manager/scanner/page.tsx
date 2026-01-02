@@ -33,7 +33,7 @@ export default async function QRScannerPage() {
       status: "DELIVERED",
       cropBatch: {
         warehouseId: currentProfile.warehouseId,
-        status: "PACKAGED" // Only packaged batches can be received
+        status: { in: ["SHIPPED", "PACKAGED"] } // Awaiting warehouse receipt confirmation
       }
     },
     include: {

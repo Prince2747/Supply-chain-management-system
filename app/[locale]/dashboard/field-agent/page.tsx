@@ -169,21 +169,21 @@ export default async function FieldAgentDashboard() {
   const recentActivities = await getRecentActivities(user.id);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('title')}</h1>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('totalFarms')}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('totalFarms')}</CardTitle>
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalFarms}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xl sm:text-2xl font-bold">{stats.totalFarms}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               +{stats.thisMonthRegistrations} {t('newThisMonth')}
             </p>
           </CardContent>
@@ -191,12 +191,12 @@ export default async function FieldAgentDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('registeredFarmers')}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('registeredFarmers')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalFarmers}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xl sm:text-2xl font-bold">{stats.totalFarmers}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               {t('activePartnerships')}
             </p>
           </CardContent>
@@ -204,12 +204,12 @@ export default async function FieldAgentDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('activeBatches')}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('activeBatches')}</CardTitle>
             <Sprout className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.activeCropBatches}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xl sm:text-2xl font-bold">{stats.activeCropBatches}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               {stats.pendingHarvests} {t('pendingHarvest')}
             </p>
           </CardContent>
@@ -217,12 +217,12 @@ export default async function FieldAgentDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('qrCodes')}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('qrCodes')}</CardTitle>
             <QrCode className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.qrCodesGenerated}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xl sm:text-2xl font-bold">{stats.qrCodesGenerated}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               {t('generatedThisMonth')}
             </p>
           </CardContent>
@@ -230,14 +230,14 @@ export default async function FieldAgentDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Users className="mr-2 h-5 w-5" />
+            <CardTitle className="flex items-center text-base sm:text-lg">
+              <Users className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               {t('farmerManagement')}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               {t('farmerManagementDesc')}
             </CardDescription>
           </CardHeader>
@@ -252,11 +252,11 @@ export default async function FieldAgentDashboard() {
 
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Building className="mr-2 h-5 w-5" />
+            <CardTitle className="flex items-center text-base sm:text-lg">
+              <Building className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               {t('farmOperations')}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               {t('farmOperationsDesc')}
             </CardDescription>
           </CardHeader>
@@ -271,11 +271,11 @@ export default async function FieldAgentDashboard() {
 
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Sprout className="mr-2 h-5 w-5" />
+            <CardTitle className="flex items-center text-base sm:text-lg">
+              <Sprout className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               {t('cropBatches')}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               {t('cropBatchesDesc')}
             </CardDescription>
           </CardHeader>
@@ -292,41 +292,41 @@ export default async function FieldAgentDashboard() {
       {/* Recent Activities */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Clock className="mr-2 h-5 w-5" />
+          <CardTitle className="flex items-center text-base sm:text-lg">
+            <Clock className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
             {t('recentActivities')}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             {t('recentActivitiesDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {recentActivities.length > 0 ? (
               recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-center space-x-4 p-3 rounded-lg bg-gray-50">
+                <div key={activity.id} className="flex items-center space-x-2 sm:space-x-4 p-2 sm:p-3 rounded-lg bg-gray-50">
                   <div className="flex-shrink-0">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-xs sm:text-sm font-medium text-gray-900">
                       {activity.action.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
                     </p>
                     {activity.details && (
-                      <p className="text-sm text-gray-500">
+                      <p className="text-[10px] sm:text-xs text-gray-500 truncate">
                         {typeof activity.details === 'object' ? JSON.stringify(activity.details) : activity.details}
                       </p>
                     )}
                   </div>
-                  <div className="flex-shrink-0 text-xs text-gray-400">
+                  <div className="flex-shrink-0 text-[10px] sm:text-xs text-gray-400">
                     {formatTimeAgo(activity.createdAt, t)}
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center text-gray-500 py-4">
-                <p className="text-sm">{t('noRecentActivities')}</p>
-                <p className="text-xs">{t('noRecentActivitiesDesc')}</p>
+              <div className="text-center text-gray-500 py-3 sm:py-4">
+                <p className="text-xs sm:text-sm">{t('noRecentActivities')}</p>
+                <p className="text-[10px] sm:text-xs">{t('noRecentActivitiesDesc')}</p>
               </div>
             )}
           </div>

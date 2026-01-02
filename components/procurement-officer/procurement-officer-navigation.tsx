@@ -7,8 +7,7 @@ import {
   BarChart3,
   ClipboardList,
   Package,
-  CheckSquare,
-  Bell
+  CheckSquare
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -42,11 +41,6 @@ export function ProcurementOfficerNavigation({
       name: t("batchReviews"),
       href: `/${locale}/dashboard/procurement-officer/batch-reviews`,
       icon: CheckSquare,
-    },
-    {
-      name: t("notifications"),
-      href: `/${locale}/dashboard/procurement-officer/notifications`,
-      icon: Bell,
     },
   ];
   

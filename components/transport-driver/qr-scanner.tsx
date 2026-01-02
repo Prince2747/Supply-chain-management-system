@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,9 +39,79 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
   const [selectedAction, setSelectedAction] = useState<"pickup" | "delivery" | "">(action || "");
   const router = useRouter();
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const scannerControlsRef = useRef<{ stop: () => void } | null>(null);
+  const hasScannedRef = useRef(false);
+
   useEffect(() => {
     loadTasks();
   }, []);
+
+  useEffect(() => {
+    if (!isManualInput) {
+      startScanner();
+    } else {
+      stopScanner();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isManualInput]);
+
+  useEffect(() => {
+    return () => {
+      stopScanner();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const stopScanner = () => {
+    try {
+      scannerControlsRef.current?.stop();
+    } catch {
+      // ignore
+    } finally {
+      scannerControlsRef.current = null;
+    }
+  };
+
+  const startScanner = async () => {
+    if (!videoRef.current) return;
+    if (scannerControlsRef.current) return;
+
+    hasScannedRef.current = false;
+
+    try {
+      const { BrowserQRCodeReader } = await import("@zxing/browser");
+      const reader = new BrowserQRCodeReader();
+
+      const controls = await reader.decodeFromVideoDevice(
+        undefined,
+        videoRef.current,
+        (result) => {
+          if (!result) return;
+          if (hasScannedRef.current) return;
+          hasScannedRef.current = true;
+
+          const text = result.getText?.() ?? String(result);
+          setQrCode(text);
+
+          // Stop scanning to prevent duplicate reads, then switch to manual so user can confirm.
+          stopScanner();
+          setIsManualInput(true);
+
+          toast.success(t("qrDetected"), {
+            description: t("qrDetectedDesc"),
+          });
+        }
+      );
+
+      scannerControlsRef.current = controls;
+    } catch (error) {
+      console.error("Error starting QR scanner:", error);
+      toast.error(t("cameraPermissionError"));
+      setIsManualInput(true);
+      stopScanner();
+    }
+  };
 
   const loadTasks = async () => {
     try {
@@ -224,7 +294,10 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
               </Button>
               <Button
                 variant={isManualInput ? "default" : "outline"}
-                onClick={() => setIsManualInput(true)}
+                onClick={() => {
+                  setIsManualInput(true);
+                  stopScanner();
+                }}
                 size="sm"
               >
                 <Type className="h-4 w-4 mr-2" />
@@ -232,18 +305,28 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
               </Button>
             </div>
 
-            {/* Camera Scanner (placeholder - would need a QR scanning library) */}
+            {/* Camera Scanner */}
             {!isManualInput && (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <Camera className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500">{t("cameraPlaceholder")}</p>
-                <p className="text-sm text-gray-400 mt-2">
-                  {t("cameraPlaceholderDesc")}
-                </p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsManualInput(true)}
-                  className="mt-4"
+              <div className="space-y-3">
+                <div className="relative overflow-hidden rounded-lg border-2 border-dashed border-gray-300">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full aspect-square object-cover"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-48 h-48 border-2 border-white/80 rounded-lg" />
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsManualInput(true);
+                    stopScanner();
+                  }}
+                  className="w-full"
                 >
                   {t("switchToManual")}
                 </Button>

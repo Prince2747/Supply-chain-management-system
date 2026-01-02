@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
+import { useLocale } from 'next-intl'
 import { toast } from 'sonner'
 import { 
   Card, 
@@ -47,6 +48,18 @@ import {
   Building2,
   Loader2
 } from 'lucide-react'
+
+function formatDateUtc(input: string | Date, locale: string) {
+  const date = input instanceof Date ? input : new Date(input)
+  if (Number.isNaN(date.getTime())) return ''
+
+  return new Intl.DateTimeFormat(locale, {
+    timeZone: 'UTC',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date)
+}
 
 interface CropBatch {
   id: string
@@ -153,7 +166,10 @@ function TransportAssignmentModal({
     })
   }
 
-  if (!cropBatch) return null
+  // Guard after all hooks to avoid hook-order mismatch
+  if (!cropBatch) {
+    return null
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -297,6 +313,7 @@ export function ProcurementDashboard({
   warehouses,
   onAssignTransport 
 }: ProcurementDashboardProps) {
+  const locale = useLocale()
   const [cropBatches, setCropBatches] = useState<CropBatch[]>(initialCropBatches)
   const [selectedBatch, setSelectedBatch] = useState<CropBatch | null>(null)
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false)
@@ -396,7 +413,7 @@ export function ProcurementDashboard({
                         {batch.actualHarvest ? (
                           <div className="flex items-center gap-1 text-sm">
                             <Calendar className="h-3 w-3" />
-                            {new Date(batch.actualHarvest).toLocaleDateString()}
+                            {formatDateUtc(batch.actualHarvest, locale)}
                           </div>
                         ) : (
                           <span className="text-gray-400">Not harvested</span>

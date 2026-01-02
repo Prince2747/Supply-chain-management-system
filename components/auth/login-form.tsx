@@ -43,6 +43,25 @@ export function LoginForm() {
           setTimeout(() => {
             // Add locale prefix to the redirect path
             const localizedPath = `/${locale}${result.redirectPath}`;
+
+            // In dev (especially Codespaces), Next chunks can go stale and throw ChunkLoadError
+            // during client-side transitions. Recover by hard reloading to the destination.
+            const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+              const reason = event.reason as any;
+              const message = String(reason?.message ?? reason ?? '');
+              const name = String(reason?.name ?? '');
+              if (name === 'ChunkLoadError' || /ChunkLoadError|Loading chunk \d+ failed/i.test(message)) {
+                window.removeEventListener('unhandledrejection', onUnhandledRejection);
+                window.location.href = localizedPath;
+              }
+            };
+            window.addEventListener('unhandledrejection', onUnhandledRejection);
+
+            // Best-effort cleanup in case nothing errors.
+            window.setTimeout(() => {
+              window.removeEventListener('unhandledrejection', onUnhandledRejection);
+            }, 10_000);
+
             router.push(localizedPath);
           }, 1500);
         } else {

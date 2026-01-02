@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,7 @@ interface StorageManagementClientProps {
 }
 
 export function StorageManagementClient({ batches, stats }: StorageManagementClientProps) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedBatch, setSelectedBatch] = useState<CropBatch | null>(null);
@@ -109,9 +111,8 @@ export function StorageManagementClient({ batches, stats }: StorageManagementCli
       }
 
       toast.success('Batch successfully marked as stored');
-      
-      // Refresh the page to get updated data
-      window.location.reload();
+
+      router.refresh();
     } catch (error) {
       console.error('Error updating storage status:', error);
       toast.error('Failed to update storage status');

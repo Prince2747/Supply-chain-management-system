@@ -6,6 +6,14 @@ import { revalidatePath } from "next/cache";
 import { logActivity } from "@/lib/activity-logger";
 import { redirect } from "next/navigation";
 
+const DASHBOARD_LOCALES = ["en", "am"] as const;
+
+function revalidateDashboardPath(pathWithoutLocale: string) {
+  for (const locale of DASHBOARD_LOCALES) {
+    revalidatePath(`/${locale}${pathWithoutLocale}`);
+  }
+}
+
 // Get current driver profile
 async function getCurrentDriver() {
   const supabase = await createClient();
@@ -139,6 +147,21 @@ export async function confirmPickup(taskId: string, formData: FormData) {
   const qrCode = formData.get("qrCode") as string;
   const notes = formData.get("notes") as string || null;
 
+  const rawInput = (qrCode || "").trim();
+  let scannedBatchCode: string | undefined;
+  let scannedQrCode: string | undefined;
+  if (rawInput) {
+    try {
+      const parsed = JSON.parse(rawInput);
+      if (parsed && typeof parsed === "object") {
+        if (typeof (parsed as any).batchCode === "string") scannedBatchCode = (parsed as any).batchCode.trim();
+        if (typeof (parsed as any).qrCode === "string") scannedQrCode = (parsed as any).qrCode.trim();
+      }
+    } catch {
+      // not JSON; treat as raw code
+    }
+  }
+
   try {
     // Verify the task belongs to this driver
     const task = await prisma.transportTask.findFirst({
@@ -147,8 +170,22 @@ export async function confirmPickup(taskId: string, formData: FormData) {
         driverId: driver.id,
         status: "SCHEDULED"
       },
-      include: {
-        cropBatch: true
+      select: {
+        id: true,
+        cropBatchId: true,
+        notes: true,
+        cropBatch: {
+          select: {
+            batchCode: true,
+            qrCode: true,
+          }
+        },
+        coordinator: {
+          select: {
+            userId: true,
+            name: true,
+          }
+        }
       }
     });
 
@@ -156,8 +193,12 @@ export async function confirmPickup(taskId: string, formData: FormData) {
       return { success: false, error: "Task not found or not available for pickup" };
     }
 
-    // Verify QR code matches the batch code
-    if (qrCode !== task.cropBatch.batchCode) {
+    // Verify scanned value matches this crop batch.
+    // Accept: raw batchCode, raw qrCode, or a JSON payload containing either.
+    const matchesBatchCode = rawInput === task.cropBatch.batchCode || scannedBatchCode === task.cropBatch.batchCode;
+    const matchesQrCode = !!task.cropBatch.qrCode && (rawInput === task.cropBatch.qrCode || scannedQrCode === task.cropBatch.qrCode);
+
+    if (!matchesBatchCode && !matchesQrCode) {
       return { success: false, error: "QR code does not match the assigned batch" };
     }
 
@@ -182,10 +223,25 @@ export async function confirmPickup(taskId: string, formData: FormData) {
       action: "CONFIRM_PICKUP",
       entityType: "TransportTask",
       entityId: taskId,
-      details: { batchCode: task.cropBatch.batchCode, qrCode }
+      details: { batchCode: task.cropBatch.batchCode, qrCode: rawInput }
     });
 
-    revalidatePath("/dashboard/transport-driver");
+    // Notify the assigned transport coordinator
+    try {
+      await prisma.harvestNotification.create({
+        data: {
+          cropBatchId: task.cropBatchId,
+          sentTo: task.coordinator.userId,
+          isRead: false,
+          notificationType: 'GENERAL',
+          message: `Pickup confirmed: Driver ${driver.name} picked up batch ${task.cropBatch.batchCode}.`,
+        }
+      });
+    } catch (e) {
+      console.warn('Failed to notify coordinator on pickup:', e);
+    }
+
+    revalidateDashboardPath("/dashboard/transport-driver");
     return { success: true };
   } catch (error) {
     console.error("Error confirming pickup:", error);
@@ -200,6 +256,21 @@ export async function confirmDelivery(taskId: string, formData: FormData) {
   const qrCode = formData.get("qrCode") as string;
   const notes = formData.get("notes") as string || null;
 
+  const rawInput = (qrCode || "").trim();
+  let scannedBatchCode: string | undefined;
+  let scannedQrCode: string | undefined;
+  if (rawInput) {
+    try {
+      const parsed = JSON.parse(rawInput);
+      if (parsed && typeof parsed === "object") {
+        if (typeof (parsed as any).batchCode === "string") scannedBatchCode = (parsed as any).batchCode.trim();
+        if (typeof (parsed as any).qrCode === "string") scannedQrCode = (parsed as any).qrCode.trim();
+      }
+    } catch {
+      // not JSON; treat as raw code
+    }
+  }
+
   try {
     // Verify the task belongs to this driver
     const task = await prisma.transportTask.findFirst({
@@ -208,8 +279,23 @@ export async function confirmDelivery(taskId: string, formData: FormData) {
         driverId: driver.id,
         status: "IN_TRANSIT"
       },
-      include: {
-        cropBatch: true
+      select: {
+        id: true,
+        cropBatchId: true,
+        notes: true,
+        cropBatch: {
+          select: {
+            batchCode: true,
+            qrCode: true,
+            warehouseId: true,
+          }
+        },
+        coordinator: {
+          select: {
+            userId: true,
+            name: true,
+          }
+        }
       }
     });
 
@@ -217,8 +303,12 @@ export async function confirmDelivery(taskId: string, formData: FormData) {
       return { success: false, error: "Task not found or not available for delivery" };
     }
 
-    // Verify QR code matches the batch code
-    if (qrCode !== task.cropBatch.batchCode) {
+    // Verify scanned value matches this crop batch.
+    // Accept: raw batchCode, raw qrCode, or a JSON payload containing either.
+    const matchesBatchCode = rawInput === task.cropBatch.batchCode || scannedBatchCode === task.cropBatch.batchCode;
+    const matchesQrCode = !!task.cropBatch.qrCode && (rawInput === task.cropBatch.qrCode || scannedQrCode === task.cropBatch.qrCode);
+
+    if (!matchesBatchCode && !matchesQrCode) {
       return { success: false, error: "QR code does not match the assigned batch" };
     }
 
@@ -253,10 +343,52 @@ export async function confirmDelivery(taskId: string, formData: FormData) {
       action: "CONFIRM_DELIVERY",
       entityType: "TransportTask",
       entityId: taskId,
-      details: { batchCode: task.cropBatch.batchCode, qrCode }
+      details: { batchCode: task.cropBatch.batchCode, qrCode: rawInput }
     });
 
-    revalidatePath("/dashboard/transport-driver");
+    // Notify coordinator + destination warehouse managers that warehouse receipt is pending.
+    try {
+      await prisma.harvestNotification.create({
+        data: {
+          cropBatchId: task.cropBatchId,
+          sentTo: task.coordinator.userId,
+          isRead: false,
+          notificationType: 'GENERAL',
+          message: `Delivery confirmed: Driver ${driver.name} delivered batch ${task.cropBatch.batchCode}. Awaiting warehouse receipt confirmation.`,
+        }
+      });
+    } catch (e) {
+      console.warn('Failed to notify coordinator on delivery:', e);
+    }
+
+    if (task.cropBatch.warehouseId) {
+      try {
+        const warehouseManagers = await prisma.profile.findMany({
+          where: {
+            role: 'warehouse_manager',
+            isActive: true,
+            warehouseId: task.cropBatch.warehouseId,
+          },
+          select: { userId: true },
+        });
+
+        if (warehouseManagers.length > 0) {
+          await prisma.harvestNotification.createMany({
+            data: warehouseManagers.map((wm) => ({
+              cropBatchId: task.cropBatchId,
+              sentTo: wm.userId,
+              isRead: false,
+              notificationType: 'GENERAL',
+              message: `Batch delivered: Batch ${task.cropBatch.batchCode} has arrived. Please scan and confirm receipt.`,
+            })),
+          });
+        }
+      } catch (e) {
+        console.warn('Failed to notify warehouse managers on delivery:', e);
+      }
+    }
+
+    revalidateDashboardPath("/dashboard/transport-driver");
     return { success: true };
   } catch (error) {
     console.error("Error confirming delivery:", error);
