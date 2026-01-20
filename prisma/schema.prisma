@@ -160,6 +160,29 @@ model HarvestNotification {
   cropBatch        CropBatch        @relation(fields: [cropBatchId], references: [id])
 }
 
+// Unified Notification model for all roles
+model Notification {
+  id          String               @id @default(uuid()) @db.Uuid
+  userId      String               @db.Uuid
+  type        NotificationType     @default(GENERAL)
+  category    NotificationCategory @default(GENERAL)
+  title       String
+  message     String
+  metadata    Json?                // Flexible data: { taskId, vehicleId, batchId, etc. }
+  actionUrl   String?              // Deep link to relevant page
+  priority    NotificationPriority @default(NORMAL)
+  isRead      Boolean              @default(false)
+  readAt      DateTime?
+  createdAt   DateTime             @default(now())
+  createdBy   String?              @db.Uuid
+  expiresAt   DateTime?
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@index([type])
+  @@index([category])
+}
+
 model Vehicle {
   id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   plateNumber    String          @unique
@@ -263,11 +286,57 @@ enum InspectionStatus {
 }
 
 enum NotificationType {
+  // Field Agent
   HARVEST_READY
   INSPECTION_DUE
   PEST_ALERT
   WEATHER_WARNING
+  FARM_REGISTERED
+  CROP_BATCH_CREATED
+  
+  // Warehouse Manager
+  SHIPMENT_ARRIVING
+  STORAGE_FULL
+  BATCH_RECEIVED
+  PACKAGING_COMPLETE
+  QUALITY_CHECK_NEEDED
+  LOW_STOCK_ALERT
+  
+  // Transport Coordinator
+  TRANSPORT_SCHEDULED
+  DRIVER_ASSIGNED
+  ROUTE_DELAYED
+  VEHICLE_ISSUE
+  TASK_COMPLETED
+  ISSUE_REPORTED
+  
+  // Transport Driver
+  TASK_ASSIGNED
+  ROUTE_UPDATED
+  PICKUP_READY
+  DELIVERY_CONFIRMED
+  SCHEDULE_CHANGED
+  
+  // General
   GENERAL
+  ANNOUNCEMENT
+  REMINDER
+  SYSTEM_ALERT
+}
+
+enum NotificationCategory {
+  CROP_MANAGEMENT
+  WAREHOUSE
+  TRANSPORT
+  SYSTEM
+  GENERAL
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
 }
 
 enum VehicleType {

@@ -959,7 +959,24 @@
       "dashboard": "ዳሽቦርድ",
       "myTasks": "ስራዎቼ",
       "qrScanner": "QR ስካነር",
-      "issues": "ችግሮች"
+      "issues": "ችግሮች",
+      "notifications": "ማሳወቂያዎች"
+    },
+    "notifications": {
+      "title": "የስራ ማሳወቂያዎች",
+      "noNotifications": "ገና ማሳወቂያዎች የሉም",
+      "noNotificationsDesc": "አስፈላጊ ነገር ሲኖር እናሳውቅዎታለን",
+      "markAllRead": "ሁሉንም እንደተነበበ ምልክት አድርግ",
+      "markRead": "እንደተነበበ ምልክት አድርግ",
+      "unreadCount": "{count} ያልተነበቡ ማሳወቂያዎች አሉዎት",
+      "allCaughtUp": "ሁሉም ተጠናቅቋል!",
+      "types": {
+        "TASK_ASSIGNED": "ስራ ተመድቧል",
+        "ROUTE_UPDATED": "መንገድ ተዘምኗል",
+        "PICKUP_READY": "ለማንሳት ዝግጁ",
+        "DELIVERY_CONFIRMED": "ማድረስ ተረጋግጧል",
+        "SCHEDULE_CHANGED": "መርሐግብር ተቀይሯል"
+      }
     },
     "dashboard": {
       "title": "የትራንስፖርት ሹፌር ዳሽቦርድ",
@@ -1120,7 +1137,25 @@
       "dashboard": "ዳሽቦርድ",
       "packaging": "ማሸጊያ",
       "receiptScanner": "ደረሰኝ ስካነር",
-      "storage": "ማከማቻ"
+      "storage": "ማከማቻ",
+      "notifications": "ማሳወቂያዎች"
+    },
+    "notifications": {
+      "title": "የመጋዘን ማሳወቂያዎች",
+      "noNotifications": "ገና ማሳወቂያዎች የሉም",
+      "noNotificationsDesc": "አስፈላጊ ነገር ሲኖር እናሳውቅዎታለን",
+      "markAllRead": "ሁሉንም እንደተነበበ ምልክት አድርግ",
+      "markRead": "እንደተነበበ ምልክት አድርግ",
+      "unreadCount": "{count} ያልተነበቡ ማሳወቂያዎች አሉዎት",
+      "allCaughtUp": "ሁሉም ተጠናቅቋል!",
+      "types": {
+        "SHIPMENT_ARRIVING": "ጭነት እየደረሰ ነው",
+        "STORAGE_FULL": "ማከማቻ ሞልቷል",
+        "BATCH_RECEIVED": "ባች ተቀብሏል",
+        "PACKAGING_COMPLETE": "ማሸግ ተጠናቅቋል",
+        "QUALITY_CHECK_NEEDED": "የጥራት ምርመራ ያስፈልጋል",
+        "LOW_STOCK_ALERT": "ዝቅተኛ ክምችት ማስጠንቀቂያ"
+      }
     },
     "dashboard": {
       "title": "የመጋዘን አስተዳዳሪ ዳሽቦርድ",
@@ -1384,7 +1419,25 @@
       "vehicles": "ተሽከርካሪዎች",
       "drivers": "ሹፌሮች",
       "issues": "ጉዳዮች",
-      "reports": "ሪፖርቶች"
+      "reports": "ሪፖርቶች",
+      "notifications": "ማሳወቂያዎች"
+    },
+    "notifications": {
+      "title": "የትራንስፖርት ማሳወቂያዎች",
+      "noNotifications": "ገና ማሳወቂያዎች የሉም",
+      "noNotificationsDesc": "አስፈላጊ ነገር ሲኖር እናሳውቅዎታለን",
+      "markAllRead": "ሁሉንም እንደተነበበ ምልክት አድርግ",
+      "markRead": "እንደተነበበ ምልክት አድርግ",
+      "unreadCount": "{count} ያልተነበቡ ማሳወቂያዎች አሉዎት",
+      "allCaughtUp": "ሁሉም ተጠናቅቋል!",
+      "types": {
+        "TRANSPORT_SCHEDULED": "ትራንስፖርት ተመዝግቧል",
+        "DRIVER_ASSIGNED": "ሹፌር ተመድቧል",
+        "ROUTE_DELAYED": "መንገድ ዘግይቷል",
+        "VEHICLE_ISSUE": "የተሽከርካሪ ችግር",
+        "TASK_COMPLETED": "ስራ ተጠናቅቋል",
+        "ISSUE_REPORTED": "ችግር ሪፖርት ተደርጓል"
+      }
     },
     "dashboard": {
       "title": "የትራንስፖርት አስተባባሪ ዳሽቦርድ",

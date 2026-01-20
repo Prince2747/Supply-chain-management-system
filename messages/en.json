@@ -1004,7 +1004,24 @@
       "dashboard": "Dashboard",
       "myTasks": "My Tasks",
       "qrScanner": "QR Scanner",
-      "issues": "Issues"
+      "issues": "Issues",
+      "notifications": "Notifications"
+    },
+    "notifications": {
+      "title": "Task Notifications",
+      "noNotifications": "No notifications yet",
+      "noNotificationsDesc": "We'll notify you when there's something important",
+      "markAllRead": "Mark all read",
+      "markRead": "Mark read",
+      "unreadCount": "You have {count} unread notification(s)",
+      "allCaughtUp": "All caught up!",
+      "types": {
+        "TASK_ASSIGNED": "Task Assigned",
+        "ROUTE_UPDATED": "Route Updated",
+        "PICKUP_READY": "Pickup Ready",
+        "DELIVERY_CONFIRMED": "Delivery Confirmed",
+        "SCHEDULE_CHANGED": "Schedule Changed"
+      }
     },
     "dashboard": {
       "title": "Transport Driver Dashboard",
@@ -1165,7 +1182,25 @@
       "dashboard": "Dashboard",
       "packaging": "Packaging",
       "receiptScanner": "Receipt Scanner",
-      "storage": "Storage"
+      "storage": "Storage",
+      "notifications": "Notifications"
+    },
+    "notifications": {
+      "title": "Warehouse Notifications",
+      "noNotifications": "No notifications yet",
+      "noNotificationsDesc": "We'll notify you when there's something important",
+      "markAllRead": "Mark all read",
+      "markRead": "Mark read",
+      "unreadCount": "You have {count} unread notification(s)",
+      "allCaughtUp": "All caught up!",
+      "types": {
+        "SHIPMENT_ARRIVING": "Shipment Arriving",
+        "STORAGE_FULL": "Storage Full",
+        "BATCH_RECEIVED": "Batch Received",
+        "PACKAGING_COMPLETE": "Packaging Complete",
+        "QUALITY_CHECK_NEEDED": "Quality Check Needed",
+        "LOW_STOCK_ALERT": "Low Stock Alert"
+      }
     },
     "dashboard": {
       "title": "Warehouse Manager Dashboard",
@@ -1429,7 +1464,25 @@
       "vehicles": "Vehicles",
       "drivers": "Drivers",
       "issues": "Issues",
-      "reports": "Reports"
+      "reports": "Reports",
+      "notifications": "Notifications"
+    },
+    "notifications": {
+      "title": "Transport Notifications",
+      "noNotifications": "No notifications yet",
+      "noNotificationsDesc": "We'll notify you when there's something important",
+      "markAllRead": "Mark all read",
+      "markRead": "Mark read",
+      "unreadCount": "You have {count} unread notification(s)",
+      "allCaughtUp": "All caught up!",
+      "types": {
+        "TRANSPORT_SCHEDULED": "Transport Scheduled",
+        "DRIVER_ASSIGNED": "Driver Assigned",
+        "ROUTE_DELAYED": "Route Delayed",
+        "VEHICLE_ISSUE": "Vehicle Issue",
+        "TASK_COMPLETED": "Task Completed",
+        "ISSUE_REPORTED": "Issue Reported"
+      }
     },
     "dashboard": {
       "title": "Transport Coordinator Dashboard",
