@@ -1,16 +1,30 @@
 'use server'
 
 import { prisma } from "@/lib/prisma";
-import { Role } from "@/lib/generated/prisma/client";
+import { NotificationCategory, NotificationType, Role } from "@/lib/generated/prisma/client";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 import { logActivity } from "@/lib/activity-logger";
 import {
-  getMyHarvestNotifications,
-  markHarvestNotificationAsRead,
-} from "@/lib/notifications/actions";
+  createBulkNotifications,
+  getMyNotifications,
+  markNotificationAsRead as markUnifiedNotificationAsRead,
+} from "@/lib/notifications/unified-actions";
 
 const DASHBOARD_LOCALES = ["en", "am"] as const;
+
+const ALLOWED_CROP_TYPES = [
+  'Haricot Bean',
+  'Faba Bean',
+  'Chickpea',
+  'Red Pea',
+  'Lentil',
+  'Soybean',
+  'Vetch',
+  'Niger Seed (Noug)',
+  'Sesame',
+  'Groundnut',
+] as const;
 
 function revalidateDashboardPath(pathWithoutLocale: string) {
   for (const locale of DASHBOARD_LOCALES) {
@@ -47,34 +61,78 @@ export async function createFarmer(formData: FormData) {
       throw new Error('Access denied: Field agent role required');
     }
 
-    const name = formData.get('name') as string;
+    const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
     const email = formData.get('email') as string;
     const phone = formData.get('phone') as string;
     const address = formData.get('address') as string;
     const city = formData.get('city') as string;
     const state = formData.get('state') as string;
+    const region = formData.get('region') as string;
+    const zone = formData.get('zone') as string;
+    const woreda = formData.get('woreda') as string;
+    const kebele = formData.get('kebele') as string;
+    const gender = formData.get('gender') as string;
+    const farmerType = formData.get('farmerType') as string;
     const country = formData.get('country') as string;
 
-    if (!name) {
-      throw new Error('Name is required');
+    if (!firstName || !lastName) {
+      throw new Error('First name and last name are required');
     }
+
+    if (!region) {
+      throw new Error('Region is required');
+    }
+
+    const normalizedPhone = (phone || '').trim();
+    if (!normalizedPhone) {
+      throw new Error('Phone number is required');
+    }
+    if (!normalizedPhone.startsWith('+251')) {
+      throw new Error('Phone number must start with +251');
+    }
+
+    if (!gender) {
+      throw new Error('Gender is required');
+    }
+
+    if (!farmerType) {
+      throw new Error('Farmer type is required');
+    }
+
+    const normalizedCountry = (country || 'Ethiopia').trim();
+    if (normalizedCountry.toLowerCase() !== 'ethiopia') {
+      throw new Error('Country must be Ethiopia');
+    }
+
+    const name = `${firstName.trim()} ${lastName.trim()}`.trim();
 
     // Generate farmer ID
     const farmerCount = await prisma.farmer.count();
     const farmerId = `FAR-${String(farmerCount + 1).padStart(4, '0')}`;
 
+    const farmerData: any = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      name,
+      email: email || null,
+      phone: normalizedPhone,
+      address: address || null,
+      city: city || null,
+      state: state || null,
+      region: region || null,
+      zone: zone || null,
+      woreda: woreda || null,
+      kebele: kebele || null,
+      gender: gender || null,
+      farmerType: farmerType || null,
+      country: normalizedCountry,
+      farmerId,
+      registeredBy: user.id,
+    };
+
     const farmer = await prisma.farmer.create({
-      data: {
-        name,
-        email: email || null,
-        phone: phone || null,
-        address: address || null,
-        city: city || null,
-        state: state || null,
-        country: country || null,
-        farmerId,
-        registeredBy: user.id,
-      }
+      data: farmerData,
     });
 
     // Log the activity
@@ -142,29 +200,58 @@ export async function updateFarmer(formData: FormData) {
     }
 
     const id = formData.get('id') as string;
-    const name = formData.get('name') as string;
+    const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
     const email = formData.get('email') as string;
     const phone = formData.get('phone') as string;
     const address = formData.get('address') as string;
     const city = formData.get('city') as string;
     const state = formData.get('state') as string;
+    const region = formData.get('region') as string;
+    const zone = formData.get('zone') as string;
+    const woreda = formData.get('woreda') as string;
+    const kebele = formData.get('kebele') as string;
+    const gender = formData.get('gender') as string;
+    const farmerType = formData.get('farmerType') as string;
     const country = formData.get('country') as string;
 
-    if (!id || !name) {
-      throw new Error('ID and name are required');
+    if (!id || !firstName || !lastName) {
+      throw new Error('ID, first name, and last name are required');
     }
+
+    const normalizedPhone = (phone || '').trim();
+    if (normalizedPhone && !normalizedPhone.startsWith('+251')) {
+      throw new Error('Phone number must start with +251');
+    }
+
+    const normalizedCountry = (country || 'Ethiopia').trim();
+    if (normalizedCountry.toLowerCase() !== 'ethiopia') {
+      throw new Error('Country must be Ethiopia');
+    }
+
+    const name = `${firstName.trim()} ${lastName.trim()}`.trim();
+
+    const updateData: any = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      name,
+      email: email || null,
+      phone: normalizedPhone || null,
+      address: address || null,
+      city: city || null,
+      state: state || null,
+      region: region || null,
+      zone: zone || null,
+      woreda: woreda || null,
+      kebele: kebele || null,
+      gender: gender || null,
+      farmerType: farmerType || null,
+      country: normalizedCountry,
+    };
 
     const farmer = await prisma.farmer.update({
       where: { id },
-      data: {
-        name,
-        email: email || null,
-        phone: phone || null,
-        address: address || null,
-        city: city || null,
-        state: state || null,
-        country: country || null,
-      }
+      data: updateData,
     });
 
     revalidateDashboardPath('/dashboard/field-agent/farmers');
@@ -224,26 +311,40 @@ export async function createFarm(formData: FormData) {
     const coordinates = formData.get('coordinates') as string;
     const area = formData.get('area') as string;
     const soilType = formData.get('soilType') as string;
+    const region = formData.get('region') as string;
+    const zone = formData.get('zone') as string;
+    const woreda = formData.get('woreda') as string;
+    const kebele = formData.get('kebele') as string;
 
     if (!name || !farmerId) {
       throw new Error('Name and farmer are required');
+    }
+
+    if (!region) {
+      throw new Error('Region is required');
     }
 
     // Generate farm code
     const farmCount = await prisma.farm.count();
     const farmCode = `FM-${String(farmCount + 1).padStart(4, '0')}`;
 
+    const farmData: any = {
+      name,
+      farmCode,
+      farmerId,
+      location: location || null,
+      coordinates: coordinates || null,
+      area: area ? parseFloat(area) : null,
+      soilType: soilType || null,
+      region: region || null,
+      zone: zone || null,
+      woreda: woreda || null,
+      kebele: kebele || null,
+      registeredBy: user.id,
+    };
+
     const farm = await prisma.farm.create({
-      data: {
-        name,
-        farmCode,
-        farmerId,
-        location: location || null,
-        coordinates: coordinates || null,
-        area: area ? parseFloat(area) : null,
-        soilType: soilType || null,
-        registeredBy: user.id,
-      },
+      data: farmData,
       include: {
         farmer: {
           select: {
@@ -332,6 +433,10 @@ export async function createCropBatch(formData: FormData) {
 
     if (!cropType || !farmId) {
       throw new Error('Crop type and farm are required');
+    }
+
+    if (!ALLOWED_CROP_TYPES.includes(cropType as any)) {
+      throw new Error('Invalid crop type');
     }
 
     // Get farm to get farmer ID
@@ -474,7 +579,7 @@ export async function updateCropBatchStatus(batchId: string, status: string) {
 // Harvest Notification Actions
 export async function getHarvestNotifications() {
   try {
-    return await getMyHarvestNotifications();
+    return await getMyNotifications(NotificationCategory.CROP_MANAGEMENT);
   } catch (error) {
     console.error('Error fetching harvest notifications:', error);
     return [];
@@ -483,7 +588,7 @@ export async function getHarvestNotifications() {
 
 export async function markNotificationAsRead(notificationId: string) {
   try {
-    const result = await markHarvestNotificationAsRead(notificationId);
+    const result = await markUnifiedNotificationAsRead(notificationId);
     if (result.success) {
       revalidateDashboardPath('/dashboard/field-agent/notifications');
     }
@@ -528,12 +633,12 @@ export async function updateCropStatus(
     }
 
     // Workflow handoff: once packaged, transport coordinator takes over
-    const terminalForFieldAgent = ['PACKAGED', 'SHIPPED', 'RECEIVED', 'STORED'] as const;
+    const terminalForFieldAgent = ['PENDING_APPROVAL', 'PROCESSED', 'PACKAGED', 'SHIPPED', 'RECEIVED', 'STORED'] as const;
     if (terminalForFieldAgent.includes(cropBatch.status as any)) {
       throw new Error('This crop batch is ready for shipment. Transport coordinator will handle the next steps.');
     }
 
-    const disallowedNewStatuses = ['SHIPPED', 'RECEIVED', 'STORED'] as const;
+    const disallowedNewStatuses = ['PROCESSED', 'SHIPPED', 'RECEIVED', 'STORED'] as const;
     if (disallowedNewStatuses.includes(newStatus as any)) {
       throw new Error('Field agents cannot set shipment/warehouse statuses. Please stop at PACKAGED.');
     }
@@ -558,25 +663,31 @@ export async function updateCropStatus(
       data: updateData
     });
 
-    // Create notification for procurement officer when crop is ready for harvest or processed
-    if (newStatus === 'READY_FOR_HARVEST' || newStatus === 'PROCESSED') {
+    // Create notification for procurement officer when crop is submitted for approval
+    if (newStatus === 'PENDING_APPROVAL') {
       // Find procurement officers
       const procurementOfficers = await prisma.profile.findMany({
         where: { role: 'procurement_officer', isActive: true }
       });
 
-      // Create notifications for all procurement officers
-      for (const officer of procurementOfficers) {
-        await prisma.harvestNotification.create({
-          data: {
-            cropBatchId: batchId,
-            message: `Crop batch ${cropBatch.batchCode} is now ${newStatus.replace('_', ' ').toLowerCase()}. Status notes: ${notes}`,
-            notificationType: newStatus === 'READY_FOR_HARVEST' ? 'HARVEST_READY' : 'GENERAL',
-            sentTo: officer.userId,
-            isRead: false
-          }
-        });
-      }
+      const message = `Crop batch ${cropBatch.batchCode} is pending approval. Status notes: ${notes}`;
+      const title = 'Crop batch pending approval';
+
+      await createBulkNotifications(
+        procurementOfficers.map((officer) => ({
+          userId: officer.userId,
+          type: NotificationType.HARVEST_READY,
+          category: NotificationCategory.CROP_MANAGEMENT,
+          title,
+          message,
+          metadata: {
+            batchId,
+            batchCode: cropBatch.batchCode,
+            newStatus,
+            notes,
+          },
+        }))
+      );
     }
 
     // Log the activity

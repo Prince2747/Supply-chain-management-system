@@ -332,6 +332,21 @@ export function ProcurementDashboard({
     STORED: 'bg-slate-100 text-slate-800'
   }
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'PROCESSED':
+        return 'Approved'
+      case 'SHIPPED':
+        return 'Pending Receipt'
+      case 'RECEIVED':
+        return 'Received at Warehouse'
+      case 'STORED':
+        return 'Completed'
+      default:
+        return status.replace('_', ' ')
+    }
+  }
+
   const handleAssignTransport = async (batchId: string) => {
     const batch = cropBatches.find(b => b.id === batchId)
     if (batch) {
@@ -403,7 +418,7 @@ export function ProcurementDashboard({
                       <TableCell>{batch.farmer.name || 'Unknown Farmer'}</TableCell>
                       <TableCell>
                         <Badge className={statusColors[batch.status as keyof typeof statusColors]}>
-                          {batch.status.replace('_', ' ')}
+                          {getStatusLabel(batch.status)}
                         </Badge>
                       </TableCell>
                       <TableCell>

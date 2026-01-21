@@ -4,6 +4,11 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/utils/supabase/server';
 import { logActivity } from '@/lib/activity-logger';
+import {
+  notifyTransportCoordinator,
+  createBulkNotifications,
+} from '@/lib/notifications/unified-actions';
+import { NotificationCategory, NotificationType } from '@/lib/generated/prisma';
 
 const DASHBOARD_LOCALES = ['en', 'am'] as const;
 
@@ -213,6 +218,9 @@ export async function confirmBatchReceipt(batchId: string) {
       return { error: 'Batch ID is required' };
     }
 
+    // Enforce QR-only receipt confirmation.
+    return { error: 'Receipt confirmations must be done via QR code scanning.' };
+
     const ctx = await getWarehouseManagerContext();
     if (ctx.error || !ctx.user || !ctx.profile) {
       return { error: ctx.error || 'Unauthorized' };
@@ -252,15 +260,13 @@ export async function confirmBatchReceipt(batchId: string) {
       });
 
       if (latestTask?.coordinator?.userId) {
-        await prisma.harvestNotification.create({
-          data: {
-            cropBatchId: batchId,
-            sentTo: latestTask.coordinator.userId,
-            isRead: false,
-            notificationType: 'GENERAL',
-            message: `Warehouse receipt confirmed: Batch ${updatedBatch.batchCode} has been received at the warehouse.`,
-          },
-        });
+        await notifyTransportCoordinator(
+          latestTask.coordinator.userId,
+          NotificationType.BATCH_RECEIVED,
+          'Received at warehouse',
+          `Batch ${updatedBatch.batchCode} has been received at the warehouse.`,
+          { batchId, batchCode: updatedBatch.batchCode }
+        );
       }
 
       const procurementOfficers = await prisma.profile.findMany({
@@ -269,15 +275,16 @@ export async function confirmBatchReceipt(batchId: string) {
       });
 
       if (procurementOfficers.length > 0) {
-        await prisma.harvestNotification.createMany({
-          data: procurementOfficers.map((po) => ({
-            cropBatchId: batchId,
-            sentTo: po.userId,
-            isRead: false,
-            notificationType: 'GENERAL',
-            message: `Batch received: Batch ${updatedBatch.batchCode} has arrived at the warehouse.`,
-          })),
-        });
+        await createBulkNotifications(
+          procurementOfficers.map((po) => ({
+            userId: po.userId,
+            type: NotificationType.BATCH_RECEIVED,
+            category: NotificationCategory.WAREHOUSE,
+            title: 'Received at warehouse',
+            message: `Batch ${updatedBatch.batchCode} has been received at the warehouse.`,
+            metadata: { batchId, batchCode: updatedBatch.batchCode },
+          }))
+        );
       }
     } catch (e) {
       console.warn('Failed to send receipt notifications:', e);
@@ -286,7 +293,13 @@ export async function confirmBatchReceipt(batchId: string) {
     await logActivity({
       userId: ctx.user.id,
       action: 'BATCH_RECEIPT_CONFIRMATION',
-      details: `Confirmed receipt of batch ${updatedBatch.batchCode} at warehouse`,
+      details: {
+        message: `Confirmed receipt of batch ${updatedBatch.batchCode} at warehouse`,
+        role: ctx.profile.role,
+        statusFrom: currentBatch.status,
+        statusTo: 'RECEIVED',
+        receiptMethod: 'qr_scan',
+      },
       entityType: 'CropBatch',
       entityId: batchId
     });
@@ -328,16 +341,78 @@ export async function updateStorageStatus(batchId: string, storageLocation?: str
       return { error: `Cannot store batch in ${currentBatch.status} status. Only RECEIVED batches can be stored.` };
     }
 
+    const noteFragments: string[] = [];
+    if (storageLocation) noteFragments.push(`Storage location: ${storageLocation}`);
+    if (notes) noteFragments.push(`Notes: ${notes}`);
+
+    const appendedNotes = noteFragments.length
+      ? `${currentBatch.notes ? `${currentBatch.notes} | ` : ''}${noteFragments.join(' | ')}`
+      : currentBatch.notes ?? undefined;
+
     const updatedBatch = await prisma.cropBatch.update({
       where: { id: batchId },
-      data: { status: 'STORED', updatedAt: new Date() },
+      data: {
+        status: 'STORED',
+        updatedAt: new Date(),
+        notes: appendedNotes,
+      },
       include: { farm: { select: { name: true } } }
     });
+
+    try {
+      const latestTask = await prisma.transportTask.findFirst({
+        where: { cropBatchId: batchId },
+        orderBy: { updatedAt: 'desc' },
+        include: {
+          coordinator: { select: { userId: true } },
+        },
+      });
+
+      const procurementOfficers = await prisma.profile.findMany({
+        where: { role: 'procurement_officer', isActive: true },
+        select: { userId: true },
+      });
+
+      if (procurementOfficers.length > 0) {
+        await createBulkNotifications(
+          procurementOfficers.map((po) => ({
+            userId: po.userId,
+            type: NotificationType.GENERAL,
+            category: NotificationCategory.WAREHOUSE,
+            title: 'Batch stored',
+            message: `Batch ${updatedBatch.batchCode} has been stored in the warehouse${storageLocation ? ` (${storageLocation})` : ''}.`,
+            metadata: {
+              batchId,
+              batchCode: updatedBatch.batchCode,
+              storageLocation: storageLocation || null,
+            },
+          }))
+        );
+      }
+
+      if (latestTask?.coordinator?.userId) {
+        await notifyTransportCoordinator(
+          latestTask.coordinator.userId,
+          NotificationType.GENERAL,
+          'Batch stored',
+          `Batch ${updatedBatch.batchCode} has been stored in the warehouse${storageLocation ? ` (${storageLocation})` : ''}.`,
+          { batchId, batchCode: updatedBatch.batchCode, storageLocation: storageLocation || null }
+        );
+      }
+    } catch (e) {
+      console.warn('Failed to notify on storage update:', e);
+    }
 
     await logActivity({
       userId: ctx.user.id,
       action: 'BATCH_STORAGE_UPDATE',
-      details: `Updated batch ${updatedBatch.batchCode} status to STORED${storageLocation ? ` (location: ${storageLocation})` : ''}${notes ? ` (notes: ${notes})` : ''}`,
+      details: {
+        message: `Updated batch ${updatedBatch.batchCode} status to STORED${storageLocation ? ` (location: ${storageLocation})` : ''}${notes ? ` (notes: ${notes})` : ''}`,
+        role: ctx.profile.role,
+        statusFrom: currentBatch.status,
+        statusTo: 'STORED',
+        storageLocation: storageLocation || null,
+      },
       entityType: 'CropBatch',
       entityId: batchId
     });

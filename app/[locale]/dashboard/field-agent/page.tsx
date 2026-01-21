@@ -68,10 +68,11 @@ async function getDashboardStats(userId: string) {
       }),
       
       // Unread notifications for this field agent
-      prisma.harvestNotification.count({
+      prisma.notification.count({
         where: {
-          sentTo: userId,
-          isRead: false
+          userId,
+          isRead: false,
+          category: 'CROP_MANAGEMENT',
         }
       }),
       

@@ -4,8 +4,59 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { logActivity } from "@/lib/activity-logger";
+import {
+  notifyTransportDriver,
+  notifyAllWarehouseManagers,
+} from "@/lib/notifications/unified-actions";
+import { NotificationType } from "@/lib/generated/prisma";
 
 const DASHBOARD_LOCALES = ["en", "am"] as const;
+
+const VEHICLE_TYPES = [
+  "TRUCK",
+  "VAN",
+  "PICKUP",
+  "REFRIGERATED_TRUCK",
+  "CONTAINER_TRUCK",
+] as const;
+
+const VEHICLE_STATUSES = [
+  "AVAILABLE",
+  "IN_USE",
+  "MAINTENANCE",
+  "OUT_OF_SERVICE",
+] as const;
+
+const DRIVER_STATUSES = [
+  "AVAILABLE",
+  "ON_DUTY",
+  "OFF_DUTY",
+  "SICK_LEAVE",
+] as const;
+
+const TRANSPORT_STATUSES = [
+  "SCHEDULED",
+  "IN_TRANSIT",
+  "DELIVERED",
+  "CANCELLED",
+  "DELAYED",
+] as const;
+
+const ISSUE_TYPES = [
+  "VEHICLE_BREAKDOWN",
+  "TRAFFIC_DELAY",
+  "WEATHER_DELAY",
+  "DAMAGED_GOODS",
+  "ROUTE_CHANGE",
+  "OTHER",
+] as const;
+
+const ISSUE_STATUSES = [
+  "OPEN",
+  "IN_PROGRESS",
+  "RESOLVED",
+  "ESCALATED",
+] as const;
 
 function revalidateDashboardPath(pathWithoutLocale: string) {
   for (const locale of DASHBOARD_LOCALES) {
@@ -104,14 +155,31 @@ export async function getTransportTasks() {
 export async function createTransportTask(formData: FormData) {
   const profile = await getCurrentUser();
 
+  const cropBatchId = (formData.get("cropBatchId") as string)?.trim();
+  const vehicleId = (formData.get("vehicleId") as string)?.trim();
+  const driverId = (formData.get("driverId") as string)?.trim();
+  const pickupLocation = (formData.get("pickupLocation") as string)?.trim();
+  const deliveryLocation = (formData.get("deliveryLocation") as string)?.trim();
+  const scheduledDateRaw = formData.get("scheduledDate") as string;
+  const notes = (formData.get("notes") as string) || null;
+
+  if (!cropBatchId || !vehicleId || !driverId || !pickupLocation || !deliveryLocation || !scheduledDateRaw) {
+    return { success: false, error: "All required fields must be filled" };
+  }
+
+  const scheduledDate = new Date(scheduledDateRaw);
+  if (Number.isNaN(scheduledDate.getTime())) {
+    return { success: false, error: "Scheduled date is invalid" };
+  }
+
   const data = {
-    cropBatchId: formData.get("cropBatchId") as string,
-    vehicleId: formData.get("vehicleId") as string,
-    driverId: formData.get("driverId") as string,
-    pickupLocation: formData.get("pickupLocation") as string,
-    deliveryLocation: formData.get("deliveryLocation") as string,
-    scheduledDate: new Date(formData.get("scheduledDate") as string),
-    notes: formData.get("notes") as string || null,
+    cropBatchId,
+    vehicleId,
+    driverId,
+    pickupLocation,
+    deliveryLocation,
+    scheduledDate,
+    notes,
   };
 
   try {
@@ -140,15 +208,13 @@ export async function createTransportTask(formData: FormData) {
 
       const driverUserId = driverWithProfile?.Profile?.userId;
       if (driverUserId) {
-        await prisma.harvestNotification.create({
-          data: {
-            cropBatchId: data.cropBatchId,
-            sentTo: driverUserId,
-            isRead: false,
-            notificationType: 'GENERAL',
-            message: `New transport task assigned for batch ${task.cropBatch.batchCode}. Scheduled: ${task.scheduledDate.toLocaleDateString()}.`,
-          }
-        });
+        await notifyTransportDriver(
+          driverUserId,
+          NotificationType.TASK_ASSIGNED,
+          'New transport task assigned',
+          `New transport task assigned for batch ${task.cropBatch.batchCode}. Scheduled: ${task.scheduledDate.toLocaleDateString()}.`,
+          { batchId: data.cropBatchId, batchCode: task.cropBatch.batchCode, scheduledDate: task.scheduledDate }
+        );
       }
     } catch (e) {
       console.warn('Failed to notify driver for transport task:', e);
@@ -178,12 +244,29 @@ export async function createTransportTask(formData: FormData) {
 export async function updateTransportTask(taskId: string, formData: FormData) {
   const profile = await getCurrentUser();
 
-  const status = formData.get("status") as string;
+  const status = (formData.get("status") as string)?.trim();
+  if (!status || !TRANSPORT_STATUSES.includes(status as any)) {
+    return { success: false, error: "Invalid transport status" };
+  }
+
+  const actualPickupDateRaw = formData.get("actualPickupDate") as string | null;
+  const actualDeliveryDateRaw = formData.get("actualDeliveryDate") as string | null;
+  const actualPickupDate = actualPickupDateRaw ? new Date(actualPickupDateRaw) : null;
+  const actualDeliveryDate = actualDeliveryDateRaw ? new Date(actualDeliveryDateRaw) : null;
+
+  if (actualPickupDate && Number.isNaN(actualPickupDate.getTime())) {
+    return { success: false, error: "Actual pickup date is invalid" };
+  }
+
+  if (actualDeliveryDate && Number.isNaN(actualDeliveryDate.getTime())) {
+    return { success: false, error: "Actual delivery date is invalid" };
+  }
+
   const data = {
     status: status as any, // Type assertion to handle enum
-    actualPickupDate: formData.get("actualPickupDate") ? new Date(formData.get("actualPickupDate") as string) : null,
-    actualDeliveryDate: formData.get("actualDeliveryDate") ? new Date(formData.get("actualDeliveryDate") as string) : null,
-    notes: formData.get("notes") as string || null,
+    actualPickupDate,
+    actualDeliveryDate,
+    notes: (formData.get("notes") as string) || null,
   };
 
   try {
@@ -233,11 +316,27 @@ export async function getVehicles() {
 export async function createVehicle(formData: FormData) {
   const profile = await getCurrentUser();
 
-  const vehicleType = formData.get("type") as string;
+  const vehicleType = (formData.get("type") as string)?.trim();
+  const plateNumber = (formData.get("plateNumber") as string)?.trim();
+  const capacityRaw = formData.get("capacity") as string;
+  const capacity = Number(capacityRaw);
+
+  if (!plateNumber || !vehicleType) {
+    return { success: false, error: "Plate number and vehicle type are required" };
+  }
+
+  if (!VEHICLE_TYPES.includes(vehicleType as any)) {
+    return { success: false, error: "Invalid vehicle type" };
+  }
+
+  if (!Number.isFinite(capacity) || capacity <= 0) {
+    return { success: false, error: "Vehicle capacity must be a positive number" };
+  }
+
   const data = {
-    plateNumber: formData.get("plateNumber") as string,
+    plateNumber,
     type: vehicleType as any, // Type assertion to handle enum
-    capacity: parseFloat(formData.get("capacity") as string),
+    capacity,
   };
 
   try {
@@ -264,6 +363,14 @@ export async function createVehicle(formData: FormData) {
 export async function updateVehicleStatus(vehicleId: string, status: string) {
   const profile = await getCurrentUser();
 
+  if (!vehicleId) {
+    return { success: false, error: "Vehicle ID is required" };
+  }
+
+  if (!status || !VEHICLE_STATUSES.includes(status as any)) {
+    return { success: false, error: "Invalid vehicle status" };
+  }
+
   try {
     const vehicle = await prisma.vehicle.update({
       where: { id: vehicleId },
@@ -289,11 +396,31 @@ export async function updateVehicleStatus(vehicleId: string, status: string) {
 export async function updateVehicle(vehicleId: string, formData: FormData) {
   const profile = await getCurrentUser();
 
-  const vehicleType = formData.get("type") as string;
+  if (!vehicleId) {
+    return { success: false, error: "Vehicle ID is required" };
+  }
+
+  const vehicleType = (formData.get("type") as string)?.trim();
+  const plateNumber = (formData.get("plateNumber") as string)?.trim();
+  const capacityRaw = formData.get("capacity") as string;
+  const capacity = Number(capacityRaw);
+
+  if (!plateNumber || !vehicleType) {
+    return { success: false, error: "Plate number and vehicle type are required" };
+  }
+
+  if (!VEHICLE_TYPES.includes(vehicleType as any)) {
+    return { success: false, error: "Invalid vehicle type" };
+  }
+
+  if (!Number.isFinite(capacity) || capacity <= 0) {
+    return { success: false, error: "Vehicle capacity must be a positive number" };
+  }
+
   const data = {
-    plateNumber: formData.get("plateNumber") as string,
+    plateNumber,
     type: vehicleType as any, // Type assertion to handle enum
-    capacity: parseFloat(formData.get("capacity") as string),
+    capacity,
   };
 
   try {
@@ -339,11 +466,20 @@ export async function getDrivers() {
 export async function createDriver(formData: FormData) {
   const profile = await getCurrentUser();
 
+  const name = (formData.get("name") as string)?.trim();
+  const licenseNumber = (formData.get("licenseNumber") as string)?.trim();
+  const phone = (formData.get("phone") as string)?.trim();
+  const email = (formData.get("email") as string)?.trim() || null;
+
+  if (!name || !licenseNumber || !phone) {
+    return { success: false, error: "Name, license number, and phone are required" };
+  }
+
   const data = {
-    name: formData.get("name") as string,
-    licenseNumber: formData.get("licenseNumber") as string,
-    phone: formData.get("phone") as string,
-    email: formData.get("email") as string || null,
+    name,
+    licenseNumber,
+    phone,
+    email,
   };
 
   try {
@@ -370,6 +506,14 @@ export async function createDriver(formData: FormData) {
 export async function updateDriverStatus(driverId: string, status: string) {
   const profile = await getCurrentUser();
 
+  if (!driverId) {
+    return { success: false, error: "Driver ID is required" };
+  }
+
+  if (!status || !DRIVER_STATUSES.includes(status as any)) {
+    return { success: false, error: "Invalid driver status" };
+  }
+
   try {
     const driver = await prisma.driver.update({
       where: { id: driverId },
@@ -395,11 +539,24 @@ export async function updateDriverStatus(driverId: string, status: string) {
 export async function updateDriver(driverId: string, formData: FormData) {
   const profile = await getCurrentUser();
 
+  if (!driverId) {
+    return { success: false, error: "Driver ID is required" };
+  }
+
+  const name = (formData.get("name") as string)?.trim();
+  const licenseNumber = (formData.get("licenseNumber") as string)?.trim();
+  const phone = (formData.get("phone") as string)?.trim();
+  const email = (formData.get("email") as string)?.trim() || null;
+
+  if (!name || !licenseNumber || !phone) {
+    return { success: false, error: "Name, license number, and phone are required" };
+  }
+
   const data = {
-    name: formData.get("name") as string,
-    licenseNumber: formData.get("licenseNumber") as string,
-    phone: formData.get("phone") as string,
-    email: formData.get("email") as string || null,
+    name,
+    licenseNumber,
+    phone,
+    email,
   };
 
   try {
@@ -449,11 +606,22 @@ export async function getTransportIssues() {
 export async function createTransportIssue(formData: FormData) {
   const profile = await getCurrentUser();
 
-  const issueType = formData.get("issueType") as string;
+  const issueType = (formData.get("issueType") as string)?.trim();
+  const transportTaskId = (formData.get("transportTaskId") as string)?.trim();
+  const description = (formData.get("description") as string)?.trim();
+
+  if (!transportTaskId || !issueType || !description) {
+    return { success: false, error: "All required fields must be filled" };
+  }
+
+  if (!ISSUE_TYPES.includes(issueType as any)) {
+    return { success: false, error: "Invalid issue type" };
+  }
+
   const data = {
-    transportTaskId: formData.get("transportTaskId") as string,
+    transportTaskId,
     issueType: issueType as any, // Type assertion to handle enum
-    description: formData.get("description") as string,
+    description,
   };
 
   try {
@@ -489,10 +657,19 @@ export async function createTransportIssue(formData: FormData) {
 export async function updateTransportIssue(issueId: string, formData: FormData) {
   const profile = await getCurrentUser();
 
-  const status = formData.get("status") as string;
+  const status = (formData.get("status") as string)?.trim();
+  if (!status || !ISSUE_STATUSES.includes(status as any)) {
+    return { success: false, error: "Invalid issue status" };
+  }
+
+  const resolution = (formData.get("resolution") as string) || null;
+  if (status === "RESOLVED" && !resolution?.trim()) {
+    return { success: false, error: "Resolution is required when resolving an issue" };
+  }
+
   const data = {
     status: status as any, // Type assertion to handle enum
-    resolution: formData.get("resolution") as string || null,
+    resolution: resolution?.trim() || null,
     resolvedAt: formData.get("status") === "RESOLVED" ? new Date() : null,
   };
 
@@ -705,19 +882,22 @@ export async function createTransportSchedule(formData: FormData) {
   try {
     const profile = await getCurrentUser();
 
-    const cropBatchId = formData.get("cropBatchId") as string;
-    const driverId = formData.get("driverId") as string;
-    const vehicleId = formData.get("vehicleId") as string;
-    const scheduledDateStr = formData.get("scheduledDate") as string;
-    const pickupLocation = formData.get("pickupLocation") as string;
-    const deliveryLocation = formData.get("deliveryLocation") as string;
-    const notes = formData.get("notes") as string;
+    const cropBatchId = (formData.get("cropBatchId") as string)?.trim();
+    const driverId = (formData.get("driverId") as string)?.trim();
+    const vehicleId = (formData.get("vehicleId") as string)?.trim();
+    const scheduledDateStr = (formData.get("scheduledDate") as string)?.trim();
+    const pickupLocation = (formData.get("pickupLocation") as string)?.trim();
+    const deliveryLocation = (formData.get("deliveryLocation") as string)?.trim();
+    const notes = (formData.get("notes") as string) || null;
 
     if (!cropBatchId || !driverId || !vehicleId || !scheduledDateStr || !pickupLocation || !deliveryLocation) {
       return { success: false, error: "All required fields must be filled" };
     }
 
     const scheduledDate = new Date(scheduledDateStr);
+    if (Number.isNaN(scheduledDate.getTime())) {
+      return { success: false, error: "Scheduled date is invalid" };
+    }
 
     // Verify crop batch exists and is ready for transport scheduling
     const cropBatch = await prisma.cropBatch.findUnique({
@@ -811,7 +991,7 @@ export async function createTransportSchedule(formData: FormData) {
         scheduledDate,
         pickupLocation,
         deliveryLocation,
-        notes: notes || null,
+        notes,
         coordinatorId: profile.id,
       }
     });
@@ -862,15 +1042,13 @@ export async function createTransportSchedule(formData: FormData) {
 
       if (warehouseManagers.length > 0) {
         const warehouseLabel = cropBatch.warehouse ? `${cropBatch.warehouse.name} (${cropBatch.warehouse.code})` : 'your warehouse';
-        await prisma.harvestNotification.createMany({
-          data: warehouseManagers.map((wm) => ({
-            cropBatchId,
-            sentTo: wm.userId,
-            isRead: false,
-            notificationType: 'GENERAL',
-            message: `Transport scheduled: Batch ${cropBatch.batchCode} is scheduled for delivery to ${warehouseLabel} on ${scheduledDate.toLocaleDateString()}.`,
-          }))
-        });
+        await notifyAllWarehouseManagers(
+          cropBatch.warehouseId!,
+          NotificationType.SHIPMENT_ARRIVING,
+          'Shipment scheduled',
+          `Transport scheduled: Batch ${cropBatch.batchCode} is scheduled for delivery to ${warehouseLabel} on ${scheduledDate.toLocaleDateString()}.`,
+          { batchId: cropBatchId, batchCode: cropBatch.batchCode, scheduledDate }
+        );
       }
     } catch (e) {
       console.warn('Failed to notify warehouse managers on scheduling:', e);
@@ -955,6 +1133,14 @@ export async function assignDriverToTransportTask(
     const profile = await getCurrentUser();
     if (profile.userId !== coordinatorId) {
       throw new Error('Unauthorized')
+    }
+
+    if (!data.transportTaskId || !data.driverId || !data.vehicleId) {
+      throw new Error('Transport task, driver, and vehicle are required')
+    }
+
+    if (data.scheduledDate && Number.isNaN(data.scheduledDate.getTime())) {
+      throw new Error('Scheduled date is invalid')
     }
 
     // Verify the transport task exists and belongs to this coordinator
@@ -1053,6 +1239,10 @@ export async function updateTransportTaskStatusAction(
     const profile = await getCurrentUser();
     if (profile.userId !== coordinatorId) {
       throw new Error('Unauthorized')
+    }
+
+    if (!status || !TRANSPORT_STATUSES.includes(status as any)) {
+      throw new Error('Invalid transport status')
     }
 
     // Verify the transport task exists and belongs to this coordinator

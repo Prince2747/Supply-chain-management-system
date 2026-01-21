@@ -46,7 +46,7 @@ export default async function ProcurementOfficerDashboard() {
   // Get batch statistics for review
   const pendingBatches = await prisma.cropBatch.count({
     where: { 
-      status: "HARVESTED" // Batches ready for procurement review
+      status: "PENDING_APPROVAL" as any // Batches ready for procurement review
     }
   });
 
@@ -61,7 +61,7 @@ export default async function ProcurementOfficerDashboard() {
   // Get recent batches needing review
   const recentBatches = await prisma.cropBatch.findMany({
     where: {
-      status: "HARVESTED"
+      status: "PENDING_APPROVAL" as any
     },
     include: {
       farm: {

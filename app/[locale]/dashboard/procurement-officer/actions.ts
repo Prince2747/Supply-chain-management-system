@@ -4,8 +4,25 @@ import { prisma } from '@/lib/prisma'
 import { logActivity } from '@/lib/activity-logger'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
+import { createBulkNotifications } from '@/lib/notifications/unified-actions'
+import { NotificationCategory, NotificationType } from '@/lib/generated/prisma'
 
 const DASHBOARD_LOCALES = ['en', 'am'] as const
+
+const PROCUREMENT_CROP_TYPES = [
+  'Haricot Bean',
+  'Faba Bean',
+  'Chickpea',
+  'Red Pea',
+  'Lentil',
+  'Soybean',
+  'Vetch',
+  'Niger Seed (Noug)',
+  'Sesame',
+  'Groundnut',
+] as const
+
+const STOCK_UNITS = ['kg', 'quintals', 'tons'] as const
 
 function revalidateDashboardPath(pathWithoutLocale: string) {
   for (const locale of DASHBOARD_LOCALES) {
@@ -17,13 +34,14 @@ type StockRequirementRow = {
   cropType: string
   minStock: number
   unit: string
+  targetQuantity: number | null
 }
 
 export async function getStockRequirementsFromDb(): Promise<StockRequirementRow[]> {
   // Uses raw SQL because this repo commits a generated Prisma client
   // (lib/generated/prisma) which would otherwise need regeneration.
   const rows = await prisma.$queryRaw<StockRequirementRow[]>`
-    SELECT "cropType", "minStock", "unit"
+    SELECT "cropType", "minStock", "unit", "targetQuantity"
     FROM "public"."StockRequirement"
     ORDER BY "cropType" ASC
   `
@@ -33,6 +51,7 @@ export async function getStockRequirementsFromDb(): Promise<StockRequirementRow[
 export async function upsertStockRequirement(input: {
   cropType: string
   minStock: number
+  targetQuantity?: number
   unit?: string
 }) {
   const supabase = await createClient()
@@ -59,22 +78,38 @@ export async function upsertStockRequirement(input: {
 
   const cropType = (input.cropType || '').trim()
   const minStock = Number(input.minStock)
+  const targetQuantity = input.targetQuantity === undefined || input.targetQuantity === null
+    ? 0
+    : Number(input.targetQuantity)
   const unit = (input.unit || 'kg').trim() || 'kg'
 
   if (!cropType) {
     return { success: false, error: 'Crop type is required' } as const
   }
 
+  if (!PROCUREMENT_CROP_TYPES.includes(cropType as any)) {
+    return { success: false, error: 'Invalid crop type' } as const
+  }
+
   if (!Number.isFinite(minStock) || minStock < 0) {
     return { success: false, error: 'Minimum stock must be a non-negative number' } as const
   }
 
+  if (!Number.isFinite(targetQuantity) || targetQuantity < 0) {
+    return { success: false, error: 'Target quantity must be a non-negative number' } as const
+  }
+
+  if (!STOCK_UNITS.includes(unit as any)) {
+    return { success: false, error: 'Invalid unit' } as const
+  }
+
   // Upsert into the new table.
   await prisma.$executeRaw`
-    INSERT INTO "public"."StockRequirement" ("cropType", "minStock", "unit", "createdBy", "updatedBy")
-    VALUES (${cropType}, ${minStock}, ${unit}, ${user.id}::uuid, ${user.id}::uuid)
+    INSERT INTO "public"."StockRequirement" ("cropType", "minStock", "targetQuantity", "unit", "createdBy", "updatedBy")
+    VALUES (${cropType}, ${minStock}, ${targetQuantity}, ${unit}, ${user.id}::uuid, ${user.id}::uuid)
     ON CONFLICT ("cropType") DO UPDATE
     SET "minStock" = EXCLUDED."minStock",
+        "targetQuantity" = EXCLUDED."targetQuantity",
         "unit" = EXCLUDED."unit",
         "updatedBy" = ${user.id}::uuid,
         "updatedAt" = CURRENT_TIMESTAMP
@@ -87,6 +122,7 @@ export async function upsertStockRequirement(input: {
     details: {
       cropType,
       minStock,
+      targetQuantity,
       unit,
     },
   })
@@ -261,28 +297,37 @@ export async function assignTransportTask(
 
       const notifications: Array<{ sentTo: string; message: string }> = []
 
+      const warehouseLocation = warehouse.address || warehouse.city || 'Location not specified'
+
       notifications.push({
         sentTo: coordinator.userId,
-        message: `New transport request: Batch ${cropBatch.batchCode} assigned to warehouse ${warehouse.name} (${warehouse.code}). Please schedule transport.`,
+        message: `Batch assigned: Batch ${cropBatch.batchCode} assigned to warehouse ${warehouse.name} (${warehouse.code}). Location: ${warehouseLocation}.`,
       })
 
       for (const wm of warehouseManagers) {
         notifications.push({
           sentTo: wm.userId,
-          message: `Incoming shipment: Batch ${cropBatch.batchCode} is assigned to your warehouse (${warehouse.name}). Awaiting scheduling and delivery.`,
+          message: `Incoming batch: Batch ${cropBatch.batchCode} is assigned to your warehouse (${warehouse.name}). Awaiting transport and receipt confirmation.`,
         })
       }
 
       if (notifications.length > 0) {
-        await prisma.harvestNotification.createMany({
-          data: notifications.map((n) => ({
-            cropBatchId: data.cropBatchId,
-            sentTo: n.sentTo,
-            isRead: false,
-            notificationType: 'GENERAL',
+        await createBulkNotifications(
+          notifications.map((n) => ({
+            userId: n.sentTo,
+            type: NotificationType.TRANSPORT_SCHEDULED,
+            category: NotificationCategory.TRANSPORT,
+            title: 'Transport request created',
             message: n.message,
+            metadata: {
+              batchId: data.cropBatchId,
+              batchCode: cropBatch.batchCode,
+              warehouseId: warehouse.id,
+              warehouseName: warehouse.name,
+              warehouseAddress: warehouse.address || warehouse.city || null,
+            },
           }))
-        })
+        )
       }
     } catch (e) {
       console.warn('Failed to send assignment notifications:', e)
@@ -298,6 +343,9 @@ export async function assignTransportTask(
         message: `Requested transport for crop batch ${cropBatch.batchCode} to coordinator ${coordinator.name}`,
         coordinatorId: data.coordinatorId,
         warehouseId: data.warehouseId,
+        role: procurementOfficer.role,
+        statusFrom: 'PROCESSED',
+        statusTo: 'SHIPPED',
       },
     })
 
@@ -356,7 +404,7 @@ export async function notifyFieldAgentsLowStock(input: { cropType: string; minSt
 
   // Prefer DB-backed minStock if present.
   const dbReq = await prisma.$queryRaw<StockRequirementRow[]>`
-    SELECT "cropType", "minStock", "unit"
+    SELECT "cropType", "minStock", "unit", "targetQuantity"
     FROM "public"."StockRequirement"
     WHERE "cropType" = ${cropType}
     LIMIT 1
@@ -412,15 +460,21 @@ export async function notifyFieldAgentsLowStock(input: { cropType: string; minSt
 
   const message = `Low stock alert: ${cropType} is below minimum (${currentStock} < ${minStock}). Please procure more ${cropType}.`
 
-  await prisma.harvestNotification.createMany({
-    data: fieldAgents.map((fa) => ({
-      cropBatchId: representativeBatch.id,
-      sentTo: fa.userId,
-      isRead: false,
-      notificationType: 'GENERAL',
+  await createBulkNotifications(
+    fieldAgents.map((fa) => ({
+      userId: fa.userId,
+      type: NotificationType.LOW_STOCK_ALERT,
+      category: NotificationCategory.WAREHOUSE,
+      title: 'Low stock alert',
       message,
-    })),
-  })
+      metadata: {
+        cropType,
+        minStock,
+        currentStock,
+        representativeBatchId: representativeBatch.id,
+      },
+    }))
+  )
 
   await logActivity({
     userId: user.id,

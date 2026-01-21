@@ -9,35 +9,21 @@ import {
   CheckCircle, 
   Clock, 
   AlertTriangle,
-  Sprout,
-  Building2,
-  User,
   Calendar,
-  Eye,
   Check
 } from "lucide-react";
 import { getHarvestNotifications, markNotificationAsRead } from "../actions";
 import { toast } from "sonner";
+import { NotificationPriority, NotificationType } from "@/lib/generated/prisma";
 
-interface HarvestNotification {
+interface UnifiedNotification {
   id: string;
+  title: string;
   message: string;
-  notificationType: string;
+  type: NotificationType;
+  priority: NotificationPriority;
   isRead: boolean;
   createdAt: Date;
-  cropBatch: {
-    batchCode: string;
-    cropType: string;
-    status: string;
-    farm: {
-      name: string;
-      farmCode: string;
-    };
-    farmer: {
-      name: string;
-      farmerId: string;
-    };
-  };
 }
 
 const notificationTypeColors: Record<string, string> = {
@@ -45,19 +31,23 @@ const notificationTypeColors: Record<string, string> = {
   INSPECTION_DUE: "bg-yellow-100 text-yellow-800 border-yellow-200",
   PEST_ALERT: "bg-red-100 text-red-800 border-red-200",
   WEATHER_WARNING: "bg-orange-100 text-orange-800 border-orange-200",
-  GENERAL: "bg-blue-100 text-blue-800 border-blue-200",
+  FARM_REGISTERED: "bg-blue-100 text-blue-800 border-blue-200",
+  CROP_BATCH_CREATED: "bg-indigo-100 text-indigo-800 border-indigo-200",
+  GENERAL: "bg-gray-100 text-gray-800 border-gray-200",
 };
 
 const notificationIcons: Record<string, any> = {
-  HARVEST_READY: Sprout,
+  HARVEST_READY: CheckCircle,
   INSPECTION_DUE: Clock,
   PEST_ALERT: AlertTriangle,
   WEATHER_WARNING: AlertTriangle,
+  FARM_REGISTERED: Bell,
+  CROP_BATCH_CREATED: Bell,
   GENERAL: Bell,
 };
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<HarvestNotification[]>([]);
+  const [notifications, setNotifications] = useState<UnifiedNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
 
@@ -140,7 +130,7 @@ export default function NotificationsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
           <p className="text-muted-foreground">
-            Stay updated with harvest alerts and farm activities
+            Stay updated with crop management alerts and farm activities
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -211,15 +201,15 @@ export default function NotificationsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Harvest Ready</CardTitle>
-            <Sprout className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">High Priority</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {notifications.filter(n => n.notificationType === 'HARVEST_READY').length}
+              {notifications.filter(n => n.priority === 'HIGH' || n.priority === 'URGENT').length}
             </div>
             <p className="text-xs text-muted-foreground">
-              Ready for harvest
+              Needs attention
             </p>
           </CardContent>
         </Card>
@@ -246,18 +236,23 @@ export default function NotificationsPage() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-3 flex-1">
-                    <div className={`p-2 rounded-lg ${getNotificationColor(notification.notificationType)}`}>
-                      {getNotificationIcon(notification.notificationType)}
+                    <div className={`p-2 rounded-lg ${getNotificationColor(notification.type)}`}>
+                      {getNotificationIcon(notification.type)}
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-1">
                         <Badge 
                           variant="outline" 
-                          className={getNotificationColor(notification.notificationType)}
+                          className={getNotificationColor(notification.type)}
                         >
-                          {notification.notificationType.replace(/_/g, " ")}
+                          {notification.type.replace(/_/g, " ")}
                         </Badge>
+                        {(notification.priority === "HIGH" || notification.priority === "URGENT") && (
+                          <Badge variant="destructive" className="text-xs">
+                            {notification.priority}
+                          </Badge>
+                        )}
                         {!notification.isRead && (
                           <Badge variant="default" className="bg-blue-600">
                             New
@@ -266,22 +261,13 @@ export default function NotificationsPage() {
                       </div>
                       
                       <p className={`text-sm ${notification.isRead ? 'text-muted-foreground' : 'text-gray-900 font-medium'}`}>
+                        {notification.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
                         {notification.message}
                       </p>
                       
                       <div className="mt-2 flex items-center space-x-4 text-xs text-muted-foreground">
-                        <div className="flex items-center">
-                          <Sprout className="mr-1 h-3 w-3" />
-                          {notification.cropBatch.batchCode} - {notification.cropBatch.cropType}
-                        </div>
-                        <div className="flex items-center">
-                          <Building2 className="mr-1 h-3 w-3" />
-                          {notification.cropBatch.farm.name}
-                        </div>
-                        <div className="flex items-center">
-                          <User className="mr-1 h-3 w-3" />
-                          {notification.cropBatch.farmer.name}
-                        </div>
                         <div className="flex items-center">
                           <Clock className="mr-1 h-3 w-3" />
                           {formatDate(notification.createdAt)}
@@ -301,8 +287,8 @@ export default function NotificationsPage() {
                         Mark Read
                       </Button>
                     )}
-                    <Button variant="outline" size="sm">
-                      <Eye className="h-3 w-3" />
+                    <Button variant="outline" size="sm" onClick={() => handleMarkAsRead(notification.id)}>
+                      <Check className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>

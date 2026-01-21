@@ -71,13 +71,21 @@ model ActivityLog {
 
 model Farmer {
   id           String      @id @default(uuid()) @db.Uuid
+  firstName    String
+  lastName     String
   name         String
   email        String?     @unique
   phone        String?
   address      String?
   city         String?
   state        String?
-  country      String?
+  region       String?
+  zone         String?
+  woreda       String?
+  kebele       String?
+  gender       Gender?
+  farmerType   FarmerType?
+  country      String?     @default("Ethiopia")
   farmerId     String      @unique
   registeredBy String      @db.Uuid
   isActive     Boolean     @default(true)
@@ -95,7 +103,11 @@ model Farm {
   location     String?
   coordinates  String?
   area         Float?
-  soilType     String?
+  soilType     SoilType?
+  region       String?
+  zone         String?
+  woreda       String?
+  kebele       String?
   isActive     Boolean          @default(true)
   registeredBy String           @db.Uuid
   createdAt    DateTime         @default(now())
@@ -120,6 +132,7 @@ model CropBatch {
   status          CropBatchStatus       @default(PLANTED)
   qrCode          String?               @unique
   notes           String?
+  approvalData    Json?
   createdBy       String                @db.Uuid
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
@@ -268,6 +281,7 @@ enum CropBatchStatus {
   PLANTED
   GROWING
   READY_FOR_HARVEST
+  PENDING_APPROVAL
   HARVESTED
   PROCESSED
   SHIPPED
@@ -276,6 +290,27 @@ enum CropBatchStatus {
   PACKAGED
   RECEIVED
   STORED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum FarmerType {
+  INTERNAL_FARMER
+  OUTGROWER_FARMER
+  EXTERNAL_FARMER
+}
+
+enum SoilType {
+  SAND
+  PEAT
+  SILT
+  CHALK
+  CLAY
+  SALINE_SOIL
+  LOAM
 }
 
 enum InspectionStatus {

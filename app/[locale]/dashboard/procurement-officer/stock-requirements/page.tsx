@@ -9,6 +9,18 @@ import { getStockRequirementsFromDb } from "../actions";
 export default async function StockRequirementsPage() {
   const t = await getTranslations("procurementOfficer.stockRequirements");
   const locale = await getLocale();
+  const allowedCropTypes = [
+    'Haricot Bean',
+    'Faba Bean',
+    'Chickpea',
+    'Red Pea',
+    'Lentil',
+    'Soybean',
+    'Vetch',
+    'Niger Seed (Noug)',
+    'Sesame',
+    'Groundnut',
+  ] as const;
   // Get current user authentication
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -55,7 +67,8 @@ export default async function StockRequirementsPage() {
   const requirementByCrop = new Map(dbRequirements.map(r => [r.cropType, r] as const));
 
   const cropTypesFromDb = dbRequirements.map((r) => ({ cropType: r.cropType, unit: r.unit }));
-  const allCrops = [...allCropTypes, ...cropTypesFromDb]
+  const baseList = allowedCropTypes.map((cropType) => ({ cropType, unit: 'kg' as string | null }));
+  const allCrops = [...baseList, ...allCropTypes, ...cropTypesFromDb]
     .reduce((acc, item) => {
       if (!acc.some((x) => x.cropType === item.cropType)) acc.push(item);
       return acc;
@@ -70,6 +83,7 @@ export default async function StockRequirementsPage() {
 
       const req = requirementByCrop.get(crop.cropType);
       const minStock = req?.minStock ?? 0;
+      const targetQuantity = req?.targetQuantity ?? 0;
       const unit = req?.unit || crop.unit || 'kg';
 
       const status =
@@ -82,6 +96,7 @@ export default async function StockRequirementsPage() {
       return {
         cropType: crop.cropType,
         minStock,
+        targetQuantity,
         unit,
         currentStock,
         batchCount,

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { InventoryMonitorClient } from "@/components/procurement-officer/inventory-monitor-client";
 import { getTranslations } from "next-intl/server";
 import { getLocale } from "next-intl/server";
+import { getStockRequirementsFromDb } from "../actions";
 
 export default async function InventoryMonitorPage() {
   const t = await getTranslations("procurementOfficer.inventory");
@@ -29,7 +30,7 @@ export default async function InventoryMonitorPage() {
   const inventoryData = await prisma.cropBatch.findMany({
     where: {
       status: {
-        in: ['PROCESSED', 'RECEIVED', 'STORED'] // Available inventory (include newly received)
+        in: ['PROCESSED', 'SHIPPED', 'RECEIVED', 'STORED'] // Include in-transit batches
       }
     },
     include: {
@@ -70,7 +71,7 @@ export default async function InventoryMonitorPage() {
     },
     where: {
       status: {
-        in: ['PROCESSED', 'RECEIVED', 'STORED']
+        in: ['PROCESSED', 'SHIPPED', 'RECEIVED', 'STORED']
       }
     },
     orderBy: {
@@ -91,7 +92,7 @@ export default async function InventoryMonitorPage() {
     },
     where: {
       status: {
-        in: ['PROCESSED', 'RECEIVED', 'STORED']
+        in: ['PROCESSED', 'SHIPPED', 'RECEIVED', 'STORED']
       },
       warehouseId: {
         not: null
@@ -167,6 +168,42 @@ export default async function InventoryMonitorPage() {
     take: 10
   });
 
+  const dbRequirements = await getStockRequirementsFromDb();
+  const totalsByCrop = inventoryData.reduce((acc, item) => {
+    if (item.status === 'SHIPPED') {
+      return acc;
+    }
+    acc[item.cropType] = (acc[item.cropType] || 0) + (item.quantity || 0);
+    return acc;
+  }, {} as Record<string, number>);
+
+  const stockAlerts = dbRequirements
+    .map((req) => {
+      const currentStock = totalsByCrop[req.cropType] || 0;
+      return {
+        cropType: req.cropType,
+        minStock: req.minStock,
+        targetQuantity: req.targetQuantity || 0,
+        unit: req.unit || 'kg',
+        currentStock,
+      };
+    })
+    .filter((alert) => alert.minStock > 0 && alert.currentStock < alert.minStock);
+
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 2);
+  threeMonthsAgo.setDate(1);
+
+  const monthlyTrends = await prisma.$queryRaw<Array<{ month: string; totalQuantity: number }>>`
+    SELECT TO_CHAR(DATE_TRUNC('month', "updatedAt"), 'Mon YYYY') as "month",
+           COALESCE(SUM("quantity"), 0)::float as "totalQuantity"
+    FROM "public"."CropBatch"
+    WHERE "updatedAt" >= ${threeMonthsAgo}
+      AND "status" IN ('PROCESSED', 'SHIPPED', 'RECEIVED', 'STORED')
+    GROUP BY DATE_TRUNC('month', "updatedAt")
+    ORDER BY DATE_TRUNC('month', "updatedAt") ASC
+  `;
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -184,6 +221,8 @@ export default async function InventoryMonitorPage() {
         warehouseStats={warehouseStats}
         statusDistribution={statusDistribution}
         recentActivity={recentActivity}
+        stockAlerts={stockAlerts}
+        monthlyTrends={monthlyTrends}
       />
     </div>
   );

@@ -58,6 +58,7 @@ const statusColors = {
   PLANTED: 'bg-blue-100 text-blue-800',
   GROWING: 'bg-green-100 text-green-800',
   READY_FOR_HARVEST: 'bg-yellow-100 text-yellow-800',
+  PENDING_APPROVAL: 'bg-amber-100 text-amber-800',
   HARVESTED: 'bg-orange-100 text-orange-800',
   PROCESSED: 'bg-purple-100 text-purple-800',
   READY_FOR_PACKAGING: 'bg-indigo-100 text-indigo-800',
@@ -71,7 +72,8 @@ const statusColors = {
 const statusFlow = {
   PLANTED: ['GROWING'],
   GROWING: ['READY_FOR_HARVEST'],
-  READY_FOR_HARVEST: ['HARVESTED'],
+  READY_FOR_HARVEST: ['PENDING_APPROVAL'],
+  PENDING_APPROVAL: [],
   HARVESTED: ['PROCESSED'],
   PROCESSED: ['READY_FOR_PACKAGING'],
   READY_FOR_PACKAGING: ['PACKAGING'],
@@ -212,7 +214,7 @@ export function CropStatusModal({ isOpen, onOpenChange, cropBatch, onUpdateStatu
             </div>
 
             {/* Additional fields based on selected status */}
-            {selectedStatus === 'HARVESTED' && (
+            {selectedStatus === 'PENDING_APPROVAL' && (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="actualHarvestDate">Actual Harvest Date</Label>

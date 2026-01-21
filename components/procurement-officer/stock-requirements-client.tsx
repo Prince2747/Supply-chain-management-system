@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ import { notifyFieldAgentsLowStock, upsertStockRequirement } from "@/app/[locale
 interface StockRequirement {
   cropType: string;
   minStock: number;
+  targetQuantity: number;
   unit: string;
   currentStock: number;
   batchCount: number;
@@ -48,11 +50,21 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
   const [editingRequirement, setEditingRequirement] = useState<StockRequirement | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [newMinStock, setNewMinStock] = useState<number>(0);
+  const [newTargetQuantity, setNewTargetQuantity] = useState<number>(0);
+  const [newUnit, setNewUnit] = useState<string>('kg');
   const [isPending, startTransition] = useTransition();
+
+  const unitOptions = [
+    { value: 'kg', label: t('unitKg') },
+    { value: 'quintals', label: t('unitQuintals') },
+    { value: 'tons', label: t('unitTons') },
+  ];
 
   const handleEditRequirement = (requirement: StockRequirement) => {
     setEditingRequirement(requirement);
     setNewMinStock(requirement.minStock);
+    setNewTargetQuantity(requirement.targetQuantity || 0);
+    setNewUnit(requirement.unit || 'kg');
     setIsEditDialogOpen(true);
   };
 
@@ -63,7 +75,8 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
       const result = await upsertStockRequirement({
         cropType: editingRequirement.cropType,
         minStock: newMinStock,
-        unit: editingRequirement.unit,
+        targetQuantity: newTargetQuantity,
+        unit: newUnit,
       });
 
       if (!result.success) {
@@ -84,6 +97,8 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
         return {
           ...req,
           minStock: newMinStock,
+          targetQuantity: newTargetQuantity,
+          unit: newUnit,
           status,
         };
       });
@@ -268,6 +283,9 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
                     <div className="text-sm text-muted-foreground">
                       {t("minimum")}: {requirement.minStock > 0 ? `${requirement.minStock} ${requirement.unit}` : t("notSet")}
                     </div>
+                    <div className="text-sm text-muted-foreground">
+                      {t("target")}: {requirement.targetQuantity > 0 ? `${requirement.targetQuantity} ${requirement.unit}` : t("notSet")}
+                    </div>
                   </div>
 
                   {requirement.minStock > 0 && (
@@ -355,6 +373,40 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
                 className="col-span-3"
                 placeholder={t("enterMinimumStockLevel")}
               />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="target-quantity" className="text-right">
+                {t("targetQuantity")}
+              </Label>
+              <Input
+                id="target-quantity"
+                type="number"
+                value={newTargetQuantity}
+                onChange={(e) => setNewTargetQuantity(parseInt(e.target.value) || 0)}
+                className="col-span-3"
+                placeholder={t("enterTargetQuantity")}
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="unit" className="text-right">
+                {t("unit")}
+              </Label>
+              <div className="col-span-3">
+                <Select value={newUnit} onValueChange={setNewUnit}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("selectUnit")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {unitOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
             {editingRequirement && newMinStock > 0 && (

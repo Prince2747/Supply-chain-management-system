@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/utils/supabase/server';
 import { logActivity } from '@/lib/activity-logger';
+import { createBulkNotifications, notifyTransportCoordinator } from '@/lib/notifications/unified-actions';
+import { NotificationCategory, NotificationType } from '@/lib/generated/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,12 +79,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const noteFragments: string[] = [];
+    if (storageLocation) noteFragments.push(`Storage location: ${storageLocation}`);
+    if (notes) noteFragments.push(`Notes: ${notes}`);
+
+    const appendedNotes = noteFragments.length
+      ? `${currentBatch.notes ? `${currentBatch.notes} | ` : ''}${noteFragments.join(' | ')}`
+      : currentBatch.notes ?? undefined;
+
     // Update the batch status to STORED
     const updatedBatch = await prisma.cropBatch.update({
       where: { id: batchId },
       data: { 
         status: 'STORED',
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        notes: appendedNotes,
       },
       include: {
         farm: {
@@ -91,11 +102,61 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    try {
+      const latestTask = await prisma.transportTask.findFirst({
+        where: { cropBatchId: batchId },
+        orderBy: { updatedAt: 'desc' },
+        include: {
+          coordinator: { select: { userId: true } },
+        },
+      });
+
+      const procurementOfficers = await prisma.profile.findMany({
+        where: { role: 'procurement_officer', isActive: true },
+        select: { userId: true },
+      });
+
+      if (procurementOfficers.length > 0) {
+        await createBulkNotifications(
+          procurementOfficers.map((po) => ({
+            userId: po.userId,
+            type: NotificationType.GENERAL,
+            category: NotificationCategory.WAREHOUSE,
+            title: 'Batch stored',
+            message: `Batch ${updatedBatch.batchCode} has been stored in the warehouse${storageLocation ? ` (${storageLocation})` : ''}.`,
+            metadata: {
+              batchId,
+              batchCode: updatedBatch.batchCode,
+              storageLocation: storageLocation || null,
+            },
+          }))
+        );
+      }
+
+      if (latestTask?.coordinator?.userId) {
+        await notifyTransportCoordinator(
+          latestTask.coordinator.userId,
+          NotificationType.GENERAL,
+          'Batch stored',
+          `Batch ${updatedBatch.batchCode} has been stored in the warehouse${storageLocation ? ` (${storageLocation})` : ''}.`,
+          { batchId, batchCode: updatedBatch.batchCode, storageLocation: storageLocation || null }
+        );
+      }
+    } catch (e) {
+      console.warn('Failed to notify on storage update:', e);
+    }
+
     // Log the storage activity
     await logActivity({
       userId: user.id,
       action: 'BATCH_STORAGE_UPDATE',
-      details: `Updated batch ${updatedBatch.batchCode} status to STORED`,
+      details: {
+        message: `Updated batch ${updatedBatch.batchCode} status to STORED`,
+        role: profile.role,
+        statusFrom: currentBatch.status,
+        statusTo: 'STORED',
+        storageLocation: storageLocation || null,
+      },
       entityType: 'CropBatch',
       entityId: batchId
     });
