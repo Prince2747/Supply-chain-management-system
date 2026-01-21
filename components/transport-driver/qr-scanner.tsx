@@ -27,6 +27,22 @@ interface QRScannerProps {
   action?: "pickup" | "delivery";
 }
 
+type TransportTaskSummary = {
+  id: string;
+  status: string;
+  pickupLocation: string;
+  deliveryLocation: string;
+  cropBatch: {
+    batchCode: string;
+    farm: {
+      name: string;
+    };
+  };
+  vehicle: {
+    plateNumber: string;
+  };
+};
+
 export function QRScanner({ taskId, action }: QRScannerProps) {
   const t = useTranslations("transportDriver.scanner");
   const locale = useLocale();
@@ -34,7 +50,7 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [isManualInput, setIsManualInput] = useState(true); // Start with manual input since camera may not be available
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<TransportTaskSummary[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState(taskId || "");
   const [selectedAction, setSelectedAction] = useState<"pickup" | "delivery" | "">(action || "");
   const router = useRouter();
@@ -116,7 +132,7 @@ export function QRScanner({ taskId, action }: QRScannerProps) {
   const loadTasks = async () => {
     try {
       const assignedTasks = await getAssignedTasks();
-      setTasks(assignedTasks);
+      setTasks(assignedTasks as TransportTaskSummary[]);
     } catch (error) {
       toast.error(t("loadTasksFailed"));
     }

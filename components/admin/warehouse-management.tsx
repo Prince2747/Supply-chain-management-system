@@ -26,7 +26,7 @@ async function getWarehouses(): Promise<Warehouse[]> {
       createdAt: warehouse.createdAt,
       updatedAt: warehouse.updatedAt,
     }))
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching warehouses:', error)
     // Return empty array if database is not accessible
     return []

@@ -51,7 +51,12 @@ interface CropStatusModalProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   cropBatch: CropBatch | null
-  onUpdateStatus: (batchId: string, status: string, notes: string, additionalData?: any) => Promise<void>
+  onUpdateStatus: (batchId: string, status: string, notes: string, additionalData?: StatusUpdateData) => Promise<void>
+}
+
+type StatusUpdateData = {
+  actualHarvest?: Date
+  quantity?: number
 }
 
 const statusColors = {
@@ -108,7 +113,7 @@ export function CropStatusModal({ isOpen, onOpenChange, cropBatch, onUpdateStatu
 
     startTransition(async () => {
       try {
-        const additionalData: any = {}
+        const additionalData: StatusUpdateData = {}
         
         if (selectedStatus === 'HARVESTED' && actualHarvestDate) {
           additionalData.actualHarvest = new Date(actualHarvestDate)

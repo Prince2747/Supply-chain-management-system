@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Filter, Eye, Download, X } from "lucide-react";
+import { Search, Eye, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -92,7 +92,7 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
     return "outline";
   };
 
-  const formatDetails = (details: any) => {
+  const formatDetails = (details: ActivityLog["details"]) => {
     if (!details) return t('noDetails');
     if (typeof details === "string") return details;
     return JSON.stringify(details, null, 2);

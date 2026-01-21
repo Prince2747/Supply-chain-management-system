@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, Clock, Truck, AlertTriangle, Check, Package, CheckCircle, Calendar } from 'lucide-react';
+import { Bell, Clock, Truck, AlertTriangle, Check, Package, CheckCircle, Calendar, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,6 +20,7 @@ import {
 } from '@/lib/notifications/unified-actions';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
 import { NotificationCategory, NotificationType } from '@/lib/generated/prisma';
+import { Prisma } from '@prisma/client';
 
 interface Notification {
   id: string;
@@ -31,7 +32,7 @@ interface Notification {
   createdAt: Date;
   actionUrl?: string | null;
   priority: string;
-  metadata?: any;
+  metadata?: Prisma.JsonValue;
 }
 
 type NotificationBellProps = {
@@ -68,7 +69,7 @@ const notificationTypeColors: Record<string, string> = {
   SYSTEM_ALERT: 'bg-red-100 text-red-800 border-red-200',
 };
 
-const notificationIcons: Record<string, any> = {
+const notificationIcons: Record<string, LucideIcon> = {
   // Transport
   TRANSPORT_SCHEDULED: Calendar,
   DRIVER_ASSIGNED: Truck,
@@ -173,7 +174,7 @@ export function UnifiedNotificationBell({ category, className }: NotificationBel
     return notificationDate.toLocaleDateString();
   };
 
-  const getNotificationColor = (type: string) => {
+  const getNotificationColor = (type: NotificationType) => {
     return notificationTypeColors[type] || notificationTypeColors.GENERAL;
   };
 

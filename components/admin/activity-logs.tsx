@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { ActivityLogsClient } from "./activity-logs-client";
 
 export interface ActivityLog {
@@ -7,7 +8,7 @@ export interface ActivityLog {
   action: string;
   entityType: string | null;
   entityId: string | null;
-  details: any;
+  details: Prisma.JsonValue;
   ipAddress: string | null;
   userAgent: string | null;
   createdAt: Date;
@@ -38,7 +39,7 @@ async function getActivityLogs(): Promise<ActivityLog[]> {
       createdAt: log.createdAt,
       user: profileMap.get(log.userId) || null,
     }));
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching activity logs:", error);
     // Return empty array if database is not accessible
     return [];

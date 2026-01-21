@@ -24,6 +24,15 @@ const PROCUREMENT_CROP_TYPES = [
 
 const STOCK_UNITS = ['kg', 'quintals', 'tons'] as const
 
+type ProcurementCropType = (typeof PROCUREMENT_CROP_TYPES)[number]
+type StockUnit = (typeof STOCK_UNITS)[number]
+
+const isProcurementCropType = (value: string): value is ProcurementCropType =>
+  PROCUREMENT_CROP_TYPES.includes(value as ProcurementCropType)
+
+const isStockUnit = (value: string): value is StockUnit =>
+  STOCK_UNITS.includes(value as StockUnit)
+
 function revalidateDashboardPath(pathWithoutLocale: string) {
   for (const locale of DASHBOARD_LOCALES) {
     revalidatePath(`/${locale}${pathWithoutLocale}`)
@@ -87,7 +96,7 @@ export async function upsertStockRequirement(input: {
     return { success: false, error: 'Crop type is required' } as const
   }
 
-  if (!PROCUREMENT_CROP_TYPES.includes(cropType as any)) {
+  if (!isProcurementCropType(cropType)) {
     return { success: false, error: 'Invalid crop type' } as const
   }
 
@@ -99,7 +108,7 @@ export async function upsertStockRequirement(input: {
     return { success: false, error: 'Target quantity must be a non-negative number' } as const
   }
 
-  if (!STOCK_UNITS.includes(unit as any)) {
+  if (!isStockUnit(unit)) {
     return { success: false, error: 'Invalid unit' } as const
   }
 

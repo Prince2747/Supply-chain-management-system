@@ -250,101 +250,103 @@ export default async function BatchReviewsPage() {
                 </TableHeader>
                 <TableBody>
                   {batches.map((b) => (
-                    <TableRow key={b.id}>
-                      <TableCell className="font-mono text-sm">{b.batchCode}</TableCell>
-                      <TableCell>{b.cropType}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{b.farm.name}</div>
-                          {b.farm.location ? (
-                            <div className="text-xs text-muted-foreground">{b.farm.location}</div>
-                          ) : null}
-                        </div>
-                      </TableCell>
-                      <TableCell>{b.farmer.name || "-"}</TableCell>
-                      <TableCell>
-                        {b.quantity ? `${b.quantity} ${b.unit || ""}` : "-"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">PENDING APPROVAL</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <form action={rejectBatch}>
-                            <input type="hidden" name="batchId" value={b.id} />
-                            <Button size="sm" variant="outline">
-                              {t("reject")}
-                            </Button>
-                          </form>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow key={`${b.id}-approval`}>
-                      <TableCell colSpan={7} className="bg-gray-50">
-                        <details>
-                          <summary className="cursor-pointer text-sm font-medium text-gray-700">
-                            Approval details
-                          </summary>
-                          <form action={approveBatch} className="mt-4 grid gap-4">
-                            <input type="hidden" name="batchId" value={b.id} />
-                            <div className="grid grid-cols-3 gap-4">
-                              <div>
-                                <label className="text-xs font-medium">Moisture Content (%)</label>
-                                <input name="moistureContent" type="number" step="0.01" className="mt-1 w-full rounded border px-2 py-1 text-sm" />
-                              </div>
-                              <div>
-                                <label className="text-xs font-medium">Grade</label>
-                                <input name="grade" type="text" className="mt-1 w-full rounded border px-2 py-1 text-sm" />
-                              </div>
-                              <div>
-                                <label className="text-xs font-medium">Defects</label>
-                                <input name="defects" type="text" className="mt-1 w-full rounded border px-2 py-1 text-sm" />
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4">
-                              <div>
-                                <label className="text-xs font-medium">Cleaning Status</label>
-                                <select name="cleaningStatus" className="mt-1 w-full rounded border px-2 py-1 text-sm">
-                                  <option value="">Select</option>
-                                  <option value="CLEANED">Cleaned</option>
-                                  <option value="UNCLEANED">Uncleaned</option>
-                                  <option value="PARTIALLY_CLEANED">Partially cleaned</option>
-                                </select>
-                              </div>
-                              <div>
-                                <label className="text-xs font-medium">Estimated Yield</label>
-                                <input name="estimatedYield" type="number" step="0.01" className="mt-1 w-full rounded border px-2 py-1 text-sm" />
-                              </div>
-                              <div>
-                                <label className="text-xs font-medium">Yield Unit</label>
-                                <input name="estimatedYieldUnit" type="text" defaultValue="kg" className="mt-1 w-full rounded border px-2 py-1 text-sm" />
-                              </div>
-                            </div>
-                            <div>
-                              <label className="text-xs font-medium">Crop Photos (comma-separated URLs)</label>
-                              <textarea name="cropPhotos" rows={2} className="mt-1 w-full rounded border px-2 py-1 text-sm" />
-                            </div>
-                            <div>
-                              <label className="text-xs font-medium">Weighing Photos (comma-separated URLs)</label>
-                              <textarea name="weighingPhotos" rows={2} className="mt-1 w-full rounded border px-2 py-1 text-sm" />
-                            </div>
-                            <div>
-                              <label className="text-xs font-medium">Batch Photos (comma-separated URLs)</label>
-                              <textarea name="batchPhotos" rows={2} className="mt-1 w-full rounded border px-2 py-1 text-sm" />
-                            </div>
-                            <div>
-                              <label className="text-xs font-medium">Notes</label>
-                              <textarea name="notes" rows={2} className="mt-1 w-full rounded border px-2 py-1 text-sm" />
-                            </div>
-                            <div className="flex justify-end">
-                              <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                                {t("approve")}
+                    <>
+                      <TableRow key={b.id}>
+                        <TableCell className="font-mono text-sm">{b.batchCode}</TableCell>
+                        <TableCell>{b.cropType}</TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{b.farm.name}</div>
+                            {b.farm.location ? (
+                              <div className="text-xs text-muted-foreground">{b.farm.location}</div>
+                            ) : null}
+                          </div>
+                        </TableCell>
+                        <TableCell>{b.farmer.name || "-"}</TableCell>
+                        <TableCell>
+                          {b.quantity ? `${b.quantity} ${b.unit || ""}` : "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">PENDING APPROVAL</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <form action={rejectBatch}>
+                              <input type="hidden" name="batchId" value={b.id} />
+                              <Button size="sm" variant="outline">
+                                {t("reject")}
                               </Button>
-                            </div>
-                          </form>
-                        </details>
-                      </TableCell>
-                    </TableRow>
+                            </form>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow key={`${b.id}-approval`}>
+                        <TableCell colSpan={7} className="bg-gray-50">
+                          <details>
+                            <summary className="cursor-pointer text-sm font-medium text-gray-700">
+                              Approval details
+                            </summary>
+                            <form action={approveBatch} className="mt-4 grid gap-4">
+                              <input type="hidden" name="batchId" value={b.id} />
+                              <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                  <label className="text-xs font-medium">Moisture Content (%)</label>
+                                  <input name="moistureContent" type="number" step="0.01" className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium">Grade</label>
+                                  <input name="grade" type="text" className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium">Defects</label>
+                                  <input name="defects" type="text" className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                  <label className="text-xs font-medium">Cleaning Status</label>
+                                  <select name="cleaningStatus" className="mt-1 w-full rounded border px-2 py-1 text-sm">
+                                    <option value="">Select</option>
+                                    <option value="CLEANED">Cleaned</option>
+                                    <option value="UNCLEANED">Uncleaned</option>
+                                    <option value="PARTIALLY_CLEANED">Partially cleaned</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium">Estimated Yield</label>
+                                  <input name="estimatedYield" type="number" step="0.01" className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium">Yield Unit</label>
+                                  <input name="estimatedYieldUnit" type="text" defaultValue="kg" className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+                                </div>
+                              </div>
+                              <div>
+                                <label className="text-xs font-medium">Crop Photos (comma-separated URLs)</label>
+                                <textarea name="cropPhotos" rows={2} className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+                              </div>
+                              <div>
+                                <label className="text-xs font-medium">Weighing Photos (comma-separated URLs)</label>
+                                <textarea name="weighingPhotos" rows={2} className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+                              </div>
+                              <div>
+                                <label className="text-xs font-medium">Batch Photos (comma-separated URLs)</label>
+                                <textarea name="batchPhotos" rows={2} className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+                              </div>
+                              <div>
+                                <label className="text-xs font-medium">Notes</label>
+                                <textarea name="notes" rows={2} className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+                              </div>
+                              <div className="flex justify-end">
+                                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                                  {t("approve")}
+                                </Button>
+                              </div>
+                            </form>
+                          </details>
+                        </TableCell>
+                      </TableRow>
+                    </>
                   ))}
                 </TableBody>
               </Table>

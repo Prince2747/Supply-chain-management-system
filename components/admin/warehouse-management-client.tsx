@@ -314,8 +314,8 @@ export function WarehouseManagementClient({
                         </div>
                         {warehouses.length === 0 && (
                           <div className="text-sm text-muted-foreground">
-                            Create your first warehouse using the "Add
-                            Warehouse" button above.
+                            Create your first warehouse using the &quot;Add
+                            Warehouse&quot; button above.
                           </div>
                         )}
                       </div>

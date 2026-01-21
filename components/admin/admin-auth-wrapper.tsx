@@ -29,25 +29,30 @@ export async function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
     }
 
     return <>{children}</>;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorObj = error as { code?: string; message?: string; digest?: string };
+    const errorCode = typeof errorObj.code === "string" ? errorObj.code : undefined;
+    const errorMessage = typeof errorObj.message === "string" ? errorObj.message : "";
+    const errorDigest = typeof errorObj.digest === "string" ? errorObj.digest : "";
+
     // Handle database connection errors specifically
     if (
-      error?.code === "P1001" ||
-      error?.message?.includes("Can't reach database server") ||
-      error?.message?.includes("Connection refused")
+      errorCode === "P1001" ||
+      errorMessage.includes("Can't reach database server") ||
+      errorMessage.includes("Connection refused")
     ) {
       console.error("Database connection error in AdminAuthWrapper:", error);
       redirect("/error?type=database");
     }
 
     // Handle other Prisma errors that are database-related
-    if (error?.code?.startsWith("P") && error?.code !== "P2025") {
+    if (errorCode?.startsWith("P") && errorCode !== "P2025") {
       console.error("Database error in AdminAuthWrapper:", error);
       redirect("/error?type=database");
     }
 
     // Don't catch redirect errors - let them pass through
-    if (error?.digest?.includes("NEXT_REDIRECT")) {
+    if (errorDigest.includes("NEXT_REDIRECT")) {
       throw error;
     }
 
