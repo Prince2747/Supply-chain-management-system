@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useLocale } from 'next-intl';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,31 @@ export function LoginForm() {
 
   const handleSubmit = async (formData: FormData) => {
     setError(null);
+
+    const email = (formData.get('email') || '').toString().trim();
+    const password = (formData.get('password') || '').toString();
+
+    if (!email) {
+      const message = t('emailRequired');
+      setError(message);
+      toast.error(message);
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      const message = t('emailInvalid');
+      setError(message);
+      toast.error(message);
+      return;
+    }
+
+    if (!password) {
+      const message = t('passwordRequired');
+      setError(message);
+      toast.error(message);
+      return;
+    }
     
     // Show signing in toast
     const signingInToast = toast.loading(t('signingIn'), {
@@ -118,6 +144,15 @@ export function LoginForm() {
             )}
           </button>
         </div>
+      </div>
+
+      <div className="text-right">
+        <Link
+          href={`/${locale}/reset-password`}
+          className="text-sm text-primary hover:underline"
+        >
+          {t('forgotPassword')}
+        </Link>
       </div>
 
       <Button type="submit" className="w-full" disabled={isPending}>

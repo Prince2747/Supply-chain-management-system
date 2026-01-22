@@ -14,8 +14,12 @@ export async function login(formData: FormData) {
   const password = formData.get('password') as string
 
   // Validate inputs
-  if (!email || !password) {
-    throw new Error('Email and password are required')
+  if (!email) {
+    throw new Error('Email is required')
+  }
+
+  if (!password) {
+    throw new Error('Password is required')
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
