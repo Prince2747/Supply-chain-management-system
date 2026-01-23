@@ -10,6 +10,7 @@ import {
 } from "@/lib/notifications/unified-actions";
 import { NotificationType } from "@/lib/generated/prisma";
 import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 
 const DASHBOARD_LOCALES = ["en", "am"] as const;
 
@@ -69,9 +70,10 @@ function revalidateDashboardPath(pathWithoutLocale: string) {
 async function getCurrentUser() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
+  const locale = await getLocale();
   
   if (error || !user) {
-    redirect("/login");
+    redirect(`/${locale}/login`);
   }
 
   const profile = await prisma.profile.findUnique({
@@ -79,7 +81,7 @@ async function getCurrentUser() {
   });
 
   if (!profile || profile.role !== "transport_coordinator") {
-    redirect("/unauthorized");
+    redirect(`/${locale}/unauthorized`);
   }
 
   return profile;
@@ -711,7 +713,8 @@ export async function getAvailableCropBatches() {
 
   return prisma.cropBatch.findMany({
     where: {
-      status: "HARVESTED", // Use valid enum value
+      status: { in: ["PROCESSED", "SHIPPED"] },
+      warehouseId: { not: null },
       transportTasks: {
         none: {
           status: { in: ["SCHEDULED", "IN_TRANSIT"] }
@@ -719,9 +722,10 @@ export async function getAvailableCropBatches() {
       }
     },
     include: {
-      farm: true
+      farm: true,
+      warehouse: true
     },
-    orderBy: { actualHarvest: "desc" } // Use valid field name
+    orderBy: { updatedAt: "desc" }
   });
 }
 
@@ -921,6 +925,7 @@ export async function createTransportSchedule(formData: FormData) {
       "PROCESSED",
       "READY_FOR_PACKAGING",
       "PACKAGED",
+      "SHIPPED",
     ] as const;
 
     if (!cropBatch || !eligibleCropBatchStatuses.includes(cropBatch.status as any)) {

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { checkFieldAgentRole } from "@/app/[locale]/dashboard/field-agent/actions";
+import { useLocale } from "next-intl";
 
 interface FieldAgentAuthWrapperProps {
   children: React.ReactNode;
@@ -12,13 +13,14 @@ interface FieldAgentAuthWrapperProps {
 export function FieldAgentAuthWrapper({ children }: FieldAgentAuthWrapperProps) {
   const router = useRouter();
   const supabase = createClient();
+  const locale = useLocale();
 
   useEffect(() => {
     const checkAccess = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        router.push('/login');
+        router.push(`/${locale}/login`);
         return;
       }
 
@@ -26,13 +28,13 @@ export function FieldAgentAuthWrapper({ children }: FieldAgentAuthWrapperProps) 
       const isFieldAgent = await checkFieldAgentRole(user.id);
       
       if (!isFieldAgent) {
-        router.push('/unauthorized');
+        router.push(`/${locale}/unauthorized`);
         return;
       }
     };
 
     checkAccess();
-  }, [router]);
+  }, [router, locale]);
 
   return <>{children}</>;
 }

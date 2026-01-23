@@ -6,12 +6,13 @@ import { PendingSchedules } from "@/components/transport-coordinator/pending-sch
 import { Calendar, Truck, MapPin } from "lucide-react";
 
 export default async function SchedulePage() {
-  // Get crop batches that are ready for transport (harvested, packaged, ready for packaging)
+  // Get crop batches that are ready for transport (approved + assigned to a warehouse)
   const availableCropBatches = await prisma.cropBatch.findMany({
     where: {
       status: {
-        in: ["HARVESTED", "READY_FOR_PACKAGING", "PACKAGED", "PROCESSED"],
+        in: ["PROCESSED", "SHIPPED"],
       },
+      warehouseId: { not: null },
       // Only show crops that don't have active transport tasks
       transportTasks: {
         none: {
@@ -31,6 +32,14 @@ export default async function SchedulePage() {
         select: {
           name: true,
           location: true,
+        },
+      },
+      warehouse: {
+        select: {
+          name: true,
+          code: true,
+          address: true,
+          city: true,
         },
       },
     },

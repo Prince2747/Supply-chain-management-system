@@ -34,6 +34,12 @@ interface CropBatch {
     name: string;
     location: string | null;
   };
+  warehouse?: {
+    name: string;
+    code: string;
+    address: string | null;
+    city: string | null;
+  } | null;
 }
 
 interface Driver {
@@ -151,6 +157,12 @@ export function ScheduleTransportForm({
             <p className="text-xs text-muted-foreground">
               📍 Farm: {selectedCropBatch.farm.name}
             </p>
+            {selectedCropBatch.warehouse && (
+              <p className="text-xs text-muted-foreground">
+                🏭 Warehouse: {selectedCropBatch.warehouse.name} ({selectedCropBatch.warehouse.code})
+                {selectedCropBatch.warehouse.city ? ` - ${selectedCropBatch.warehouse.city}` : ''}
+              </p>
+            )}
             <p className="text-xs text-muted-foreground">
               📦 Quantity: {selectedCropBatch.quantity || 'N/A'} kg
             </p>
@@ -267,6 +279,15 @@ export function ScheduleTransportForm({
           placeholder="Enter detailed delivery location address..."
           required
           className="min-h-[80px]"
+          defaultValue={
+            selectedCropBatch?.warehouse
+              ? `${selectedCropBatch.warehouse.address || ''}${
+                  selectedCropBatch.warehouse.city
+                    ? `${selectedCropBatch.warehouse.address ? ', ' : ''}${selectedCropBatch.warehouse.city}`
+                    : ''
+                }`.trim()
+              : ''
+          }
         />
       </div>
 

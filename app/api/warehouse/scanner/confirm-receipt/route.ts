@@ -130,7 +130,10 @@ export async function POST(request: NextRequest) {
       const latestTask = await prisma.transportTask.findFirst({
         where: { cropBatchId: batchId },
         orderBy: { updatedAt: 'desc' },
-        include: {
+        select: {
+          id: true,
+          pickupLocation: true,
+          deliveryLocation: true,
           coordinator: { select: { userId: true } },
           driver: {
             select: {
@@ -139,7 +142,7 @@ export async function POST(request: NextRequest) {
               Profile: { select: { userId: true } },
             },
           },
-        },
+        }
       });
 
       const procurementOfficers = await prisma.profile.findMany({
@@ -197,6 +200,17 @@ export async function POST(request: NextRequest) {
         // Rejected: notify procurement, coordinator, driver, and field agent
         const rejectionMessage = `Batch ${updatedBatch.batchCode} was rejected at warehouse.${normalizedNotes ? ` Notes: ${normalizedNotes}` : ''}`;
 
+        if (latestTask?.id) {
+          await prisma.transportTask.update({
+            where: { id: latestTask.id },
+            data: {
+              status: 'DELAYED',
+              notes: `${normalizedNotes ? `Return requested: ${normalizedNotes}` : 'Return requested from warehouse'}${latestTask.deliveryLocation ? ` | Return from: ${latestTask.deliveryLocation}` : ''}${latestTask.pickupLocation ? ` | Return to: ${latestTask.pickupLocation}` : ''}`,
+              updatedAt: new Date(),
+            },
+          });
+        }
+
         if (procurementOfficers.length > 0) {
           await createBulkNotifications(
             procurementOfficers.map((po) => ({
@@ -215,8 +229,8 @@ export async function POST(request: NextRequest) {
             latestTask.coordinator.userId,
             NotificationType.ISSUE_REPORTED,
             'Batch rejected',
-            `Batch ${updatedBatch.batchCode} was rejected at warehouse. Please return it to pickup location.`,
-            { batchId, batchCode: updatedBatch.batchCode, issueType: normalizedIssueType }
+            `Batch ${updatedBatch.batchCode} was rejected at warehouse. Please return it to pickup location.${latestTask?.pickupLocation ? ` Pickup: ${latestTask.pickupLocation}.` : ''}`,
+            { batchId, batchCode: updatedBatch.batchCode, issueType: normalizedIssueType, pickupLocation: latestTask?.pickupLocation }
           );
         }
 
@@ -227,8 +241,8 @@ export async function POST(request: NextRequest) {
               type: NotificationType.ISSUE_REPORTED,
               category: NotificationCategory.TRANSPORT,
               title: 'Return batch to pickup',
-              message: `Batch ${updatedBatch.batchCode} was rejected. Please return it to the pickup location.`,
-              metadata: { batchId, batchCode: updatedBatch.batchCode, issueType: normalizedIssueType },
+              message: `Batch ${updatedBatch.batchCode} was rejected. Please return it to the pickup location.${latestTask?.pickupLocation ? ` Pickup: ${latestTask.pickupLocation}.` : ''}`,
+              metadata: { batchId, batchCode: updatedBatch.batchCode, issueType: normalizedIssueType, pickupLocation: latestTask?.pickupLocation },
             },
           ]);
         }
