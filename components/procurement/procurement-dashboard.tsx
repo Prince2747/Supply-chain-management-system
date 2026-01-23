@@ -356,7 +356,7 @@ export function ProcurementDashboard({
   }
 
   const readyBatches = cropBatches.filter(batch => 
-    batch.status === 'READY_FOR_HARVEST' || batch.status === 'PROCESSED'
+    batch.status === 'PROCESSED'
   )
 
   return (

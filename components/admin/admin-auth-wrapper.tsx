@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { getLocale } from "next-intl/server";
 
 interface AdminAuthWrapperProps {
   children: ReactNode;
@@ -13,10 +14,11 @@ export async function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    const locale = await getLocale();
 
     // Check if user is authenticated
     if (!user) {
-      redirect("/login");
+      redirect(`/${locale}/login`);
     }
 
     // Check if user has admin role
@@ -25,7 +27,7 @@ export async function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
     });
 
     if (!profile || profile.role !== "admin") {
-      redirect("/unauthorized");
+      redirect(`/${locale}/unauthorized`);
     }
 
     return <>{children}</>;
@@ -42,13 +44,13 @@ export async function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
       errorMessage.includes("Connection refused")
     ) {
       console.error("Database connection error in AdminAuthWrapper:", error);
-      redirect("/error?type=database");
+      redirect(`/${locale}/error?type=database`);
     }
 
     // Handle other Prisma errors that are database-related
     if (errorCode?.startsWith("P") && errorCode !== "P2025") {
       console.error("Database error in AdminAuthWrapper:", error);
-      redirect("/error?type=database");
+      redirect(`/${locale}/error?type=database`);
     }
 
     // Don't catch redirect errors - let them pass through
@@ -58,6 +60,6 @@ export async function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
 
     // For other unexpected errors, log and redirect to general error
     console.error("Unexpected error in AdminAuthWrapper:", error);
-    redirect("/error?type=general");
+    redirect(`/${locale}/error?type=general`);
   }
 }

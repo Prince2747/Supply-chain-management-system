@@ -283,12 +283,11 @@ export async function assignTransportTask(
       throw new Error('Warehouse not found')
     }
 
-    // Update crop batch status and assign warehouse.
+    // Assign warehouse but keep status PROCESSED until transport is scheduled.
     // Transport coordinator will create the actual transport task later.
     await prisma.cropBatch.update({
       where: { id: data.cropBatchId },
       data: { 
-        status: 'SHIPPED',
         warehouseId: data.warehouseId
       }
     })
@@ -354,7 +353,7 @@ export async function assignTransportTask(
         warehouseId: data.warehouseId,
         role: procurementOfficer.role,
         statusFrom: 'PROCESSED',
-        statusTo: 'SHIPPED',
+        statusTo: 'PROCESSED',
       },
     })
 

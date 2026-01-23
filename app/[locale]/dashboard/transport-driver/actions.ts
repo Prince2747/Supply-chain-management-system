@@ -11,6 +11,7 @@ import {
 } from "@/lib/notifications/unified-actions";
 import { NotificationCategory, NotificationType } from "@/lib/generated/prisma";
 import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 
 const DASHBOARD_LOCALES = ["en", "am"] as const;
 
@@ -33,9 +34,10 @@ function revalidateDashboardPath(pathWithoutLocale: string) {
 async function getCurrentDriver() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
+  const locale = await getLocale();
   
   if (error || !user) {
-    redirect("/login");
+    redirect(`/${locale}/login`);
   }
 
   const profile = await prisma.profile.findUnique({
@@ -43,7 +45,7 @@ async function getCurrentDriver() {
   });
 
   if (!profile || profile.role !== "transport_driver") {
-    redirect("/unauthorized");
+    redirect(`/${locale}/unauthorized`);
   }
 
   // Find the driver record associated with this profile
@@ -52,7 +54,7 @@ async function getCurrentDriver() {
   });
 
   if (!driver) {
-    redirect("/unauthorized");
+    redirect(`/${locale}/unauthorized`);
   }
 
   return { profile, driver };
