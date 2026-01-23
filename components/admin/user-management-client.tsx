@@ -318,10 +318,13 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
                 <CardTitle>{t('createNewUser')}</CardTitle>
               </CardHeader>
               <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Fields marked with * are required.
+                </p>
                 <form onSubmit={handleCreateUser} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="email">{t('email')}</Label>
+                      <Label htmlFor="email">{t('email')} *</Label>
                       <Input 
                         id="email" 
                         name="email" 
@@ -329,9 +332,12 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
                         required 
                         placeholder="user@example.com"
                       />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Must be a valid email (include @).
+                      </p>
                     </div>
                     <div>
-                      <Label htmlFor="name">{t('name')}</Label>
+                      <Label htmlFor="name">{t('name')} *</Label>
                       <Input 
                         id="name" 
                         name="name" 
@@ -343,7 +349,7 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="password">{t('password')}</Label>
+                      <Label htmlFor="password">{t('password')} *</Label>
                       <Input 
                         id="password" 
                         name="password" 
@@ -353,7 +359,7 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
                       />
                     </div>
                     <div>
-                      <Label htmlFor="role">{t('role')}</Label>
+                      <Label htmlFor="role">{t('role')} *</Label>
                       <Select name="role" required defaultValue="field_agent">
                         <SelectTrigger>
                           <SelectValue placeholder={t('selectRole')} />

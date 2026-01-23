@@ -9,6 +9,7 @@ import {
   notifyAllWarehouseManagers,
 } from "@/lib/notifications/unified-actions";
 import { NotificationType } from "@/lib/generated/prisma";
+import { redirect } from "next/navigation";
 
 const DASHBOARD_LOCALES = ["en", "am"] as const;
 
@@ -70,7 +71,7 @@ async function getCurrentUser() {
   const { data: { user }, error } = await supabase.auth.getUser();
   
   if (error || !user) {
-    throw new Error("Unauthorized");
+    redirect("/login");
   }
 
   const profile = await prisma.profile.findUnique({
@@ -78,7 +79,7 @@ async function getCurrentUser() {
   });
 
   if (!profile || profile.role !== "transport_coordinator") {
-    throw new Error("Access denied: Transport coordinator role required");
+    redirect("/unauthorized");
   }
 
   return profile;

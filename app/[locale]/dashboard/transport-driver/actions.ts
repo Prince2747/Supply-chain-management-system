@@ -35,7 +35,7 @@ async function getCurrentDriver() {
   const { data: { user }, error } = await supabase.auth.getUser();
   
   if (error || !user) {
-    throw new Error("Unauthorized");
+    redirect("/login");
   }
 
   const profile = await prisma.profile.findUnique({
@@ -43,7 +43,7 @@ async function getCurrentDriver() {
   });
 
   if (!profile || profile.role !== "transport_driver") {
-    throw new Error("Access denied: Transport driver role required");
+    redirect("/unauthorized");
   }
 
   // Find the driver record associated with this profile
@@ -52,7 +52,7 @@ async function getCurrentDriver() {
   });
 
   if (!driver) {
-    throw new Error("Driver record not found");
+    redirect("/unauthorized");
   }
 
   return { profile, driver };

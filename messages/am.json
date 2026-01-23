@@ -462,7 +462,14 @@
   "errorPage": {
     "general": {
       "title": "የሆነ ችግር ተፈጥሯል",
-      "description": "ያልተጠበቀ ስህተት ተፈጥሯል"
+      "description": "ያልተጠበቀ ስህተት ተፈጥሯል",
+      "suggestions": {
+        "0": "Refresh the page and try again",
+        "1": "Check your internet connection",
+        "2": "Clear your browser cache",
+        "3": "Try again in a few minutes"
+      },
+      "buttonText": "Refresh page"
     },
     "database": {
       "title": "የዳታቤዝ ግንኙነት ስህተት",
@@ -473,12 +480,22 @@
         "2": "የአውታረ መረብ ግንኙነት ይፈትሹ",
         "3": "የዳታቤዝ ምስክርነቶችን ይገምግሙ",
         "4": "የስርዓት አስተዳዳሪን ያግኙ"
-      }
+      },
+      "buttonText": "Try again"
     },
     "auth": {
       "title": "የማረጋገጫ ስህተት",
       "description": "በማረጋገጫዎ ላይ ችግር ነበር"
     },
+    "couldBeDue": "This could be due to:",
+    "returnToLogin": "Return to login",
+    "persistsMessage": "If the problem persists, contact",
+    "technicalSupport": "technical support",
+    "errorDetails": "Error details",
+    "errorCode": "Error code",
+    "loading": "Loading...",
+    "system": "System",
+    "systemName": "Supply Chain Management System",
     "goHome": "ወደ ዋና ገጽ ይሂዱ",
     "retry": "እንደገና ይሞክሩ",
     "timestamp": "ስህተቱ የተፈጠረው"

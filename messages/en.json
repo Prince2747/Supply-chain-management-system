@@ -507,7 +507,14 @@
   "errorPage": {
     "general": {
       "title": "Something went wrong",
-      "description": "An unexpected error has occurred"
+      "description": "An unexpected error has occurred",
+      "suggestions": {
+        "0": "Refresh the page and try again",
+        "1": "Check your internet connection",
+        "2": "Clear your browser cache",
+        "3": "Try again in a few minutes"
+      },
+      "buttonText": "Refresh page"
     },
     "database": {
       "title": "Database Connection Error",
@@ -518,12 +525,22 @@
         "2": "Check network connectivity",
         "3": "Review database credentials",
         "4": "Contact system administrator"
-      }
+      },
+      "buttonText": "Try again"
     },
     "auth": {
       "title": "Authentication Error",
       "description": "There was a problem with your authentication"
     },
+    "couldBeDue": "This could be due to:",
+    "returnToLogin": "Return to login",
+    "persistsMessage": "If the problem persists, contact",
+    "technicalSupport": "technical support",
+    "errorDetails": "Error details",
+    "errorCode": "Error code",
+    "loading": "Loading...",
+    "system": "System",
+    "systemName": "Supply Chain Management System",
     "goHome": "Go to Home",
     "retry": "Try Again",
     "timestamp": "Error occurred at"
