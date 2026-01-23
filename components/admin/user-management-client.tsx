@@ -88,12 +88,48 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
   const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+
+    const email = (formData.get('email') || '').toString().trim();
+    const name = (formData.get('name') || '').toString().trim();
+    const password = (formData.get('password') || '').toString();
+    const role = (formData.get('role') || '').toString();
+
+    if (!email) {
+      toast.error('Email is required');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    if (!password) {
+      toast.error('Password is required');
+      return;
+    }
+
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+
+    if (!name) {
+      toast.error('Name is required');
+      return;
+    }
+
+    if (!role) {
+      toast.error('Role is required');
+      return;
+    }
     
     startTransition(async () => {
       try {
         // Validate role
-        const role = formData.get('role');
-        if (!role || !['field_agent', 'warehouse_manager', 'transport_coordinator', 'procurement_officer', 'admin'].includes(role as string)) {
+        // Validate role
+        if (!['field_agent', 'warehouse_manager', 'transport_coordinator', 'procurement_officer', 'admin', 'manager', 'transport_driver'].includes(role)) {
           toast.error('Please select a valid role');
           return;
         }
@@ -282,10 +318,13 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
                 <CardTitle>{t('createNewUser')}</CardTitle>
               </CardHeader>
               <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Fields marked with * are required.
+                </p>
                 <form onSubmit={handleCreateUser} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="email">{t('email')}</Label>
+                      <Label htmlFor="email">{t('email')} *</Label>
                       <Input 
                         id="email" 
                         name="email" 
@@ -293,20 +332,24 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
                         required 
                         placeholder="user@example.com"
                       />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Must be a valid email (include @).
+                      </p>
                     </div>
                     <div>
-                      <Label htmlFor="name">{t('name')}</Label>
+                      <Label htmlFor="name">{t('name')} *</Label>
                       <Input 
                         id="name" 
                         name="name" 
                         type="text" 
+                        required
                         placeholder={t('fullName')}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="password">{t('password')}</Label>
+                      <Label htmlFor="password">{t('password')} *</Label>
                       <Input 
                         id="password" 
                         name="password" 
@@ -316,7 +359,7 @@ export function UserManagementClient({ initialUsers, warehouses }: UserManagemen
                       />
                     </div>
                     <div>
-                      <Label htmlFor="role">{t('role')}</Label>
+                      <Label htmlFor="role">{t('role')} *</Label>
                       <Select name="role" required defaultValue="field_agent">
                         <SelectTrigger>
                           <SelectValue placeholder={t('selectRole')} />

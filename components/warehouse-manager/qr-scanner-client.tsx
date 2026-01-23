@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -54,38 +56,68 @@ interface BatchDetails {
 }
 
 export function QRScannerClient() {
+  const router = useRouter();
   const [isScanning, setIsScanning] = useState(false);
   const [manualCode, setManualCode] = useState("");
   const [batchDetails, setBatchDetails] = useState<BatchDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [receiptDecision, setReceiptDecision] = useState<"accept" | "reject">("accept");
+  const [receivedQuantity, setReceivedQuantity] = useState<string>("");
+  const [issueType, setIssueType] = useState<string>("NONE");
+  const [issueNotes, setIssueNotes] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const scannerControlsRef = useRef<{ stop: () => void } | null>(null);
+  const hasScannedRef = useRef(false);
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      });
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setIsScanning(true);
-      }
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      toast.error('Unable to access camera. Please check permissions.');
-    }
+  const startCamera = () => {
+    setIsScanning(true);
   };
 
   const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
+    try {
+      scannerControlsRef.current?.stop();
+    } catch {
+      // ignore
+    } finally {
+      scannerControlsRef.current = null;
+      setIsScanning(false);
     }
-    setIsScanning(false);
+  };
+
+  const startScanner = async () => {
+    if (!videoRef.current) return;
+    if (scannerControlsRef.current) return;
+
+    hasScannedRef.current = false;
+
+    try {
+      const { BrowserQRCodeReader } = await import("@zxing/browser");
+      const reader = new BrowserQRCodeReader();
+
+      const controls = await reader.decodeFromVideoDevice(
+        undefined,
+        videoRef.current,
+        (result) => {
+          if (!result) return;
+          if (hasScannedRef.current) return;
+
+          hasScannedRef.current = true;
+          const text = result.getText?.() ?? String(result);
+
+          // Stop camera immediately to prevent duplicate reads
+          stopCamera();
+          handleScan(text);
+        }
+      );
+
+      scannerControlsRef.current = controls;
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      toast.error('Unable to access camera. Please check permissions.');
+      stopCamera();
+    }
   };
 
   useEffect(() => {
@@ -93,6 +125,13 @@ export function QRScannerClient() {
       stopCamera();
     };
   }, []);
+
+  useEffect(() => {
+    if (isScanning) {
+      startScanner();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isScanning]);
 
   const handleScan = async (qrCode: string) => {
     if (!qrCode.trim()) {
@@ -111,17 +150,28 @@ export function QRScannerClient() {
       });
 
       if (!response.ok) {
-        throw new Error('Batch not found or invalid QR code');
+        let message = 'Failed to verify batch';
+        try {
+          const data = await response.json();
+          if (data?.error) message = String(data.error);
+        } catch {
+          // ignore
+        }
+        throw new Error(message);
       }
 
       const batch = await response.json();
       setBatchDetails(batch);
       setShowDetails(true);
       setManualCode("");
+      setReceiptDecision("accept");
+      setReceivedQuantity("");
+      setIssueType("NONE");
+      setIssueNotes("");
       stopCamera();
     } catch (error) {
       console.error('Error verifying batch:', error);
-      toast.error('Invalid QR code or batch not found');
+      toast.error(error instanceof Error ? error.message : 'Invalid QR code or batch not found');
     } finally {
       setIsLoading(false);
     }
@@ -139,7 +189,11 @@ export function QRScannerClient() {
         },
         body: JSON.stringify({ 
           batchId: batchDetails.id,
-          transportTaskId: batchDetails.transportTask?.id 
+          transportTaskId: batchDetails.transportTask?.id,
+          decision: receiptDecision,
+          receivedQuantity: receivedQuantity ? Number(receivedQuantity) : null,
+          issueType: issueType === "NONE" ? null : issueType,
+          notes: issueNotes || null,
         }),
       });
 
@@ -147,12 +201,19 @@ export function QRScannerClient() {
         throw new Error('Failed to confirm receipt');
       }
 
-      toast.success(`Batch ${batchDetails.batchCode} receipt confirmed successfully`);
+      toast.success(
+        receiptDecision === "reject"
+          ? `Batch ${batchDetails.batchCode} rejected and return initiated`
+          : `Batch ${batchDetails.batchCode} receipt confirmed successfully`
+      );
       setBatchDetails(null);
       setShowDetails(false);
-      
-      // Refresh the page to update the deliveries list
-      window.location.reload();
+      setIssueNotes("");
+      setIssueType("NONE");
+      setReceivedQuantity("");
+      setReceiptDecision("accept");
+
+      router.refresh();
     } catch (error) {
       console.error('Error confirming receipt:', error);
       toast.error('Failed to confirm batch receipt');
@@ -338,6 +399,77 @@ export function QRScannerClient() {
                 <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
                 <span className="text-green-800 font-medium">Batch verified and ready for receipt confirmation</span>
               </div>
+
+              {/* Receipt Decision */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <AlertTriangle className="h-5 w-5 mr-2 text-amber-500" />
+                    Receipt Decision
+                  </CardTitle>
+                  <CardDescription>
+                    Record any issues and choose to accept or reject the batch.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Decision</label>
+                      <div className="mt-2 flex items-center gap-3">
+                        <Button
+                          type="button"
+                          variant={receiptDecision === "accept" ? "default" : "outline"}
+                          onClick={() => setReceiptDecision("accept")}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={receiptDecision === "reject" ? "destructive" : "outline"}
+                          onClick={() => setReceiptDecision("reject")}
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Received Quantity (kg)</label>
+                      <Input
+                        type="number"
+                        value={receivedQuantity}
+                        onChange={(e) => setReceivedQuantity(e.target.value)}
+                        placeholder={batchDetails.quantity ? String(batchDetails.quantity) : "Enter quantity"}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Issue Type</label>
+                    <div className="mt-2">
+                      <select
+                        className="w-full border rounded-md p-2 text-sm"
+                        value={issueType}
+                        onChange={(e) => setIssueType(e.target.value)}
+                      >
+                        <option value="NONE">No issues</option>
+                        <option value="UNDERWEIGHT">Under weight</option>
+                        <option value="DEFECT">Defect</option>
+                        <option value="OTHER">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Notes</label>
+                    <Textarea
+                      value={issueNotes}
+                      onChange={(e) => setIssueNotes(e.target.value)}
+                      placeholder="Describe defects, damage, or discrepancy..."
+                      rows={3}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 
@@ -351,10 +483,10 @@ export function QRScannerClient() {
             </Button>
             <Button 
               onClick={handleConfirmReceipt}
-              disabled={isConfirming}
-              className="bg-green-600 hover:bg-green-700"
+              disabled={isConfirming || (receiptDecision === "reject" && !issueNotes.trim())}
+              className={receiptDecision === "reject" ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
             >
-              {isConfirming ? "Confirming..." : "Confirm Receipt"}
+              {isConfirming ? "Confirming..." : receiptDecision === "reject" ? "Reject Batch" : "Confirm Receipt"}
             </Button>
           </DialogFooter>
         </DialogContent>

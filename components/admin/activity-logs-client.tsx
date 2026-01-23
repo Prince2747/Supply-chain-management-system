@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Filter, Eye, Download, X } from "lucide-react";
+import { Search, Eye, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -67,6 +67,10 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
   const [entityFilter, setEntityFilter] = useState<string>("all");
   const [selectedLog, setSelectedLog] = useState<ActivityLog | null>(null);
 
+  const getUserDisplayName = (log: ActivityLog) => {
+    return log.user?.name || log.user?.email || t('unknownUser');
+  };
+
   // Filter logs based on search term and filters
   const filteredLogs = logs.filter((log) => {
     const matchesSearch =
@@ -92,7 +96,7 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
     return "outline";
   };
 
-  const formatDetails = (details: any) => {
+  const formatDetails = (details: ActivityLog["details"]) => {
     if (!details) return t('noDetails');
     if (typeof details === "string") return details;
     return JSON.stringify(details, null, 2);
@@ -105,7 +109,7 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
         "No.": index + 1,
         Date: new Date(log.createdAt).toLocaleDateString(),
         Time: new Date(log.createdAt).toLocaleTimeString(),
-        "User Name": log.user?.name || "Unknown User",
+        "User Name": getUserDisplayName(log),
         "User Email": log.user?.email || log.userId.slice(0, 8) + "...",
         Action: log.action.replace("_", " "),
         "Entity Type": log.entityType || "N/A",
@@ -262,7 +266,7 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
                       <TableCell>
                         <div>
                           <div className="font-medium">
-                            {log.user?.name || t('unknownUser')}
+                            {getUserDisplayName(log)}
                           </div>
                           <div className="text-sm text-muted-foreground">
                             {log.user?.email || log.userId.slice(0, 8) + "..."}
@@ -336,7 +340,7 @@ export function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
                       </div>
                       <div className="flex flex-col">
                         <span className="text-xs text-muted-foreground">{t('user')}</span>
-                        <span className="font-medium">{selectedLog.user?.name || t('unknown')}</span>
+                        <span className="font-medium">{getUserDisplayName(selectedLog)}</span>
                         <span className="text-xs text-muted-foreground">{selectedLog.user?.email || selectedLog.userId}</span>
                       </div>
                       <div className="flex flex-col">

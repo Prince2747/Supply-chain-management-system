@@ -91,7 +91,6 @@ export default async function WarehouseManagerDashboard() {
       status: "DELIVERED",
       cropBatch: {
         warehouseId: warehouseId,
-        status: "PACKAGED" // Ready to be received and stored
       }
     },
     include: {
@@ -143,20 +142,20 @@ export default async function WarehouseManagerDashboard() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-3 mb-2">
-          <Warehouse className="h-8 w-8 text-green-600" />
+        <div className="flex items-center gap-2 sm:gap-3 mb-2">
+          <Warehouse className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-            <p className="text-lg font-medium text-green-600">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("title")}</h1>
+            <p className="text-sm sm:text-base lg:text-lg font-medium text-green-600">
               {currentProfile.warehouse?.name} ({currentProfile.warehouse?.code})
             </p>
           </div>
         </div>
         {currentProfile.warehouse?.address && (
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             📍 {currentProfile.warehouse.address}
             {currentProfile.warehouse.city && `, ${currentProfile.warehouse.city}`}
           </p>
@@ -164,15 +163,15 @@ export default async function WarehouseManagerDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("readyForPackaging")}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("readyForPackaging")}</CardTitle>
             <Package className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{readyForPackaging}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xl sm:text-2xl font-bold text-blue-600">{readyForPackaging}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               {t("readyForPackagingDesc")}
             </p>
           </CardContent>
@@ -180,12 +179,12 @@ export default async function WarehouseManagerDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("currentlyPackaging")}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("currentlyPackaging")}</CardTitle>
             <PackageCheck className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{currentlyPackaging}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xl sm:text-2xl font-bold text-yellow-600">{currentlyPackaging}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               {t("currentlyPackagingDesc")}
             </p>
           </CardContent>
@@ -193,11 +192,11 @@ export default async function WarehouseManagerDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("packaged")}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("packaged")}</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{packaged}</div>
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{packaged}</div>
             <p className="text-xs text-muted-foreground">
               {t("packagedDesc")}
             </p>
@@ -206,12 +205,12 @@ export default async function WarehouseManagerDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("stored")}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("stored")}</CardTitle>
             <Archive className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stored}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xl sm:text-2xl font-bold text-purple-600">{stored}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               {t("storedDesc")}
             </p>
           </CardContent>
@@ -219,14 +218,14 @@ export default async function WarehouseManagerDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <PackageCheck className="h-5 w-5 mr-2 text-blue-500" />
+            <CardTitle className="flex items-center text-base sm:text-lg">
+              <PackageCheck className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-blue-500" />
               {t("packagingManagement")}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               {t("viewPackagingDesc")}
             </CardDescription>
           </CardHeader>
@@ -241,11 +240,11 @@ export default async function WarehouseManagerDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Scan className="h-5 w-5 mr-2 text-green-500" />
+            <CardTitle className="flex items-center text-base sm:text-lg">
+              <Scan className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-green-500" />
               {t("receiptScanner")}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               {t("scanReceiptButton")}
             </CardDescription>
           </CardHeader>
@@ -260,11 +259,11 @@ export default async function WarehouseManagerDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Archive className="h-5 w-5 mr-2 text-purple-500" />
+            <CardTitle className="flex items-center text-base sm:text-lg">
+              <Archive className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-purple-500" />
               {t("storageManagement")}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               {t("updateStorage")}
             </CardDescription>
           </CardHeader>
@@ -279,31 +278,31 @@ export default async function WarehouseManagerDashboard() {
       </div>
 
       {/* Recent Activities */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Recent Deliveries for Receipt */}
         <Card>
           <CardHeader>
-            <CardTitle>{t("recentDeliveries")}</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-base sm:text-lg">{t("recentDeliveries")}</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
               {t("recentDeliveriesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {recentTransportTasks.length === 0 ? (
-              <div className="text-center py-6 text-muted-foreground">
-                <Warehouse className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>{t("noRecentDeliveries")}</p>
+              <div className="text-center py-4 sm:py-6 text-muted-foreground">
+                <Warehouse className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-xs sm:text-sm">{t("noRecentDeliveries")}</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {recentTransportTasks.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="font-medium">{task.cropBatch.batchCode}</div>
-                      <div className="text-sm text-muted-foreground">
+                  <div key={task.id} className="flex items-center justify-between p-2 sm:p-3 border rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs sm:text-sm font-medium truncate">{task.cropBatch.batchCode}</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground truncate">
                         {task.cropBatch.farm.name} • {task.driver.name} • {task.vehicle.plateNumber}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">
                         {t("delivered")}: {task.actualDeliveryDate ? format(new Date(task.actualDeliveryDate), "PPp") : "N/A"}
                       </div>
                     </div>
@@ -325,27 +324,27 @@ export default async function WarehouseManagerDashboard() {
         {/* Recent Packaging Activities */}
         <Card>
           <CardHeader>
-            <CardTitle>{t("recentPackagingActivities")}</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-base sm:text-lg">{t("recentPackagingActivities")}</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
               {t("recentPackagingActivitiesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {recentPackaging.length === 0 ? (
-              <div className="text-center py-6 text-muted-foreground">
-                <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>{t("noRecentPackaging")}</p>
+              <div className="text-center py-4 sm:py-6 text-muted-foreground">
+                <Package className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-xs sm:text-sm">{t("noRecentPackaging")}</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {recentPackaging.map((batch) => (
-                  <div key={batch.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="font-medium">{batch.batchCode}</div>
-                      <div className="text-sm text-muted-foreground">
+                  <div key={batch.id} className="flex items-center justify-between p-2 sm:p-3 border rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs sm:text-sm font-medium truncate">{batch.batchCode}</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground truncate">
                         {batch.farm.name} • {batch.quantity || 0}kg
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">
                         {t("updated")}: {format(new Date(batch.updatedAt), "PPp")}
                       </div>
                     </div>

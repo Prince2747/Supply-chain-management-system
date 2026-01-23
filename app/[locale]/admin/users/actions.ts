@@ -44,14 +44,35 @@ export async function createUser(formData: FormData): Promise<ActionResult> {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const name = formData.get('name') as string | null
+  const email = (formData.get('email') as string | null) || ''
+  const password = (formData.get('password') as string | null) || ''
+  const name = (formData.get('name') as string | null) || ''
   const role = formData.get('role') as Role
 
   // Validate inputs
-  if (!email || !password || !role) {
-    return { error: 'Email, password, and role are required.', message: null }
+  if (!email) {
+    return { error: 'Email is required.', message: null }
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    return { error: 'Please provide a valid email address.', message: null }
+  }
+
+  if (!password) {
+    return { error: 'Password is required.', message: null }
+  }
+
+  if (password.length < 8) {
+    return { error: 'Password must be at least 8 characters.', message: null }
+  }
+
+  if (!name.trim()) {
+    return { error: 'Name is required.', message: null }
+  }
+
+  if (!role) {
+    return { error: 'Role is required.', message: null }
   }
   const validRoles = [
     'admin',

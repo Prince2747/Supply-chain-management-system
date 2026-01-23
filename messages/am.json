@@ -388,8 +388,11 @@
   "loginForm": {
     "email": "ኢሜይል",
     "emailPlaceholder": "ኢሜይልዎን ያስገቡ",
+    "emailRequired": "ኢሜይል ያስፈልጋል",
+    "emailInvalid": "ትክክለኛ ኢሜይል ያስገቡ",
     "password": "የይለፍ ቃል",
     "passwordPlaceholder": "የይለፍ ቃልዎን ያስገቡ",
+    "passwordRequired": "የይለፍ ቃል ያስፈልጋል",
     "signIn": "ግባ",
     "authenticatingButton": "በማረጋገጥ ላይ...",
     "signingIn": "በመግባት ላይ...",
@@ -398,8 +401,49 @@
     "welcome": "እንኳን ደህና መጡ!",
     "error": "ስህተት ተፈጥሯል",
     "signInFailed": "መግባት አልተሳካም",
+    "forgotPassword": "የይለፍ ቃል ረስተዋል?",
     "noAccount": "መለያ የለዎትም?",
     "contactAdmin": "አስተዳዳሪን ያግኙ"
+  },
+
+  "resetPassword": {
+    "title": "የይለፍ ቃል ዳግም ማቋቋም",
+    "description": "ኢሜይልዎን ያስገቡ፣ የመቀየሪያ አገናኝ እንልካለን።",
+    "email": "ኢሜይል",
+    "emailPlaceholder": "ኢሜይልዎን ያስገቡ",
+    "emailRequired": "ኢሜይል ያስፈልጋል",
+    "emailInvalid": "ትክክለኛ ኢሜይል ያስገቡ",
+    "sendLink": "የመቀየሪያ አገናኝ ላክ",
+    "sendingButton": "በመላክ ላይ...",
+    "sending": "አገናኝ በመላክ ላይ...",
+    "sendingDescription": "እባክዎን የመቀየሪያ አገናኝ ለመላክ ይጠብቁ",
+    "emailSent": "አገናኝ ተልኳል",
+    "checkInbox": "ኢንቦክስዎን ይፈትሹ እና ለመቀየር አገናኙን ይከተሉ",
+    "sendFailed": "አገናኝ ላክ አልተሳካም",
+    "error": "ስህተት ተፈጥሯል"
+  },
+
+  "updatePassword": {
+    "title": "አዲስ የይለፍ ቃል ያቀናብሩ",
+    "description": "ለመለያዎ አዲስ የይለፍ ቃል ይፍጠሩ።",
+    "newPassword": "አዲስ የይለፍ ቃል",
+    "newPasswordPlaceholder": "አዲስ የይለፍ ቃል ያስገቡ",
+    "confirmPassword": "የይለፍ ቃል ያረጋግጡ",
+    "confirmPasswordPlaceholder": "አዲሱን የይለፍ ቃል ደግመው ያስገቡ",
+    "updateButton": "የይለፍ ቃል ያዘምኑ",
+    "updatingButton": "በማዘመን ላይ...",
+    "updating": "የይለፍ ቃል በማዘመን ላይ...",
+    "updatingDescription": "እባክዎን የይለፍ ቃል ሲዘመን ይጠብቁ",
+    "updatedSuccess": "የይለፍ ቃል ተዘምኗል",
+    "updatedDescription": "አሁን በአዲሱ የይለፍ ቃል መግባት ይችላሉ",
+    "updateFailed": "የይለፍ ቃል ማዘመን አልተሳካም",
+    "passwordRequired": "የይለፍ ቃል ያስፈልጋል",
+    "passwordTooShort": "የይለፍ ቃል ቢያንስ 8 ቁምፊዎች መሆን አለበት",
+    "confirmRequired": "የይለፍ ቃል እንደገና ያረጋግጡ",
+    "passwordsMismatch": "የይለፍ ቃሎቹ አንድ አይደሉም",
+    "missingLink": "ይህ አገናኝ የማይሰራ ወይም ጊዜው ያበቃ ነው።",
+    "backToReset": "አዲስ የመቀየሪያ አገናኝ ይጠይቁ",
+    "error": "ስህተት ተፈጥሯል"
   },
   
   "login": {
@@ -418,7 +462,14 @@
   "errorPage": {
     "general": {
       "title": "የሆነ ችግር ተፈጥሯል",
-      "description": "ያልተጠበቀ ስህተት ተፈጥሯል"
+      "description": "ያልተጠበቀ ስህተት ተፈጥሯል",
+      "suggestions": {
+        "0": "Refresh the page and try again",
+        "1": "Check your internet connection",
+        "2": "Clear your browser cache",
+        "3": "Try again in a few minutes"
+      },
+      "buttonText": "Refresh page"
     },
     "database": {
       "title": "የዳታቤዝ ግንኙነት ስህተት",
@@ -429,12 +480,22 @@
         "2": "የአውታረ መረብ ግንኙነት ይፈትሹ",
         "3": "የዳታቤዝ ምስክርነቶችን ይገምግሙ",
         "4": "የስርዓት አስተዳዳሪን ያግኙ"
-      }
+      },
+      "buttonText": "Try again"
     },
     "auth": {
       "title": "የማረጋገጫ ስህተት",
       "description": "በማረጋገጫዎ ላይ ችግር ነበር"
     },
+    "couldBeDue": "This could be due to:",
+    "returnToLogin": "Return to login",
+    "persistsMessage": "If the problem persists, contact",
+    "technicalSupport": "technical support",
+    "errorDetails": "Error details",
+    "errorCode": "Error code",
+    "loading": "Loading...",
+    "system": "System",
+    "systemName": "Supply Chain Management System",
     "goHome": "ወደ ዋና ገጽ ይሂዱ",
     "retry": "እንደገና ይሞክሩ",
     "timestamp": "ስህተቱ የተፈጠረው"
@@ -457,7 +518,8 @@
       "contact": "ይህ ስህተት ነው ብለው ካመኑ ድጋፍን ያግኙ"
     },
     "loginButton": "ወደ መግቢያ ይሂዱ",
-    "homeButton": "ወደ ዋና ገጽ ይሂዱ"
+    "homeButton": "ወደ ዋና ገጽ ይሂዱ",
+    "returnHome": "ወደ ዋና ገጽ ይሂዱ"
   },
   
   "common": {
@@ -534,11 +596,13 @@
       "allRoles": "ሁሉም ሚናዎች",
       "user": "ተጠቃሚ",
       "warehouse": "መጋዘን",
+      "code": "ኮድ",
       "created": "ተፈጥሯል",
       "actions": "ድርጊቶች",
       "noUsersFound": "ምንም ተጠቃሚዎች አልተገኙም",
       "noName": "ስም የለም",
       "notAssigned": "አልተመደበም",
+      "na": "አ/ሚ",
       "assignWarehouse": "መጋዘን መድብ",
       "noWarehouse": "መጋዘን የለም",
       "deactivate": "አሰናክል",
@@ -958,7 +1022,24 @@
       "dashboard": "ዳሽቦርድ",
       "myTasks": "ስራዎቼ",
       "qrScanner": "QR ስካነር",
-      "issues": "ችግሮች"
+      "issues": "ችግሮች",
+      "notifications": "ማሳወቂያዎች"
+    },
+    "notifications": {
+      "title": "የስራ ማሳወቂያዎች",
+      "noNotifications": "ገና ማሳወቂያዎች የሉም",
+      "noNotificationsDesc": "አስፈላጊ ነገር ሲኖር እናሳውቅዎታለን",
+      "markAllRead": "ሁሉንም እንደተነበበ ምልክት አድርግ",
+      "markRead": "እንደተነበበ ምልክት አድርግ",
+      "unreadCount": "{count} ያልተነበቡ ማሳወቂያዎች አሉዎት",
+      "allCaughtUp": "ሁሉም ተጠናቅቋል!",
+      "types": {
+        "TASK_ASSIGNED": "ስራ ተመድቧል",
+        "ROUTE_UPDATED": "መንገድ ተዘምኗል",
+        "PICKUP_READY": "ለማንሳት ዝግጁ",
+        "DELIVERY_CONFIRMED": "ማድረስ ተረጋግጧል",
+        "SCHEDULE_CHANGED": "መርሐግብር ተቀይሯል"
+      }
     },
     "dashboard": {
       "title": "የትራንስፖርት ሹፌር ዳሽቦርድ",
@@ -1053,7 +1134,10 @@
       "errorQRCode": "እባክዎ QR ኮድ ያስገቡ ወይም ይቃኙ",
       "errorSelectTask": "እባክዎ ስራ ይምረጡ",
       "errorSelectAction": "እባክዎ ድርጊት ይምረጡ (መውሰጃ ወይም ማድረስ)",
-      "loadTasksFailed": "ስራዎችን መጫን አልተሳካም"
+      "loadTasksFailed": "ስራዎችን መጫን አልተሳካም",
+      "qrDetected": "QR ኮድ ተገኝቷል",
+      "qrDetectedDesc": "የQR ኮድ መስኩ በራሱ ተሞልቷል።",
+      "cameraPermissionError": "ካሜራን መድረስ አልተቻለም። ፈቃዶችን ይመርምሩ።"
     },
     "issues": {
       "title": "የትራንስፖርት ችግሮች",
@@ -1116,7 +1200,25 @@
       "dashboard": "ዳሽቦርድ",
       "packaging": "ማሸጊያ",
       "receiptScanner": "ደረሰኝ ስካነር",
-      "storage": "ማከማቻ"
+      "storage": "ማከማቻ",
+      "notifications": "ማሳወቂያዎች"
+    },
+    "notifications": {
+      "title": "የመጋዘን ማሳወቂያዎች",
+      "noNotifications": "ገና ማሳወቂያዎች የሉም",
+      "noNotificationsDesc": "አስፈላጊ ነገር ሲኖር እናሳውቅዎታለን",
+      "markAllRead": "ሁሉንም እንደተነበበ ምልክት አድርግ",
+      "markRead": "እንደተነበበ ምልክት አድርግ",
+      "unreadCount": "{count} ያልተነበቡ ማሳወቂያዎች አሉዎት",
+      "allCaughtUp": "ሁሉም ተጠናቅቋል!",
+      "types": {
+        "SHIPMENT_ARRIVING": "ጭነት እየደረሰ ነው",
+        "STORAGE_FULL": "ማከማቻ ሞልቷል",
+        "BATCH_RECEIVED": "ባች ተቀብሏል",
+        "PACKAGING_COMPLETE": "ማሸግ ተጠናቅቋል",
+        "QUALITY_CHECK_NEEDED": "የጥራት ምርመራ ያስፈልጋል",
+        "LOW_STOCK_ALERT": "ዝቅተኛ ክምችት ማስጠንቀቂያ"
+      }
     },
     "dashboard": {
       "title": "የመጋዘን አስተዳዳሪ ዳሽቦርድ",
@@ -1283,8 +1385,24 @@
       "from": "ከ",
       "notAssigned": "አልተመደበም",
       "noLocation": "ምንም ቦታ የለም",
+      "storageLocation": "የማከማቻ ቦታ",
+      "notAvailable": "አይገኝም",
       "noDate": "ምንም ቀን የለም",
       "updated": "ዘምኗል",
+      "current": "አሁኑ",
+      "minimum": "ዝቅተኛ",
+      "target": "ግብ",
+      "low": "ዝቅተኛ",
+      "lowStockAlerts": "ዝቅተኛ የአክሲዮን ማሳወቂያዎች",
+      "lowStockDescription": "ከዝቅተኛ የአክሲዮን መስፈርቶች በታች ያሉ ሰብሎች",
+      "noLowStockAlerts": "ዝቅተኛ የአክሲዮን ማሳወቂያዎች የሉም",
+      "threeMonthTrend": "የ3 ወር የክምችት እንቅስቃሴ",
+      "trendDescription": "ባለፉት ሶስት ወራት ውስጥ ጠቅላላ የክምችት እንቅስቃሴ",
+      "noTrendData": "የእንቅስቃሴ መረጃ የለም",
+      "statusProcessed": "ተሰራተ",
+      "statusInTransit": "በመጓጓዣ ላይ",
+      "statusPendingReceipt": "ለመቀበል በመጠባበቅ ላይ",
+      "statusCompleted": "ተጠናቋል",
       "recentActivity": "የቅርብ ጊዜ እንቅስቃሴ",
       "latestInventoryChanges": "ባለፉት 30 ቀናት ውስጥ የቅርብ ጊዜ የክምችት ለውጦች",
       "noRecentActivity": "ምንም የቅርብ ጊዜ እንቅስቃሴ የለም",
@@ -1320,7 +1438,10 @@
     "stockRequirements": {
       "title": "የአክሲዮን መስፈርቶች",
       "description": "ዝቅተኛ የአክሲዮን ደረጃዎችን ያዘጋጁ እና የክምችት መስፈርቶችን ይቆጣጠሩ",
+      "totalCrops": "ጠቅላላ ሰብሎች",
+      "cropTypesInSystem": "በስርዓቱ ውስጥ ያሉ የሰብል ዓይነቶች",
       "sufficientStock": "በቂ አክሲዮን",
+      "aboveMinimum": "ከዝቅተኛ ደረጃ በላይ",
       "meetingRequirements": "መስፈርቶችን ማሟላት",
       "lowStock": "ዝቅተኛ አክሲዮን",
       "belowMinimum": "ከዝቅተኛ ደረጃዎች በታች",
@@ -1336,14 +1457,45 @@
       "sufficient": "በቂ",
       "low": "ዝቅተኛ",
       "noRequirement": "መስፈርት የለም",
+      "edit": "አርትዕ",
       "editRequirement": "መስፈርትን አርትዕ",
       "editStockRequirement": "የአክሲዮን መስፈርትን አርትዕ",
-      "setMinimumStock": "ዝቅተኛ የአክሲዮን ደረጃ ያቀናብሩ",
-      "minimumStockLevel": "ዝቅተኛ የአክሲዮን ደረጃ",
-      "enterMinimum": "ዝቅተኛ የአክሲዮን መጠን ያስገቡ",
+      "setMinimumStockLevel": "ዝቅተኛ የአክሲዮን ደረጃ ያቀናብሩ",
+      "currentStock": "አሁን ያለው አክሲዮን",
+      "minimumStock": "ዝቅተኛ አክሲዮን",
+      "enterMinimumStockLevel": "ዝቅተኛ የአክሲዮን መጠን ያስገቡ",
+      "target": "ግብ",
+      "targetQuantity": "የግብ መጠን",
+      "enterTargetQuantity": "የግብ መጠን ያስገቡ",
+      "unit": "መለኪያ",
+      "selectUnit": "መለኪያ ይምረጡ",
+      "unitKg": "ኪ.ግ (kg)",
+      "unitQuintals": "ኩንታል",
+      "unitTons": "ቶን",
       "cancel": "ሰርዝ",
-      "saveChanges": "ለውጦችን አስቀምጥ",
-      "updatedRequirement": "የተዘመነ ዝቅተኛ የአክሲዮን መስፈርት ለ"
+      "saveRequirement": "መስፈርቱን አስቀምጥ",
+      "updatedRequirement": "የተዘመነ ዝቅተኛ የአክሲዮን መስፈርት ለ",
+      "setMinimumFirst": "መጀመሪያ ዝቅተኛ አክሲዮን ያቀናብሩ",
+      "stockNotLow": "አክሲዮኑ ከዝቅተኛው በታች አይደለም",
+      "notifyFieldAgents": "ለሜዳ ወኪሎች አሳውቅ",
+      "notificationSent": "ማሳወቂያ ተልኳል"
+    },
+    "batchReviews": {
+      "title": "የቡድን ግምገማዎች",
+      "description": "የተሰበሰቡ የሰብል ቡድኖችን ይገምግሙ እና ያጽድቁ",
+      "pendingTitle": "በመጠባበቅ ላይ ያሉ ግምገማዎች",
+      "pendingDescription": "ከተሰበሰቡ በኋላ የግዢ ማጽደቅ በመጠባበቅ ላይ ያሉ ቡድኖች",
+      "empty": "ግምገማ በመጠባበቅ ላይ ምንም ቡድኖች የሉም",
+      "batchCode": "የቡድን ኮድ",
+      "cropType": "የሰብል ዓይነት",
+      "farm": "እርሻ",
+      "farmer": "ገበሬ",
+      "quantity": "መጠን",
+      "status": "ሁኔታ",
+      "actions": "እርምጃዎች",
+      "approve": "አጽድቅ",
+      "reject": "አትቀበል",
+      "backToDashboard": "ወደ ዳሽቦርድ ተመለስ"
     }
   },
   "transportCoordinator": {
@@ -1354,11 +1506,30 @@
       "vehicles": "ተሽከርካሪዎች",
       "drivers": "ሹፌሮች",
       "issues": "ጉዳዮች",
-      "reports": "ሪፖርቶች"
+      "reports": "ሪፖርቶች",
+      "notifications": "ማሳወቂያዎች"
+    },
+    "notifications": {
+      "title": "የትራንስፖርት ማሳወቂያዎች",
+      "noNotifications": "ገና ማሳወቂያዎች የሉም",
+      "noNotificationsDesc": "አስፈላጊ ነገር ሲኖር እናሳውቅዎታለን",
+      "markAllRead": "ሁሉንም እንደተነበበ ምልክት አድርግ",
+      "markRead": "እንደተነበበ ምልክት አድርግ",
+      "unreadCount": "{count} ያልተነበቡ ማሳወቂያዎች አሉዎት",
+      "allCaughtUp": "ሁሉም ተጠናቅቋል!",
+      "types": {
+        "TRANSPORT_SCHEDULED": "ትራንስፖርት ተመዝግቧል",
+        "DRIVER_ASSIGNED": "ሹፌር ተመድቧል",
+        "ROUTE_DELAYED": "መንገድ ዘግይቷል",
+        "VEHICLE_ISSUE": "የተሽከርካሪ ችግር",
+        "TASK_COMPLETED": "ስራ ተጠናቅቋል",
+        "ISSUE_REPORTED": "ችግር ሪፖርት ተደርጓል"
+      }
     },
     "dashboard": {
       "title": "የትራንስፖርት አስተባባሪ ዳሽቦርድ",
       "viewAllTasks": "ሁሉንም ተግባራት ይመልከቱ",
+      "tasks": "ተግባራት",
       "totalTasks": "ጠቅላላ ተግባራት",
       "inTransit": "በመጓጓዝ ላይ",
       "availableVehicles": "የሚገኙ ተሽከርካሪዎች",

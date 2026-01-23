@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
 
 interface WarehouseManagerAuthWrapperProps {
   children: React.ReactNode;

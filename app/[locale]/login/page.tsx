@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
-import Image from "next/image";
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 
@@ -65,15 +64,6 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
           
           <Card className="shadow-2xl border-green-200">
             <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <Image 
-                  src="/logo.png" 
-                  alt={t('logoAlt')}
-                  width={80} 
-                  height={80}
-                  className="h-20 w-auto"
-                />
-              </div>
               <CardTitle className="text-2xl text-green-700">
                 {t('title')}
               </CardTitle>

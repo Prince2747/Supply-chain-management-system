@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -12,7 +11,6 @@ import {
   Warehouse,
   TrendingUp,
   Search,
-  Filter,
   BarChart3,
   MapPin,
   Calendar,
@@ -30,6 +28,7 @@ interface CropBatch {
   quantity: number | null;
   unit: string | null;
   status: string;
+  notes?: string | null;
   actualHarvest: Date | null;
   updatedAt: Date;
   farm: {
@@ -100,12 +99,27 @@ interface RecentActivity {
   };
 }
 
+interface StockAlert {
+  cropType: string;
+  minStock: number;
+  targetQuantity: number;
+  unit: string;
+  currentStock: number;
+}
+
+interface MonthlyTrend {
+  month: string;
+  totalQuantity: number;
+}
+
 interface InventoryMonitorClientProps {
   inventoryData: CropBatch[];
   cropSummary: CropSummary[];
   warehouseStats: WarehouseStat[];
   statusDistribution: StatusDistribution[];
   recentActivity: RecentActivity[];
+  stockAlerts: StockAlert[];
+  monthlyTrends: MonthlyTrend[];
 }
 
 export function InventoryMonitorClient({
@@ -113,7 +127,9 @@ export function InventoryMonitorClient({
   cropSummary,
   warehouseStats,
   statusDistribution,
-  recentActivity
+  recentActivity,
+  stockAlerts,
+  monthlyTrends
 }: InventoryMonitorClientProps) {
   const t = useTranslations("procurementOfficer.inventory");
   const [searchTerm, setSearchTerm] = useState("");
@@ -145,6 +161,10 @@ export function InventoryMonitorClient({
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'SHIPPED':
+        return 'text-orange-600 bg-orange-50 border-orange-200';
+      case 'RECEIVED':
+        return 'text-amber-600 bg-amber-50 border-amber-200';
       case 'PROCESSED':
         return 'text-green-600 bg-green-50 border-green-200';
       case 'STORED':
@@ -158,6 +178,10 @@ export function InventoryMonitorClient({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
+      case 'SHIPPED':
+        return <Package className="h-4 w-4" />;
+      case 'RECEIVED':
+        return <CheckCircle className="h-4 w-4" />;
       case 'PROCESSED':
         return <CheckCircle className="h-4 w-4" />;
       case 'STORED':
@@ -167,6 +191,27 @@ export function InventoryMonitorClient({
       default:
         return <Clock className="h-4 w-4" />;
     }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'PROCESSED':
+        return t('statusProcessed');
+      case 'SHIPPED':
+        return t('statusInTransit');
+      case 'RECEIVED':
+        return t('statusPendingReceipt');
+      case 'STORED':
+        return t('statusCompleted');
+      default:
+        return status;
+    }
+  };
+
+  const getStorageLocation = (notes?: string | null) => {
+    if (!notes) return null;
+    const match = notes.match(/Storage location:\s*([^|\n]+)/i);
+    return match?.[1]?.trim() || null;
   };
 
   return (
@@ -292,6 +337,74 @@ export function InventoryMonitorClient({
         </CardContent>
       </Card>
 
+      {/* Stock Alerts */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-red-600" />
+            {t("lowStockAlerts")}
+          </CardTitle>
+          <CardDescription>
+            {t("lowStockDescription")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {stockAlerts.length === 0 ? (
+            <div className="text-sm text-muted-foreground">
+              {t("noLowStockAlerts")}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {stockAlerts.map((alert) => (
+                <div key={alert.cropType} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <div className="font-medium">{alert.cropType}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {t("current")}: {alert.currentStock} {alert.unit} • {t("minimum")}: {alert.minStock} {alert.unit}
+                    </div>
+                    {alert.targetQuantity > 0 && (
+                      <div className="text-sm text-muted-foreground">
+                        {t("target")}: {alert.targetQuantity} {alert.unit}
+                      </div>
+                    )}
+                  </div>
+                  <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">
+                    {t("low")}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Inventory Trend */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-blue-600" />
+            {t("threeMonthTrend")}
+          </CardTitle>
+          <CardDescription>
+            {t("trendDescription")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {monthlyTrends.length === 0 ? (
+            <div className="text-sm text-muted-foreground">{t("noTrendData")}</div>
+          ) : (
+            <div className="space-y-3">
+              {monthlyTrends.map((trend) => (
+                <div key={trend.month} className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">{trend.month}</div>
+                  <div className="font-medium">{trend.totalQuantity.toLocaleString()} kg</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Filters and Search */}
       <Card>
         <CardHeader>
@@ -391,6 +504,9 @@ export function InventoryMonitorClient({
                         <MapPin className="h-4 w-4 mr-1" />
                         {item.warehouse?.address || t("noLocation")}
                       </div>
+                      <div className="text-sm text-muted-foreground">
+                        {t("storageLocation")}: {getStorageLocation(item.notes) || t("notAvailable")}
+                      </div>
                     </div>
 
                     <div className="flex flex-col">
@@ -409,7 +525,7 @@ export function InventoryMonitorClient({
                     className={getStatusColor(item.status)}
                   >
                     {getStatusIcon(item.status)}
-                    <span className="ml-1">{item.status}</span>
+                    <span className="ml-1">{getStatusLabel(item.status)}</span>
                   </Badge>
                 </div>
               ))
@@ -464,7 +580,7 @@ export function InventoryMonitorClient({
                       className={getStatusColor(activity.status)}
                     >
                       {getStatusIcon(activity.status)}
-                      <span className="ml-1">{activity.status}</span>
+                      <span className="ml-1">{getStatusLabel(activity.status)}</span>
                     </Badge>
                     <div className="text-sm text-muted-foreground">
                       {format(new Date(activity.updatedAt), "PP")}

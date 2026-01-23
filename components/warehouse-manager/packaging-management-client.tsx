@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +59,7 @@ interface PackagingManagementClientProps {
 }
 
 export function PackagingManagementClient({ batches, stats }: PackagingManagementClientProps) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedBatch, setSelectedBatch] = useState<CropBatch | null>(null);
@@ -109,9 +111,8 @@ export function PackagingManagementClient({ batches, stats }: PackagingManagemen
       }
 
       toast.success(`Batch status updated to ${newStatus.replace('_', ' ').toLowerCase()}`);
-      
-      // Refresh the page to get updated data
-      window.location.reload();
+
+      router.refresh();
     } catch (error) {
       console.error('Error updating status:', error);
       toast.error('Failed to update packaging status');

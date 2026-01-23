@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,14 +60,17 @@ interface StorageManagementClientProps {
 }
 
 export function StorageManagementClient({ batches, stats }: StorageManagementClientProps) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedBatch, setSelectedBatch] = useState<CropBatch | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [storageLocation, setStorageLocation] = useState("");
+  const [storageNotes, setStorageNotes] = useState("");
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      RECEIVED: { label: "Received", className: "bg-blue-100 text-blue-800 hover:bg-blue-100" },
+      RECEIVED: { label: "Received at Warehouse", className: "bg-blue-100 text-blue-800 hover:bg-blue-100" },
       STORED: { label: "Stored", className: "bg-green-100 text-green-800 hover:bg-green-100" },
     };
     
@@ -101,6 +105,8 @@ export function StorageManagementClient({ batches, stats }: StorageManagementCli
         body: JSON.stringify({
           batchId,
           status: 'STORED',
+          storageLocation: storageLocation.trim() || undefined,
+          notes: storageNotes.trim() || undefined,
         }),
       });
 
@@ -109,15 +115,16 @@ export function StorageManagementClient({ batches, stats }: StorageManagementCli
       }
 
       toast.success('Batch successfully marked as stored');
-      
-      // Refresh the page to get updated data
-      window.location.reload();
+
+      router.refresh();
     } catch (error) {
       console.error('Error updating storage status:', error);
       toast.error('Failed to update storage status');
     } finally {
       setIsUpdating(false);
       setSelectedBatch(null);
+      setStorageLocation("");
+      setStorageNotes("");
     }
   };
 
@@ -297,6 +304,25 @@ export function StorageManagementClient({ batches, stats }: StorageManagementCli
                         This confirms that the batch has been properly verified and placed in warehouse storage.
                       </DialogDescription>
                     </DialogHeader>
+
+                    <div className="grid gap-4">
+                      <div className="grid gap-2">
+                        <label className="text-sm font-medium">Storage Location</label>
+                        <Input
+                          placeholder="e.g., Aisle 3, Rack B"
+                          value={storageLocation}
+                          onChange={(e) => setStorageLocation(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <label className="text-sm font-medium">Notes (optional)</label>
+                        <Input
+                          placeholder="Add any storage notes"
+                          value={storageNotes}
+                          onChange={(e) => setStorageNotes(e.target.value)}
+                        />
+                      </div>
+                    </div>
                     
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                       <div className="flex items-center">
@@ -316,7 +342,11 @@ export function StorageManagementClient({ batches, stats }: StorageManagementCli
                     <DialogFooter>
                       <Button 
                         variant="outline" 
-                        onClick={() => setSelectedBatch(null)}
+                        onClick={() => {
+                          setSelectedBatch(null);
+                          setStorageLocation("");
+                          setStorageNotes("");
+                        }}
                         disabled={isUpdating}
                       >
                         Cancel

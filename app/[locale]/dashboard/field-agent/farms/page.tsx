@@ -128,7 +128,7 @@ export default function FarmsPage() {
                       ) : (
                         farmers.map((farmer) => (
                           <SelectItem key={farmer.id} value={farmer.id}>
-                            {farmer.name} - {farmer.farmerCode}
+                            {farmer.name} - {farmer.farmerId}
                           </SelectItem>
                         ))
                       )}
@@ -153,6 +153,45 @@ export default function FarmsPage() {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="region">Region *</Label>
+                  <Select name="region" required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        'Addis Ababa',
+                        'Afar',
+                        'Amhara',
+                        'Benishangul-Gumuz',
+                        'Dire Dawa',
+                        'Gambella',
+                        'Harari',
+                        'Oromia',
+                        'Sidama',
+                        'Somali',
+                        'South West Ethiopia',
+                        'SNNPR',
+                        'Tigray',
+                      ].map((region) => (
+                        <SelectItem key={region} value={region}>{region}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="zone">Zone</Label>
+                  <Input id="zone" name="zone" placeholder="Zone" />
+                </div>
+                <div>
+                  <Label htmlFor="woreda">Woreda</Label>
+                  <Input id="woreda" name="woreda" placeholder="Woreda" />
+                </div>
+                <div>
+                  <Label htmlFor="kebele">Kebele</Label>
+                  <Input id="kebele" name="kebele" placeholder="Kebele" />
+                </div>
+                <div>
                   <Label htmlFor="area">{t('size')}</Label>
                   <Input
                     id="area"
@@ -164,11 +203,20 @@ export default function FarmsPage() {
                 </div>
                 <div>
                   <Label htmlFor="soilType">{t('soilType')}</Label>
-                  <Input
-                    id="soilType"
-                    name="soilType"
-                    placeholder={t('soilTypePlaceholder')}
-                  />
+                  <Select name="soilType">
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('soilTypePlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="SAND">Sand</SelectItem>
+                      <SelectItem value="PEAT">Peat</SelectItem>
+                      <SelectItem value="SILT">Silt</SelectItem>
+                      <SelectItem value="CHALK">Chalk</SelectItem>
+                      <SelectItem value="CLAY">Clay</SelectItem>
+                      <SelectItem value="SALINE_SOIL">Saline soil</SelectItem>
+                      <SelectItem value="LOAM">Loam</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="flex gap-2">

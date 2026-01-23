@@ -77,12 +77,20 @@ model Farmer {
   address      String?
   city         String?
   state        String?
-  country      String?
+  country      String?     @default("Ethiopia")
   farmerId     String      @unique
   registeredBy String      @db.Uuid
   isActive     Boolean     @default(true)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+  firstName    String
+  lastName     String
+  region       String?
+  zone         String?
+  woreda       String?
+  kebele       String?
+  gender       Gender?
+  farmerType   FarmerType?
   cropBatches  CropBatch[]
   farms        Farm[]
 }
@@ -100,6 +108,10 @@ model Farm {
   registeredBy String           @db.Uuid
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
+  region       String?
+  zone         String?
+  woreda       String?
+  kebele       String?
   cropBatches  CropBatch[]
   farmer       Farmer           @relation(fields: [farmerId], references: [id])
   inspections  FarmInspection[]
@@ -124,6 +136,7 @@ model CropBatch {
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
   warehouseId     String?               @db.Uuid
+  approvalData    Json?
   farm            Farm                  @relation(fields: [farmId], references: [id])
   farmer          Farmer                @relation(fields: [farmerId], references: [id])
   warehouse       Warehouse?            @relation(fields: [warehouseId], references: [id])
@@ -158,6 +171,30 @@ model HarvestNotification {
   sentTo           String           @db.Uuid
   createdAt        DateTime         @default(now())
   cropBatch        CropBatch        @relation(fields: [cropBatchId], references: [id])
+
+  @@index([sentTo], map: "idx_harvestnotification_sentto")
+}
+
+model Notification {
+  id        String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String               @db.Uuid
+  type      NotificationType     @default(GENERAL)
+  category  NotificationCategory @default(GENERAL)
+  title     String
+  message   String
+  metadata  Json?
+  actionUrl String?
+  priority  NotificationPriority @default(NORMAL)
+  isRead    Boolean              @default(false)
+  readAt    DateTime?
+  createdAt DateTime             @default(now())
+  createdBy String?              @db.Uuid
+  expiresAt DateTime?
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@index([type])
+  @@index([category])
 }
 
 model Vehicle {
@@ -231,6 +268,21 @@ model SecuritySettings {
   @@map("SecuritySettings")
 }
 
+model StockRequirement {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cropType       String   @unique
+  minStock       Float
+  unit           String   @default("kg")
+  createdBy      String   @db.Uuid
+  updatedBy      String   @db.Uuid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+  targetQuantity Float    @default(0)
+
+  @@index([targetQuantity])
+  @@index([updatedAt])
+}
+
 enum Role {
   admin
   manager
@@ -253,6 +305,28 @@ enum CropBatchStatus {
   PACKAGED
   RECEIVED
   STORED
+  PENDING_APPROVAL
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum FarmerType {
+  INTERNAL_FARMER
+  OUTGROWER_FARMER
+  EXTERNAL_FARMER
+}
+
+enum SoilType {
+  SAND
+  PEAT
+  SILT
+  CHALK
+  CLAY
+  SALINE_SOIL
+  LOAM
 }
 
 enum InspectionStatus {
@@ -268,6 +342,43 @@ enum NotificationType {
   PEST_ALERT
   WEATHER_WARNING
   GENERAL
+  FARM_REGISTERED
+  CROP_BATCH_CREATED
+  SHIPMENT_ARRIVING
+  STORAGE_FULL
+  BATCH_RECEIVED
+  PACKAGING_COMPLETE
+  QUALITY_CHECK_NEEDED
+  LOW_STOCK_ALERT
+  TRANSPORT_SCHEDULED
+  DRIVER_ASSIGNED
+  ROUTE_DELAYED
+  VEHICLE_ISSUE
+  TASK_COMPLETED
+  ISSUE_REPORTED
+  TASK_ASSIGNED
+  ROUTE_UPDATED
+  PICKUP_READY
+  DELIVERY_CONFIRMED
+  SCHEDULE_CHANGED
+  ANNOUNCEMENT
+  REMINDER
+  SYSTEM_ALERT
+}
+
+enum NotificationCategory {
+  CROP_MANAGEMENT
+  WAREHOUSE
+  TRANSPORT
+  SYSTEM
+  GENERAL
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
 }
 
 enum VehicleType {

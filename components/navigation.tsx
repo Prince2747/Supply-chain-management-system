@@ -24,19 +24,19 @@ export function Navigation() {
   return (
     <>
       {/* Top Info Bar */}
-      <div className="bg-gray-100 border-b border-gray-200 py-2 text-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-gray-600">
-              <div className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5" />
-                <span className="text-xs sm:text-sm">
+      <div className="bg-gray-100 border-b border-gray-200 py-1.5 sm:py-2">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-1 sm:gap-2">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-gray-600">
+              <div className="flex items-center gap-1">
+                <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="text-[10px] sm:text-xs md:text-sm truncate max-w-[180px] sm:max-w-none">
                   {t('address')}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5" />
-                <span className="text-xs sm:text-sm">{t('email')}</span>
+              <div className="flex items-center gap-1">
+                <Mail className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="text-[10px] sm:text-xs md:text-sm">{t('email')}</span>
               </div>
             </div>
             <div className="hidden sm:flex items-center space-x-2 text-xs text-gray-500">
@@ -49,19 +49,19 @@ export function Navigation() {
 
       {/* Main Navigation - Admin Dashboard Style */}
       <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex h-14 sm:h-16 items-center justify-between">
             {/* Logo and Brand */}
-            <div className="flex items-center space-x-8">
-              <Link href={`/${locale}`} className="flex items-center space-x-2">
-                <img src="/logo.png" alt="Company Logo" className="h-8 w-auto" />
-                <span className="text-lg font-semibold text-gray-900">
+            <div className="flex items-center space-x-4 sm:space-x-8">
+              <Link href={`/${locale}`} className="flex items-center space-x-1.5 sm:space-x-2">
+                <img src="/logo.png" alt="Company Logo" className="h-6 sm:h-8 w-auto" />
+                <span className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 truncate max-w-[120px] sm:max-w-none">
                   {t('companyName')}
                 </span>
               </Link>
 
               {/* Desktop Navigation Links */}
-              <nav className="hidden md:flex items-center space-x-1">
+              <nav className="hidden md:flex items-center space-x-0.5 lg:space-x-1">
                 {navigation.map((item) => {
                   const isActive = pathname === item.href;
                   return (
@@ -69,13 +69,13 @@ export function Navigation() {
                       key={item.name}
                       href={item.href}
                       className={cn(
-                        "flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                        "flex items-center space-x-1.5 rounded-md px-2 lg:px-3 py-1.5 lg:py-2 text-xs lg:text-sm font-medium transition-colors",
                         isActive
                           ? "bg-green-100 text-green-900"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       )}
                     >
-                      <item.icon className="h-4 w-4" />
+                      <item.icon className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
                       <span>{item.name}</span>
                     </Link>
                   );
@@ -84,15 +84,15 @@ export function Navigation() {
             </div>
 
             {/* Right side - Login button and mobile menu */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <LanguageSwitcher />
               <Link href={`/${locale}/login`} className="hidden md:block">
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="text-gray-600 hover:text-gray-900"
+                  className="text-gray-600 hover:text-gray-900 text-xs lg:text-sm px-2 lg:px-3"
                 >
-                  <LogIn className="mr-2 h-4 w-4" />
+                  <LogIn className="mr-1.5 h-3.5 w-3.5 lg:h-4 lg:w-4" />
                   {t('login')}
                 </Button>
               </Link>
@@ -116,7 +116,7 @@ export function Navigation() {
           {/* Mobile Navigation Menu */}
           {isMenuOpen && (
             <div className="md:hidden border-t border-gray-200 bg-white">
-              <div className="px-4 py-2 space-y-1">
+              <div className="px-3 py-2 space-y-1">
                 {navigation.map((item) => {
                   const isActive = pathname === item.href;
                   return (
@@ -125,13 +125,13 @@ export function Navigation() {
                       href={item.href}
                       onClick={() => setIsMenuOpen(false)}
                       className={cn(
-                        "flex items-center space-x-3 rounded-md px-3 py-2 text-sm font-medium",
+                        "flex items-center space-x-2 rounded-md px-3 py-2 text-xs sm:text-sm font-medium",
                         isActive
                           ? "bg-green-100 text-green-900"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       )}
                     >
-                      <item.icon className="h-4 w-4" />
+                      <item.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       <span>{item.name}</span>
                     </Link>
                   );
@@ -142,9 +142,9 @@ export function Navigation() {
                   <Link
                     href={`/${locale}/login`}
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center space-x-3 rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    className="flex items-center space-x-2 rounded-md px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   >
-                    <LogIn className="h-4 w-4" />
+                    <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span>{t('login')}</span>
                   </Link>
                 </div>

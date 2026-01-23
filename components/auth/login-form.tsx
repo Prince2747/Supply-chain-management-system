@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useLocale } from 'next-intl';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,31 @@ export function LoginForm() {
 
   const handleSubmit = async (formData: FormData) => {
     setError(null);
+
+    const email = (formData.get('email') || '').toString().trim();
+    const password = (formData.get('password') || '').toString();
+
+    if (!email) {
+      const message = t('emailRequired');
+      setError(message);
+      toast.error(message);
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      const message = t('emailInvalid');
+      setError(message);
+      toast.error(message);
+      return;
+    }
+
+    if (!password) {
+      const message = t('passwordRequired');
+      setError(message);
+      toast.error(message);
+      return;
+    }
     
     // Show signing in toast
     const signingInToast = toast.loading(t('signingIn'), {
@@ -43,6 +69,25 @@ export function LoginForm() {
           setTimeout(() => {
             // Add locale prefix to the redirect path
             const localizedPath = `/${locale}${result.redirectPath}`;
+
+            // In dev (especially Codespaces), Next chunks can go stale and throw ChunkLoadError
+            // during client-side transitions. Recover by hard reloading to the destination.
+            const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+              const reason = event.reason as any;
+              const message = String(reason?.message ?? reason ?? '');
+              const name = String(reason?.name ?? '');
+              if (name === 'ChunkLoadError' || /ChunkLoadError|Loading chunk \d+ failed/i.test(message)) {
+                window.removeEventListener('unhandledrejection', onUnhandledRejection);
+                window.location.href = localizedPath;
+              }
+            };
+            window.addEventListener('unhandledrejection', onUnhandledRejection);
+
+            // Best-effort cleanup in case nothing errors.
+            window.setTimeout(() => {
+              window.removeEventListener('unhandledrejection', onUnhandledRejection);
+            }, 10_000);
+
             router.push(localizedPath);
           }, 1500);
         } else {
@@ -99,6 +144,15 @@ export function LoginForm() {
             )}
           </button>
         </div>
+      </div>
+
+      <div className="text-right">
+        <Link
+          href={`/${locale}/reset-password`}
+          className="text-sm text-primary hover:underline"
+        >
+          {t('forgotPassword')}
+        </Link>
       </div>
 
       <Button type="submit" className="w-full" disabled={isPending}>

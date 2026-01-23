@@ -25,7 +25,7 @@ async function getUnits(): Promise<UnitOfMeasurement[]> {
       createdAt: unit.createdAt,
       updatedAt: unit.updatedAt,
     }));
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching units:", error);
     // Return empty array if database is not accessible
     return [];

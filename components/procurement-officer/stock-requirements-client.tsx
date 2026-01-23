@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -19,18 +20,20 @@ import {
   AlertTriangle,
   CheckCircle,
   Edit,
-  Plus,
   Package,
   TrendingUp,
   TrendingDown,
-  Minus
+  Minus,
+  Send
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { notifyFieldAgentsLowStock, upsertStockRequirement } from "@/app/[locale]/dashboard/procurement-officer/actions";
 
 interface StockRequirement {
   cropType: string;
   minStock: number;
+  targetQuantity: number;
   unit: string;
   currentStock: number;
   batchCount: number;
@@ -47,32 +50,65 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
   const [editingRequirement, setEditingRequirement] = useState<StockRequirement | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [newMinStock, setNewMinStock] = useState<number>(0);
+  const [newTargetQuantity, setNewTargetQuantity] = useState<number>(0);
+  const [newUnit, setNewUnit] = useState<string>('kg');
+  const [isPending, startTransition] = useTransition();
+
+  const unitOptions = [
+    { value: 'kg', label: t('unitKg') },
+    { value: 'quintals', label: t('unitQuintals') },
+    { value: 'tons', label: t('unitTons') },
+  ];
 
   const handleEditRequirement = (requirement: StockRequirement) => {
     setEditingRequirement(requirement);
     setNewMinStock(requirement.minStock);
+    setNewTargetQuantity(requirement.targetQuantity || 0);
+    setNewUnit(requirement.unit || 'kg');
     setIsEditDialogOpen(true);
   };
 
   const handleSaveRequirement = async () => {
     if (!editingRequirement) return;
 
-    // In a real app, this would call an API
-    const updatedRequirements = stockRequirements.map(req =>
-      req.cropType === editingRequirement.cropType
-        ? {
-            ...req,
-            minStock: newMinStock,
-            status: req.currentStock >= newMinStock ? 'sufficient' as const : 'low' as const
-          }
-        : req
-    );
+    startTransition(async () => {
+      const result = await upsertStockRequirement({
+        cropType: editingRequirement.cropType,
+        minStock: newMinStock,
+        targetQuantity: newTargetQuantity,
+        unit: newUnit,
+      });
 
-    setStockRequirements(updatedRequirements);
-    setIsEditDialogOpen(false);
-    setEditingRequirement(null);
-    
-    toast.success(`${t("updatedRequirement")} ${editingRequirement.cropType}`);
+      if (!result.success) {
+        toast.error(result.error || 'Failed to save requirement');
+        return;
+      }
+
+      const updatedRequirements = stockRequirements.map((req) => {
+        if (req.cropType !== editingRequirement.cropType) return req;
+
+        const status =
+          !newMinStock || newMinStock <= 0
+            ? ('no_requirement' as const)
+            : req.currentStock >= newMinStock
+              ? ('sufficient' as const)
+              : ('low' as const);
+
+        return {
+          ...req,
+          minStock: newMinStock,
+          targetQuantity: newTargetQuantity,
+          unit: newUnit,
+          status,
+        };
+      });
+
+      setStockRequirements(updatedRequirements);
+      setIsEditDialogOpen(false);
+      setEditingRequirement(null);
+
+      toast.success(`${t("updatedRequirement")} ${editingRequirement.cropType}`);
+    });
   };
 
   const getStatusColor = (status: string) => {
@@ -133,6 +169,31 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
     sufficient: stockRequirements.filter(r => r.status === 'sufficient').length,
     low: stockRequirements.filter(r => r.status === 'low').length,
     noRequirement: stockRequirements.filter(r => r.status === 'no_requirement').length,
+  };
+
+  const handleNotifyFieldAgents = (requirement: StockRequirement) => {
+    if (requirement.minStock <= 0) {
+      toast.error(t('setMinimumFirst'));
+      return;
+    }
+
+    if (requirement.currentStock >= requirement.minStock) {
+      toast.error(t('stockNotLow'));
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await notifyFieldAgentsLowStock({
+        cropType: requirement.cropType,
+      });
+
+      if (!result.success) {
+        toast.error(result.error || 'Failed to send notification');
+        return;
+      }
+
+      toast.success(t('notificationSent'));
+    });
   };
 
   return (
@@ -222,6 +283,9 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
                     <div className="text-sm text-muted-foreground">
                       {t("minimum")}: {requirement.minStock > 0 ? `${requirement.minStock} ${requirement.unit}` : t("notSet")}
                     </div>
+                    <div className="text-sm text-muted-foreground">
+                      {t("target")}: {requirement.targetQuantity > 0 ? `${requirement.targetQuantity} ${requirement.unit}` : t("notSet")}
+                    </div>
                   </div>
 
                   {requirement.minStock > 0 && (
@@ -255,6 +319,18 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
                     <Edit className="h-4 w-4 mr-1" />
                     {t("edit")}
                   </Button>
+
+                  {requirement.status === 'low' && (
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700"
+                      onClick={() => handleNotifyFieldAgents(requirement)}
+                      disabled={isPending}
+                    >
+                      <Send className="h-4 w-4 mr-1" />
+                      {t('notifyFieldAgents')}
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
@@ -297,6 +373,40 @@ export function StockRequirementsClient({ requirements }: StockRequirementsClien
                 className="col-span-3"
                 placeholder={t("enterMinimumStockLevel")}
               />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="target-quantity" className="text-right">
+                {t("targetQuantity")}
+              </Label>
+              <Input
+                id="target-quantity"
+                type="number"
+                value={newTargetQuantity}
+                onChange={(e) => setNewTargetQuantity(parseInt(e.target.value) || 0)}
+                className="col-span-3"
+                placeholder={t("enterTargetQuantity")}
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="unit" className="text-right">
+                {t("unit")}
+              </Label>
+              <div className="col-span-3">
+                <Select value={newUnit} onValueChange={setNewUnit}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("selectUnit")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {unitOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
             {editingRequirement && newMinStock > 0 && (

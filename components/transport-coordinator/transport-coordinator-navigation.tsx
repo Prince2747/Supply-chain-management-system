@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Truck, Users, Package, AlertTriangle, BarChart3, Calendar } from "lucide-react";
+import { TransportNotificationBell } from "@/components/notifications/unified-notification-bell";
 
 export function TransportCoordinatorNavigation({
   children,
@@ -90,6 +91,16 @@ export function TransportCoordinatorNavigation({
               );
             })}
           </nav>
+          
+          {/* Notification Bell */}
+          <div className="p-4 border-t">
+            <div className="flex items-center justify-center group-hover:justify-start">
+              <TransportNotificationBell />
+              <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm text-gray-600">
+                Notifications
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

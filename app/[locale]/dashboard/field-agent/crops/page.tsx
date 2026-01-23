@@ -95,10 +95,24 @@ const statusColors: Record<string, string> = {
   PLANTED: "bg-blue-100 text-blue-800",
   GROWING: "bg-green-100 text-green-800",
   READY_FOR_HARVEST: "bg-yellow-100 text-yellow-800",
+  PENDING_APPROVAL: "bg-amber-100 text-amber-800",
   HARVESTED: "bg-purple-100 text-purple-800",
   PROCESSED: "bg-gray-100 text-gray-800",
   SHIPPED: "bg-orange-100 text-orange-800",
 };
+
+const cropTypeOptions = [
+  'Haricot Bean',
+  'Faba Bean',
+  'Chickpea',
+  'Red Pea',
+  'Lentil',
+  'Soybean',
+  'Vetch',
+  'Niger Seed (Noug)',
+  'Sesame',
+  'Groundnut',
+];
 
 export default function CropsPage() {
   const t = useTranslations('fieldAgent.crops');
@@ -355,7 +369,18 @@ export default function CropsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="cropType">{t('cropType')} *</Label>
-                  <Input id="cropType" name="cropType" required placeholder={t('cropTypePlaceholder')} />
+                  <Select name="cropType" required>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('cropTypePlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cropTypeOptions.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="variety">{t('variety')}</Label>
@@ -494,6 +519,7 @@ export default function CropsPage() {
                   <SelectItem value="PLANTED">{t('plantedStatus')}</SelectItem>
                   <SelectItem value="GROWING">{t('growingStatus')}</SelectItem>
                   <SelectItem value="READY_FOR_HARVEST">{t('readyForHarvestStatus')}</SelectItem>
+                  <SelectItem value="PENDING_APPROVAL">Pending Approval</SelectItem>
                   <SelectItem value="HARVESTED">{t('harvestedStatus')}</SelectItem>
                 </SelectContent>
               </Select>

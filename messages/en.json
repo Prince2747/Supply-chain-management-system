@@ -433,8 +433,11 @@
   "loginForm": {
     "email": "Email",
     "emailPlaceholder": "Enter your email",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
     "password": "Password",
     "passwordPlaceholder": "Enter your password",
+    "passwordRequired": "Password is required",
     "signIn": "Sign In",
     "authenticatingButton": "Authenticating...",
     "signingIn": "Signing in...",
@@ -443,8 +446,49 @@
     "welcome": "Welcome back!",
     "error": "An error occurred",
     "signInFailed": "Sign in failed",
+    "forgotPassword": "Forgot password?",
     "noAccount": "Don't have an account?",
     "contactAdmin": "Contact Admin"
+  },
+
+  "resetPassword": {
+    "title": "Reset your password",
+    "description": "Enter your email and we'll send you a reset link.",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "sendLink": "Send reset link",
+    "sendingButton": "Sending...",
+    "sending": "Sending reset link...",
+    "sendingDescription": "Please wait while we email you a reset link",
+    "emailSent": "Reset link sent",
+    "checkInbox": "Check your inbox and follow the link to reset your password",
+    "sendFailed": "Failed to send reset link",
+    "error": "An error occurred"
+  },
+
+  "updatePassword": {
+    "title": "Set a new password",
+    "description": "Create a new password for your account.",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "Enter a new password",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "Re-enter the new password",
+    "updateButton": "Update password",
+    "updatingButton": "Updating...",
+    "updating": "Updating password...",
+    "updatingDescription": "Please wait while we update your password",
+    "updatedSuccess": "Password updated",
+    "updatedDescription": "You can now log in with your new password",
+    "updateFailed": "Failed to update password",
+    "passwordRequired": "Password is required",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "confirmRequired": "Please confirm your password",
+    "passwordsMismatch": "Passwords do not match",
+    "missingLink": "This reset link is invalid or has expired.",
+    "backToReset": "Request a new reset link",
+    "error": "An error occurred"
   },
   
   "login": {
@@ -463,7 +507,14 @@
   "errorPage": {
     "general": {
       "title": "Something went wrong",
-      "description": "An unexpected error has occurred"
+      "description": "An unexpected error has occurred",
+      "suggestions": {
+        "0": "Refresh the page and try again",
+        "1": "Check your internet connection",
+        "2": "Clear your browser cache",
+        "3": "Try again in a few minutes"
+      },
+      "buttonText": "Refresh page"
     },
     "database": {
       "title": "Database Connection Error",
@@ -474,12 +525,22 @@
         "2": "Check network connectivity",
         "3": "Review database credentials",
         "4": "Contact system administrator"
-      }
+      },
+      "buttonText": "Try again"
     },
     "auth": {
       "title": "Authentication Error",
       "description": "There was a problem with your authentication"
     },
+    "couldBeDue": "This could be due to:",
+    "returnToLogin": "Return to login",
+    "persistsMessage": "If the problem persists, contact",
+    "technicalSupport": "technical support",
+    "errorDetails": "Error details",
+    "errorCode": "Error code",
+    "loading": "Loading...",
+    "system": "System",
+    "systemName": "Supply Chain Management System",
     "goHome": "Go to Home",
     "retry": "Try Again",
     "timestamp": "Error occurred at"
@@ -502,7 +563,8 @@
       "contact": "Contact support if you believe this is an error"
     },
     "loginButton": "Go to Login",
-    "homeButton": "Go to Home"
+    "homeButton": "Go to Home",
+    "returnHome": "Go to Home"
   },
   
   "common": {
@@ -579,11 +641,13 @@
       "allRoles": "All Roles",
       "user": "User",
       "warehouse": "Warehouse",
+      "code": "Code",
       "created": "Created",
       "actions": "Actions",
       "noUsersFound": "No users found",
       "noName": "No name",
       "notAssigned": "Not Assigned",
+      "na": "N/A",
       "assignWarehouse": "Assign Warehouse",
       "noWarehouse": "No Warehouse",
       "deactivate": "Deactivate",
@@ -1003,7 +1067,24 @@
       "dashboard": "Dashboard",
       "myTasks": "My Tasks",
       "qrScanner": "QR Scanner",
-      "issues": "Issues"
+      "issues": "Issues",
+      "notifications": "Notifications"
+    },
+    "notifications": {
+      "title": "Task Notifications",
+      "noNotifications": "No notifications yet",
+      "noNotificationsDesc": "We'll notify you when there's something important",
+      "markAllRead": "Mark all read",
+      "markRead": "Mark read",
+      "unreadCount": "You have {count} unread notification(s)",
+      "allCaughtUp": "All caught up!",
+      "types": {
+        "TASK_ASSIGNED": "Task Assigned",
+        "ROUTE_UPDATED": "Route Updated",
+        "PICKUP_READY": "Pickup Ready",
+        "DELIVERY_CONFIRMED": "Delivery Confirmed",
+        "SCHEDULE_CHANGED": "Schedule Changed"
+      }
     },
     "dashboard": {
       "title": "Transport Driver Dashboard",
@@ -1098,7 +1179,10 @@
       "errorQRCode": "Please enter or scan a QR code",
       "errorSelectTask": "Please select a task",
       "errorSelectAction": "Please select an action (pickup or delivery)",
-      "loadTasksFailed": "Failed to load tasks"
+      "loadTasksFailed": "Failed to load tasks",
+      "qrDetected": "QR code detected",
+      "qrDetectedDesc": "Filled the QR code field automatically.",
+      "cameraPermissionError": "Unable to access camera. Please check permissions."
     },
     "issues": {
       "title": "Transport Issues",
@@ -1161,7 +1245,25 @@
       "dashboard": "Dashboard",
       "packaging": "Packaging",
       "receiptScanner": "Receipt Scanner",
-      "storage": "Storage"
+      "storage": "Storage",
+      "notifications": "Notifications"
+    },
+    "notifications": {
+      "title": "Warehouse Notifications",
+      "noNotifications": "No notifications yet",
+      "noNotificationsDesc": "We'll notify you when there's something important",
+      "markAllRead": "Mark all read",
+      "markRead": "Mark read",
+      "unreadCount": "You have {count} unread notification(s)",
+      "allCaughtUp": "All caught up!",
+      "types": {
+        "SHIPMENT_ARRIVING": "Shipment Arriving",
+        "STORAGE_FULL": "Storage Full",
+        "BATCH_RECEIVED": "Batch Received",
+        "PACKAGING_COMPLETE": "Packaging Complete",
+        "QUALITY_CHECK_NEEDED": "Quality Check Needed",
+        "LOW_STOCK_ALERT": "Low Stock Alert"
+      }
     },
     "dashboard": {
       "title": "Warehouse Manager Dashboard",
@@ -1328,8 +1430,24 @@
       "from": "From",
       "notAssigned": "Not assigned",
       "noLocation": "No location",
+      "storageLocation": "Storage location",
+      "notAvailable": "Not available",
       "noDate": "No date",
       "updated": "Updated",
+      "current": "Current",
+      "minimum": "Minimum",
+      "target": "Target",
+      "low": "Low",
+      "lowStockAlerts": "Low Stock Alerts",
+      "lowStockDescription": "Crops below minimum stock thresholds",
+      "noLowStockAlerts": "No low stock alerts",
+      "threeMonthTrend": "3-Month Inventory Trend",
+      "trendDescription": "Total inventory movement for the last three months",
+      "noTrendData": "No trend data available",
+      "statusProcessed": "Processed",
+      "statusInTransit": "In Transit",
+      "statusPendingReceipt": "Pending Receipt",
+      "statusCompleted": "Completed",
       "recentActivity": "Recent Activity",
       "latestInventoryChanges": "Latest inventory changes in the past 30 days",
       "noRecentActivity": "No recent activity",
@@ -1391,9 +1509,38 @@
       "currentStock": "Current Stock",
       "minimumStock": "Minimum Stock",
       "enterMinimumStockLevel": "Enter minimum stock level",
+      "target": "Target",
+      "targetQuantity": "Target Quantity",
+      "enterTargetQuantity": "Enter target quantity",
+      "unit": "Unit",
+      "selectUnit": "Select unit",
+      "unitKg": "Kilograms (kg)",
+      "unitQuintals": "Quintals",
+      "unitTons": "Tons",
       "cancel": "Cancel",
       "saveRequirement": "Save Requirement",
-      "updatedRequirement": "Updated minimum stock requirement for"
+      "updatedRequirement": "Updated minimum stock requirement for",
+      "setMinimumFirst": "Set a minimum stock first",
+      "stockNotLow": "Stock is not below the minimum",
+      "notifyFieldAgents": "Notify Field Agents",
+      "notificationSent": "Notification sent"
+    },
+    "batchReviews": {
+      "title": "Batch Reviews",
+      "description": "Review and approve harvested crop batches",
+      "pendingTitle": "Pending Batch Reviews",
+      "pendingDescription": "Harvested batches currently awaiting procurement approval",
+      "empty": "No batches pending review",
+      "batchCode": "Batch Code",
+      "cropType": "Crop Type",
+      "farm": "Farm",
+      "farmer": "Farmer",
+      "quantity": "Quantity",
+      "status": "Status",
+      "actions": "Actions",
+      "approve": "Approve",
+      "reject": "Reject",
+      "backToDashboard": "Back to dashboard"
     }
   },
   "transportCoordinator": {
@@ -1404,11 +1551,30 @@
       "vehicles": "Vehicles",
       "drivers": "Drivers",
       "issues": "Issues",
-      "reports": "Reports"
+      "reports": "Reports",
+      "notifications": "Notifications"
+    },
+    "notifications": {
+      "title": "Transport Notifications",
+      "noNotifications": "No notifications yet",
+      "noNotificationsDesc": "We'll notify you when there's something important",
+      "markAllRead": "Mark all read",
+      "markRead": "Mark read",
+      "unreadCount": "You have {count} unread notification(s)",
+      "allCaughtUp": "All caught up!",
+      "types": {
+        "TRANSPORT_SCHEDULED": "Transport Scheduled",
+        "DRIVER_ASSIGNED": "Driver Assigned",
+        "ROUTE_DELAYED": "Route Delayed",
+        "VEHICLE_ISSUE": "Vehicle Issue",
+        "TASK_COMPLETED": "Task Completed",
+        "ISSUE_REPORTED": "Issue Reported"
+      }
     },
     "dashboard": {
       "title": "Transport Coordinator Dashboard",
       "viewAllTasks": "View All Tasks",
+      "tasks": "Tasks",
       "totalTasks": "Total Tasks",
       "inTransit": "in transit",
       "availableVehicles": "Available Vehicles",

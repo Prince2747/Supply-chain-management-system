@@ -95,60 +95,61 @@ export default async function TransportCoordinatorPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('title')}</h1>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild size="sm" className="text-xs sm:text-sm">
             <Link href="/dashboard/transport-coordinator/tasks">
-              <Activity className="mr-2 h-4 w-4" />
-              {t('viewAllTasks')}
+              <Activity className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">{t('viewAllTasks')}</span>
+              <span className="sm:hidden">{t('tasks')}</span>
             </Link>
           </Button>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {statCards.map((stat, i) => {
           const Icon = stat.icon;
           return (
             <Card key={i}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                <CardTitle className="text-xs sm:text-sm font-medium">{stat.title}</CardTitle>
                 <Icon className={`h-4 w-4 ${stat.color}`} />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">{stat.description}</p>
+                <div className="text-xl sm:text-2xl font-bold">{stat.value}</div>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{stat.description}</p>
               </CardContent>
             </Card>
           );
         })}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Recent Tasks */}
         <Card>
           <CardHeader>
-            <CardTitle>{t('recentTransportTasks')}</CardTitle>
-            <CardDescription>{t('latestTransportAssignments')}</CardDescription>
+            <CardTitle className="text-base sm:text-lg">{t('recentTransportTasks')}</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">{t('latestTransportAssignments')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-3 sm:space-y-4">
               {recentTasks.map((task) => (
-                <div key={task.id} className="flex items-center space-x-4">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{task.cropBatch.batchCode}</p>
-                    <p className="text-xs text-muted-foreground">
+                <div key={task.id} className="flex items-center space-x-2 sm:space-x-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-medium truncate">{task.cropBatch.batchCode}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                       {task.vehicle.plateNumber} • {task.driver.name}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
                       {task.status.replace('_', ' ').toLowerCase()}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
                       {new Date(task.scheduledDate).toLocaleDateString()}
                     </p>
                   </div>
@@ -166,25 +167,25 @@ export default async function TransportCoordinatorPage() {
         {/* Recent Issues */}
         <Card>
           <CardHeader>
-            <CardTitle>{t('recentIssues')}</CardTitle>
-            <CardDescription>{t('latestTransportIssues')}</CardDescription>
+            <CardTitle className="text-base sm:text-lg">{t('recentIssues')}</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">{t('latestTransportIssues')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-3 sm:space-y-4">
               {recentIssues.map((issue) => (
-                <div key={issue.id} className="flex items-center space-x-4">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{issue.issueType.replace('_', ' ')}</p>
-                    <p className="text-xs text-muted-foreground">
+                <div key={issue.id} className="flex items-center space-x-2 sm:space-x-4">
+                  <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-medium truncate">{issue.issueType.replace('_', ' ')}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                       {issue.transportTask.vehicle.plateNumber} • {issue.transportTask.driver.name}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
                       {issue.status.toLowerCase()}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
                       {new Date(issue.reportedAt).toLocaleDateString()}
                     </p>
                   </div>

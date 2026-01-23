@@ -218,109 +218,127 @@ export default async function AboutPage({
       </section>
 
       {/* Core Values */}
-      <section className="py-20 bg-gradient-to-b from-green-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+      <section className="relative py-20 bg-gradient-to-b from-green-50 to-white overflow-hidden">
+        {/* Decorative background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-green-200/30 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-green-100/40 rounded-full blur-3xl" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-sm border border-green-200 text-green-800 rounded-full text-sm font-semibold mb-6">
+              <Shield className="h-4 w-4" />
+              <span>{t('values.badge')}</span>
+            </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               {t('values.title')}
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
               {t('values.description')}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="group text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-300 hover:-translate-y-2">
-              <CardHeader>
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Shield className="h-8 w-8 text-green-700" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="group relative overflow-hidden border border-green-100 bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-600 to-green-400" />
+              <CardHeader className="text-center">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-4 ring-1 ring-green-200 group-hover:scale-110 group-hover:bg-green-200 transition-all duration-300">
+                  <Shield className="h-7 w-7 text-green-800" />
                 </div>
-                <CardTitle className="text-xl mb-3">{t('values.integrity.title')}</CardTitle>
-                <CardDescription className="text-base">
+                <CardTitle className="text-lg md:text-xl mb-2">{t('values.integrity.title')}</CardTitle>
+                <CardDescription className="text-sm md:text-base">
                   {t('values.integrity.description')}
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="group text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-300 hover:-translate-y-2">
-              <CardHeader>
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Award className="h-8 w-8 text-green-700" />
+            <Card className="group relative overflow-hidden border border-green-100 bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-600 to-green-400" />
+              <CardHeader className="text-center">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-4 ring-1 ring-green-200 group-hover:scale-110 group-hover:bg-green-200 transition-all duration-300">
+                  <Award className="h-7 w-7 text-green-800" />
                 </div>
-                <CardTitle className="text-xl mb-3">{t('values.excellence.title')}</CardTitle>
-                <CardDescription className="text-base">
+                <CardTitle className="text-lg md:text-xl mb-2">{t('values.excellence.title')}</CardTitle>
+                <CardDescription className="text-sm md:text-base">
                   {t('values.excellence.description')}
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="group text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-300 hover:-translate-y-2">
-              <CardHeader>
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Zap className="h-8 w-8 text-green-700" />
+            <Card className="group relative overflow-hidden border border-green-100 bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-600 to-green-400" />
+              <CardHeader className="text-center">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-4 ring-1 ring-green-200 group-hover:scale-110 group-hover:bg-green-200 transition-all duration-300">
+                  <Zap className="h-7 w-7 text-green-800" />
                 </div>
-                <CardTitle className="text-xl mb-3">{t('values.innovation.title')}</CardTitle>
-                <CardDescription className="text-base">
+                <CardTitle className="text-lg md:text-xl mb-2">{t('values.innovation.title')}</CardTitle>
+                <CardDescription className="text-sm md:text-base">
                   {t('values.innovation.description')}
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="group text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-300 hover:-translate-y-2">
-              <CardHeader>
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Users className="h-8 w-8 text-green-700" />
+            <Card className="group relative overflow-hidden border border-green-100 bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-600 to-green-400" />
+              <CardHeader className="text-center">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-4 ring-1 ring-green-200 group-hover:scale-110 group-hover:bg-green-200 transition-all duration-300">
+                  <Users className="h-7 w-7 text-green-800" />
                 </div>
-                <CardTitle className="text-xl mb-3">{t('values.partnership.title')}</CardTitle>
-                <CardDescription className="text-base">
+                <CardTitle className="text-lg md:text-xl mb-2">{t('values.partnership.title')}</CardTitle>
+                <CardDescription className="text-sm md:text-base">
                   {t('values.partnership.description')}
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="group text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-300 hover:-translate-y-2">
-              <CardHeader>
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Globe className="h-8 w-8 text-green-700" />
+            <Card className="group relative overflow-hidden border border-green-100 bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-600 to-green-400" />
+              <CardHeader className="text-center">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-4 ring-1 ring-green-200 group-hover:scale-110 group-hover:bg-green-200 transition-all duration-300">
+                  <Globe className="h-7 w-7 text-green-800" />
                 </div>
-                <CardTitle className="text-xl mb-3">{t('values.globalReach.title')}</CardTitle>
-                <CardDescription className="text-base">
+                <CardTitle className="text-lg md:text-xl mb-2">{t('values.globalReach.title')}</CardTitle>
+                <CardDescription className="text-sm md:text-base">
                   {t('values.globalReach.description')}
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="group text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-300 hover:-translate-y-2">
-              <CardHeader>
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Truck className="h-8 w-8 text-green-700" />
+            <Card className="group relative overflow-hidden border border-green-100 bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-600 to-green-400" />
+              <CardHeader className="text-center">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-4 ring-1 ring-green-200 group-hover:scale-110 group-hover:bg-green-200 transition-all duration-300">
+                  <Truck className="h-7 w-7 text-green-800" />
                 </div>
-                <CardTitle className="text-xl mb-3">{t('values.reliability.title')}</CardTitle>
-                <CardDescription className="text-base">
+                <CardTitle className="text-lg md:text-xl mb-2">{t('values.reliability.title')}</CardTitle>
+                <CardDescription className="text-sm md:text-base">
                   {t('values.reliability.description')}
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="group text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-300 hover:-translate-y-2">
-              <CardHeader>
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Heart className="h-8 w-8 text-green-700" />
+            <Card className="group relative overflow-hidden border border-green-100 bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-600 to-green-400" />
+              <CardHeader className="text-center">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-4 ring-1 ring-green-200 group-hover:scale-110 group-hover:bg-green-200 transition-all duration-300">
+                  <Heart className="h-7 w-7 text-green-800" />
                 </div>
-                <CardTitle className="text-xl mb-3">{t('values.customerFocus.title')}</CardTitle>
-                <CardDescription className="text-base">
+                <CardTitle className="text-lg md:text-xl mb-2">{t('values.customerFocus.title')}</CardTitle>
+                <CardDescription className="text-sm md:text-base">
                   {t('values.customerFocus.description')}
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="group text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-300 hover:-translate-y-2">
-              <CardHeader>
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <TrendingUp className="h-8 w-8 text-green-700" />
+            <Card className="group relative overflow-hidden border border-green-100 bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-600 to-green-400" />
+              <CardHeader className="text-center">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-4 ring-1 ring-green-200 group-hover:scale-110 group-hover:bg-green-200 transition-all duration-300">
+                  <TrendingUp className="h-7 w-7 text-green-800" />
                 </div>
-                <CardTitle className="text-xl mb-3">{t('values.growth.title')}</CardTitle>
-                <CardDescription className="text-base">
+                <CardTitle className="text-lg md:text-xl mb-2">{t('values.growth.title')}</CardTitle>
+                <CardDescription className="text-sm md:text-base">
                   {t('values.growth.description')}
                 </CardDescription>
               </CardHeader>
