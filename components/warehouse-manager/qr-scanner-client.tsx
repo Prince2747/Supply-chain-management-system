@@ -288,7 +288,7 @@ export function QRScannerClient() {
 
       {/* Batch Details Dialog */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center">
               <Package className="h-5 w-5 mr-2 text-green-500" />

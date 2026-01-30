@@ -299,6 +299,186 @@ export async function updateTransportTask(taskId: string, formData: FormData) {
   }
 }
 
+export async function updateScheduledTransportTask(
+  taskId: string,
+  data: {
+    scheduledDate?: string;
+    pickupLocation?: string;
+    deliveryLocation?: string;
+    notes?: string | null;
+  }
+) {
+  try {
+    const profile = await getCurrentUser();
+
+    if (!taskId) {
+      return { success: false, error: "Transport task ID is required" } as const;
+    }
+
+    const task = await prisma.transportTask.findFirst({
+      where: {
+        id: taskId,
+        coordinatorId: profile.id,
+        status: "SCHEDULED",
+      },
+      include: {
+        cropBatch: true,
+        driver: true,
+        vehicle: true,
+      },
+    });
+
+    if (!task) {
+      return { success: false, error: "Transport task not found or not editable" } as const;
+    }
+
+    const updateData: Record<string, any> = {};
+
+    if (typeof data.scheduledDate === "string" && data.scheduledDate.trim()) {
+      const scheduledDate = new Date(data.scheduledDate);
+      if (Number.isNaN(scheduledDate.getTime())) {
+        return { success: false, error: "Scheduled date is invalid" } as const;
+      }
+
+      const conflict = await prisma.transportTask.findFirst({
+        where: {
+          id: { not: taskId },
+          status: { in: ["SCHEDULED", "IN_TRANSIT"] },
+          scheduledDate,
+          OR: [
+            ...(task.driverId ? [{ driverId: task.driverId }] : []),
+            ...(task.vehicleId ? [{ vehicleId: task.vehicleId }] : []),
+          ],
+        },
+        select: { id: true },
+      });
+
+      if (conflict) {
+        return { success: false, error: "Driver or vehicle already scheduled for this date" } as const;
+      }
+
+      updateData.scheduledDate = scheduledDate;
+    }
+
+    if (typeof data.pickupLocation === "string" && data.pickupLocation.trim()) {
+      updateData.pickupLocation = data.pickupLocation.trim();
+    }
+
+    if (typeof data.deliveryLocation === "string" && data.deliveryLocation.trim()) {
+      updateData.deliveryLocation = data.deliveryLocation.trim();
+    }
+
+    if (data.notes !== undefined) {
+      updateData.notes = data.notes?.trim() || null;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return { success: false, error: "No changes to update" } as const;
+    }
+
+    const updatedTask = await prisma.transportTask.update({
+      where: { id: taskId },
+      data: updateData,
+    });
+
+    await logActivity({
+      userId: profile.userId,
+      action: "UPDATE_TRANSPORT_TASK",
+      entityType: "TransportTask",
+      entityId: taskId,
+      details: {
+        transportTaskId: taskId,
+        updatedFields: Object.keys(updateData),
+      },
+    });
+
+    revalidateDashboardPath("/dashboard/transport-coordinator/schedule");
+    revalidateDashboardPath("/dashboard/transport-coordinator/tasks");
+    revalidateDashboardPath("/dashboard/transport-coordinator");
+
+    return { success: true, task: updatedTask } as const;
+  } catch (error) {
+    console.error("Error updating scheduled transport task:", error);
+    return { success: false, error: "Failed to update transport task" } as const;
+  }
+}
+
+export async function cancelTransportTask(taskId: string, reason?: string) {
+  try {
+    const profile = await getCurrentUser();
+
+    if (!taskId) {
+      return { success: false, error: "Transport task ID is required" } as const;
+    }
+
+    const task = await prisma.transportTask.findFirst({
+      where: {
+        id: taskId,
+        coordinatorId: profile.id,
+        status: "SCHEDULED",
+      },
+      select: {
+        id: true,
+        notes: true,
+        driverId: true,
+        vehicleId: true,
+        cropBatchId: true,
+      },
+    });
+
+    if (!task) {
+      return { success: false, error: "Transport task not found or not cancellable" } as const;
+    }
+
+    const appendedNotes = reason?.trim()
+      ? `${task.notes ? `${task.notes} | ` : ''}Cancelled: ${reason.trim()}`
+      : task.notes;
+
+    await prisma.transportTask.update({
+      where: { id: taskId },
+      data: {
+        status: "CANCELLED",
+        notes: appendedNotes,
+        updatedAt: new Date(),
+      },
+    });
+
+    if (task.driverId) {
+      await prisma.driver.update({
+        where: { id: task.driverId },
+        data: { status: "AVAILABLE" },
+      });
+    }
+
+    if (task.vehicleId) {
+      await prisma.vehicle.update({
+        where: { id: task.vehicleId },
+        data: { status: "AVAILABLE" },
+      });
+    }
+
+    await logActivity({
+      userId: profile.userId,
+      action: "CANCEL_TRANSPORT_TASK",
+      entityType: "TransportTask",
+      entityId: taskId,
+      details: {
+        transportTaskId: taskId,
+        cropBatchId: task.cropBatchId,
+      },
+    });
+
+    revalidateDashboardPath("/dashboard/transport-coordinator/schedule");
+    revalidateDashboardPath("/dashboard/transport-coordinator/tasks");
+    revalidateDashboardPath("/dashboard/transport-coordinator");
+
+    return { success: true } as const;
+  } catch (error) {
+    console.error("Error cancelling transport task:", error);
+    return { success: false, error: "Failed to cancel transport task" } as const;
+  }
+}
+
 // Vehicles
 export async function getVehicles() {
   await getCurrentUser();

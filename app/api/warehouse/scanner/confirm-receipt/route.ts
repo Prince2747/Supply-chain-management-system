@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
       });
 
       const procurementOfficers = await prisma.profile.findMany({
-        where: { role: 'procurement_officer', isActive: true },
+        where: { role: { in: ['procurement_officer', 'manager', 'admin'] }, isActive: true },
         select: { userId: true },
       });
 

@@ -20,7 +20,7 @@ import {
 } from '@/lib/notifications/unified-actions';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
 import { NotificationCategory, NotificationType } from '@/lib/generated/prisma';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 interface Notification {
   id: string;
