@@ -67,7 +67,7 @@ function stripLocalePrefix(path: string): string {
   return path.replace(localePattern, '/');
 }
 
-export function hasRouteAccess(role: Role, path: string): boolean {
+export function hasRouteAccess(role: Role | null | undefined, path: string): boolean {
   // Strip locale prefix for route matching
   const normalizedPath = stripLocalePrefix(path);
   
@@ -81,8 +81,13 @@ export function hasRouteAccess(role: Role, path: string): boolean {
     return true;
   }
 
+  const patterns = role ? ROLE_ACCESS_PATTERNS[role] : undefined;
+  if (!patterns) {
+    return false;
+  }
+
   // Check if the path matches any of the allowed patterns for the role
-  return ROLE_ACCESS_PATTERNS[role].some(pattern => {
+  return patterns.some(pattern => {
     if (pattern.endsWith('/*')) {
       return normalizedPath.startsWith(pattern.slice(0, -2));
     }

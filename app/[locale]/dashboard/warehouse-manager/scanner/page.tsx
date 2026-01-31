@@ -6,16 +6,17 @@ import { QRScannerClient } from "@/components/warehouse-manager/qr-scanner-clien
 import { Badge } from "@/components/ui/badge";
 import { Scan, Package, Truck } from "lucide-react";
 import { format } from "date-fns";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function QRScannerPage() {
   const t = await getTranslations("warehouseManager.scanner");
+  const locale = await getLocale();
   // Get current user and their warehouse assignment
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect(`/${locale}/login`);
   }
 
   const currentProfile = await prisma.profile.findUnique({
@@ -24,7 +25,7 @@ export default async function QRScannerPage() {
   });
 
   if (!currentProfile || currentProfile.role !== 'warehouse_manager' || !currentProfile.warehouseId) {
-    redirect('/unauthorized');
+    redirect(`/${locale}/unauthorized`);
   }
 
   // Get delivered transport tasks that are ready for receipt confirmation - filtered by warehouse

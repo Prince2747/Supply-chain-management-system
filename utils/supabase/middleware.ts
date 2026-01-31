@@ -60,7 +60,7 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  const role = profile?.role || 'user';
+  const role = profile?.role ?? null;
   const isActive = profile?.isActive !== false; // Default to true if null
   
   // Extract locale from path (e.g., /en/login -> en)
