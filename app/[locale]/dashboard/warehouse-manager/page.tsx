@@ -362,7 +362,7 @@ export default async function WarehouseManagerDashboard() {
                   </div>
                 ))}
                 <Button asChild variant="outline" className="w-full mt-4">
-                  <Link href="/dashboard/warehouse-manager/packaging">
+                  <Link href={`/${locale}/dashboard/warehouse-manager/packaging`}>
                     {t("manageAllPackaging")}
                   </Link>
                 </Button>
