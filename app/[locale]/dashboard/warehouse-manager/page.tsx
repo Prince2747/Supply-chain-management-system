@@ -17,16 +17,17 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function WarehouseManagerDashboard() {
   const t = await getTranslations("warehouseManager.dashboard");
+  const locale = await getLocale();
   // Get current user and their warehouse assignment
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect(`/${locale}/login`);
   }
 
   const currentProfile = await prisma.profile.findUnique({
@@ -37,11 +38,11 @@ export default async function WarehouseManagerDashboard() {
   });
 
   if (!currentProfile || currentProfile.role !== 'warehouse_manager') {
-    redirect('/unauthorized');
+    redirect(`/${locale}/unauthorized`);
   }
 
   if (!currentProfile.warehouseId) {
-    redirect('/error?message=No warehouse assigned. Please contact your administrator.');
+    redirect(`/${locale}/error?message=No warehouse assigned. Please contact your administrator.`);
   }
 
   const warehouseId = currentProfile.warehouseId;
@@ -231,7 +232,7 @@ export default async function WarehouseManagerDashboard() {
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/dashboard/warehouse-manager/packaging">
+              <Link href={`/${locale}/dashboard/warehouse-manager/packaging`}>
                 {t("managePackaging")}
               </Link>
             </Button>
@@ -250,7 +251,7 @@ export default async function WarehouseManagerDashboard() {
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/dashboard/warehouse-manager/scanner">
+              <Link href={`/${locale}/dashboard/warehouse-manager/scanner`}>
                 {t("openScanner")}
               </Link>
             </Button>
@@ -269,7 +270,7 @@ export default async function WarehouseManagerDashboard() {
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/dashboard/warehouse-manager/storage">
+              <Link href={`/${locale}/dashboard/warehouse-manager/storage`}>
                 {t("manageStorage")}
               </Link>
             </Button>
@@ -312,7 +313,7 @@ export default async function WarehouseManagerDashboard() {
                   </div>
                 ))}
                 <Button asChild variant="outline" className="w-full mt-4">
-                  <Link href="/dashboard/warehouse-manager/scanner">
+                  <Link href={`/${locale}/dashboard/warehouse-manager/scanner`}>
                     {t("scanToConfirm")}
                   </Link>
                 </Button>
@@ -361,7 +362,7 @@ export default async function WarehouseManagerDashboard() {
                   </div>
                 ))}
                 <Button asChild variant="outline" className="w-full mt-4">
-                  <Link href="/dashboard/warehouse-manager/packaging">
+                  <Link href={`/${locale}/dashboard/warehouse-manager/packaging`}>
                     {t("manageAllPackaging")}
                   </Link>
                 </Button>

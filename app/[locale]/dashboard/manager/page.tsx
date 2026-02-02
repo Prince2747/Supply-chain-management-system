@@ -3,9 +3,12 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 import { ClipboardList, Users, LineChart } from "lucide-react";
 
 export default function ManagerDashboard() {
+  const locale = useLocale();
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Manager Dashboard</h1>
@@ -18,7 +21,7 @@ export default function ManagerDashboard() {
               Manage your team members and their assignments
             </p>
             <Button asChild className="w-full text-xs sm:text-sm">
-              <Link href="/dashboard/manager/team">
+              <Link href={`/${locale}/dashboard/manager/team`}>
                 <Users className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 View Team
               </Link>
@@ -33,7 +36,7 @@ export default function ManagerDashboard() {
               View and analyze performance reports
             </p>
             <Button asChild className="w-full text-xs sm:text-sm">
-              <Link href="/dashboard/manager/reports">
+              <Link href={`/${locale}/dashboard/manager/reports`}>
                 <LineChart className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 View Reports
               </Link>
@@ -48,7 +51,7 @@ export default function ManagerDashboard() {
               Monitor and manage team tasks
             </p>
             <Button asChild className="w-full text-xs sm:text-sm">
-              <Link href="/dashboard/manager/tasks">
+              <Link href={`/${locale}/dashboard/manager/tasks`}>
                 <ClipboardList className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 View Tasks
               </Link>

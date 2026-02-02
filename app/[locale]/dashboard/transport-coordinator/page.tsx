@@ -14,10 +14,11 @@ import {
 import { getTransportStats, getTransportTasks, getTransportIssues, getTransportCoordinatorDashboardData, assignDriverToTransportTask, updateTransportTaskStatusAction } from "./actions";
 import { createClient } from '@/utils/supabase/server';
 import { prisma } from '@/lib/prisma';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 export default async function TransportCoordinatorPage() {
   const t = await getTranslations('transportCoordinator.dashboard');
+  const locale = await getLocale();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -100,7 +101,7 @@ export default async function TransportCoordinatorPage() {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('title')}</h1>
         <div className="flex items-center space-x-2">
           <Button variant="outline" asChild size="sm" className="text-xs sm:text-sm">
-            <Link href="/dashboard/transport-coordinator/tasks">
+            <Link href={`/${locale}/dashboard/transport-coordinator/tasks`}>
               <Activity className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">{t('viewAllTasks')}</span>
               <span className="sm:hidden">{t('tasks')}</span>

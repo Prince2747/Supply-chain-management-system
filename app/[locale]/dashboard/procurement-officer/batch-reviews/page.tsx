@@ -43,6 +43,8 @@ export default async function BatchReviewsPage() {
     redirect(`/${locale}/unauthorized`);
   }
 
+  const approvedProfile = currentProfile;
+
   async function approveBatch(formData: FormData) {
     "use server";
 
@@ -153,7 +155,7 @@ export default async function BatchReviewsPage() {
       entityId: batchId,
       details: {
         message: "Approved crop batch (PENDING_APPROVAL -> PROCESSED)",
-        role: currentProfile.role,
+        role: approvedProfile.role,
         statusFrom: "PENDING_APPROVAL",
         statusTo: "PROCESSED",
         approvalData,

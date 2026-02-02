@@ -4,16 +4,17 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PackagingManagementClient } from "@/components/warehouse-manager/packaging-management-client";
 import { Package, PackageCheck, Clock } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function PackagingPage() {
   const t = await getTranslations("warehouseManager.packaging");
+  const locale = await getLocale();
   // Get current user and their warehouse assignment
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect(`/${locale}/login`);
   }
 
   const currentProfile = await prisma.profile.findUnique({
@@ -22,7 +23,7 @@ export default async function PackagingPage() {
   });
 
   if (!currentProfile || currentProfile.role !== 'warehouse_manager' || !currentProfile.warehouseId) {
-    redirect('/unauthorized');
+    redirect(`/${locale}/unauthorized`);
   }
 
   // Get all crop batches ready for packaging or currently being packaged - filtered by warehouse

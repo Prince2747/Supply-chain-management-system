@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
 import { getMyUnreadNotificationCount } from '@/lib/notifications/unified-actions';
@@ -19,7 +19,7 @@ type UseRealtimeNotificationsOptions = {
 
 export function useRealtimeNotifications(options: UseRealtimeNotificationsOptions = {}) {
   const { category, showToast = true } = options;
-  const supabase = useMemo(() => createClient(), []);
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [ready, setReady] = useState(false);
 
@@ -50,10 +50,11 @@ export function useRealtimeNotifications(options: UseRealtimeNotificationsOption
 
   // Subscribe to realtime updates
   useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let channel: ReturnType<ReturnType<typeof createClient>['channel']> | null = null;
     let cancelled = false;
 
     async function subscribe() {
+      const supabase = supabaseRef.current ?? (supabaseRef.current = createClient());
       const { data: { user } } = await supabase.auth.getUser();
       if (cancelled || !user) return;
 
@@ -138,9 +139,10 @@ export function useRealtimeNotifications(options: UseRealtimeNotificationsOption
 
     return () => {
       cancelled = true;
-      if (channel) supabase.removeChannel(channel);
+      const supabase = supabaseRef.current;
+      if (channel && supabase) supabase.removeChannel(channel);
     };
-  }, [supabase, category, refreshUnreadCount, showToast]);
+  }, [category, refreshUnreadCount, showToast]);
 
   return {
     unreadCount,
