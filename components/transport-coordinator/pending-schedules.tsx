@@ -159,27 +159,21 @@ export function PendingSchedules({ tasks }: PendingSchedulesProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
-                    onSelect={(event) => {
-                      event.preventDefault();
-                      handleEditSchedule(task);
-                    }}
+                    onClick={() => handleEditSchedule(task)}
+                    onSelect={(e) => e.preventDefault()}
                   >
                     Edit Schedule
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onSelect={(event) => {
-                      event.preventDefault();
-                      handleViewDetails(task);
-                    }}
+                    onClick={() => handleViewDetails(task)}
+                    onSelect={(e) => e.preventDefault()}
                   >
                     View Details
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="text-red-600"
-                    onSelect={(event) => {
-                      event.preventDefault();
-                      handleCancelTask(task);
-                    }}
+                    onClick={() => handleCancelTask(task)}
+                    onSelect={(e) => e.preventDefault()}
                   >
                     Cancel Task
                   </DropdownMenuItem>

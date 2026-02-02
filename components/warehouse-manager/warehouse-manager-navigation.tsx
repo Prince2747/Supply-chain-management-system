@@ -12,7 +12,6 @@ import {
   Archive
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { WarehouseNotificationBell } from "@/components/notifications/unified-notification-bell";
 
 export function WarehouseManagerNavigation({
   children,
@@ -83,16 +82,6 @@ export function WarehouseManagerNavigation({
               );
             })}
           </nav>
-          
-          {/* Notification Bell */}
-          <div className="p-4 border-t">
-            <div className="flex items-center justify-center group-hover:justify-start">
-              <WarehouseNotificationBell />
-              <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm text-gray-600">
-                Notifications
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 

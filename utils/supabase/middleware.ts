@@ -79,7 +79,9 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Check if user has access to the requested route
-  if (user && !hasRouteAccess(role, path)) {
+  // If role is not available (e.g., profile lookup failed), allow request to reach
+  // server-side guards so they can validate with Prisma.
+  if (user && role && !hasRouteAccess(role, path)) {
     // User is authenticated but doesn't have access, redirect to unauthorized
     const url = request.nextUrl.clone()
     url.pathname = `/${locale}/unauthorized`

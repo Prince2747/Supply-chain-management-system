@@ -38,7 +38,7 @@ async function getWarehouseManagerContext() {
     return { error: 'No warehouse assigned' as const, user: null, profile: null };
   }
 
-  return { error: null as const, user, profile };
+  return { error: null, user, profile };
 }
 
 function extractCodes(raw: unknown): { qrCode?: string; batchCode?: string } {

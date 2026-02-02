@@ -211,7 +211,9 @@ export async function POST(request: NextRequest) {
           });
         }
 
+        // Send notification to procurement officers about rejection
         if (procurementOfficers.length > 0) {
+          console.log('Sending batch rejection notification to', procurementOfficers.length, 'procurement officers');
           await createBulkNotifications(
             procurementOfficers.map((po) => ({
               userId: po.userId,
@@ -222,6 +224,9 @@ export async function POST(request: NextRequest) {
               metadata: { batchId, batchCode: updatedBatch.batchCode, issueType: normalizedIssueType },
             }))
           );
+          console.log('Batch rejection notifications sent successfully');
+        } else {
+          console.warn('No procurement officers found to notify about batch rejection');
         }
 
         if (latestTask?.coordinator?.userId) {

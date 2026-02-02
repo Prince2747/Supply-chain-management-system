@@ -288,8 +288,8 @@ export function QRScannerClient() {
 
       {/* Batch Details Dialog */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center">
               <Package className="h-5 w-5 mr-2 text-green-500" />
               Batch Receipt Verification
@@ -300,7 +300,7 @@ export function QRScannerClient() {
           </DialogHeader>
 
           {batchDetails && (
-            <div className="space-y-6">
+            <div className="space-y-6 overflow-y-auto flex-1 pr-2">
               {/* Batch Info */}
               <Card>
                 <CardHeader>
@@ -473,7 +473,7 @@ export function QRScannerClient() {
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="flex-shrink-0 mt-4">
             <Button 
               variant="outline" 
               onClick={() => setShowDetails(false)}
